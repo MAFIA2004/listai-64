@@ -1,10 +1,12 @@
+
 import { useState, useRef, useEffect } from 'react';
-import { Mic } from 'lucide-react';
+import { Mic, MicOff, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { COMMON_SHOPPING_ITEMS } from '@/lib/constants';
 import { checkSpelling } from '@/lib/utils';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
+import { identifyQuantities } from '@/lib/gemini-service';
 import { 
   Dialog,
   DialogContent,
@@ -16,7 +18,7 @@ import {
 import { toast } from "sonner";
 
 interface AddItemFormProps {
-  onAddItem: (name: string, price: number) => void;
+  onAddItem: (name: string, price: number, quantity?: number) => void;
 }
 
 // Constantes para patrones de reconocimiento
@@ -51,11 +53,19 @@ const WEIGHT_PATTERNS = [
   /(?:cuarto de)\s+(?:kilo|kg)\s+de\s+(.+)/i,  // "cuarto de kilo de tomates"
 ];
 
+// Patrones para cantidades
+const QUANTITY_PATTERNS = [
+  /(\d+)\s+(unidad(?:es)?|paquete(?:s)?|caja(?:s)?|botella(?:s)?|lata(?:s)?)\s+de\s+(.+)/i,  // "2 paquetes de galletas"
+  /(\d+)\s+(.+)/i,  // "3 manzanas"
+];
+
 export function AddItemForm({ onAddItem }: AddItemFormProps) {
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
+  const [itemQuantity, setItemQuantity] = useState('1');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [processingVoiceInput, setProcessingVoiceInput] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   
   // Voice recognition
@@ -66,12 +76,59 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   const [spellCheckSuggestions, setSpellCheckSuggestions] = useState<string[]>([]);
   const [misspelledWord, setMisspelledWord] = useState('');
 
-  // Función para procesar la entrada de voz
-  const processVoiceInput = (transcript: string): { name: string; price: string } => {
+  // Función para procesar la entrada de voz usando Gemini AI
+  const processVoiceInputWithAI = async (transcript: string) => {
+    setProcessingVoiceInput(true);
+    
+    try {
+      // Usar Gemini para analizar la entrada de voz
+      const result = await identifyQuantities(transcript);
+      
+      if (result && result.items && result.items.length > 0) {
+        const item = result.items[0];
+        
+        if (item.name) {
+          setItemName(item.name);
+        }
+        
+        if (item.quantity && item.quantity > 0) {
+          setItemQuantity(item.quantity.toString());
+        }
+        
+        if (item.price) {
+          setItemPrice(item.price.toString());
+        }
+        
+        // Mostrar toast con lo que se entendió
+        const quantityText = item.quantity && item.quantity > 1 ? ` (${item.quantity}x)` : '';
+        const priceText = item.price ? ` por ${item.price}€` : '';
+        
+        toast.success("Entrada por voz reconocida", {
+          description: `"${item.name}"${quantityText}${priceText}`
+        });
+        
+        return;
+      }
+      
+      // Si Gemini falla, usar el procesamiento clásico
+      processVoiceInputClassic(transcript);
+      
+    } catch (error) {
+      console.error("Error procesando entrada de voz con AI:", error);
+      // Fallback al procesamiento clásico
+      processVoiceInputClassic(transcript);
+    } finally {
+      setProcessingVoiceInput(false);
+    }
+  };
+
+  // Función clásica para procesar la entrada de voz
+  const processVoiceInputClassic = (transcript: string): void => {
     let name = '';
     let price = '';
+    let quantity = 1;
     
-    // Normalizar el texto (minúsculas, espacios, etc)
+    // Normalizar el texto
     const normalizedTranscript = transcript.toLowerCase().trim();
     
     // 1. Verificar productos por peso
@@ -101,11 +158,47 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           }
         }
         
-        return { name, price };
+        setItemName(name);
+        if (price) setItemPrice(price);
+        setItemQuantity("1"); // El peso ya está incluido en el nombre
+        
+        return;
       }
     }
     
-    // 2. Buscar el precio utilizando patrones comunes
+    // 2. Verificar cantidades específicas
+    for (const pattern of QUANTITY_PATTERNS) {
+      const match = normalizedTranscript.match(pattern);
+      if (match && match[1] && (match[2] || match[3])) {
+        quantity = parseInt(match[1], 10);
+        
+        // Obtener el nombre del producto
+        if (match[3]) {
+          name = match[3].trim(); // Para el patrón con unidad específica
+        } else {
+          name = match[2].trim(); // Para el patrón genérico
+        }
+        
+        // Buscar precio en el texto restante
+        const remainingText = normalizedTranscript.replace(match[0], '').trim();
+        
+        for (const pricePattern of PRICE_PATTERNS) {
+          const priceMatch = remainingText.match(pricePattern);
+          if (priceMatch && priceMatch[1]) {
+            price = priceMatch[1].replace(',', '.');
+            break;
+          }
+        }
+        
+        setItemName(name);
+        if (price) setItemPrice(price);
+        setItemQuantity(quantity.toString());
+        
+        return;
+      }
+    }
+    
+    // 3. Buscar el precio utilizando patrones comunes
     let foundPrice = false;
     let priceValue = '';
     
@@ -161,7 +254,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     }
     
     // Eliminar palabras de precio comunes y artículos
-    const wordsToRemove = ['añadir', 'añade', 'agregar', 'agrega', 'add'];
+    const wordsToRemove = ['añadir', 'añade', 'agregar', 'agrega', 'add', 'pon', 'poner'];
     for (const word of wordsToRemove) {
       const regex = new RegExp(`^${word}\\s+`, 'i');
       name = name.replace(regex, '');
@@ -170,42 +263,35 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     // Limpiar espacios múltiples
     name = name.replace(/\s+/g, ' ').trim();
     
-    return { name, price };
+    // Establecer los valores reconocidos en los estados
+    if (name) setItemName(name);
+    if (price) setItemPrice(price);
+    
+    // Mostrar toast con lo que se entendió
+    if (name && price) {
+      toast.success("Entrada por voz reconocida", {
+        description: `"${name}" por ${price}€${quantity > 1 ? ` (${quantity}x)` : ''}`
+      });
+    } else if (name) {
+      toast.info("Producto reconocido, falta precio", {
+        description: `"${name}"${quantity > 1 ? ` (${quantity}x)` : ''}`
+      });
+    } else if (price) {
+      toast.info("Precio reconocido, falta producto", {
+        description: `${price}€`
+      });
+    } else {
+      toast.warning("No se reconoció correctamente", {
+        description: "Intenta de nuevo con 'producto a precio'"
+      });
+    }
   };
 
   // Handle voice transcript
   useEffect(() => {
     if (transcript) {
-      const { name, price } = processVoiceInput(transcript);
-      
-      if (name) {
-        setItemName(name);
-      }
-      
-      if (price) {
-        setItemPrice(price);
-      } else {
-        setItemPrice('');
-      }
-      
-      // Mostrar toast con lo que se entendió
-      if (name && price) {
-        toast.success("Entrada por voz reconocida", {
-          description: `"${name}" por ${price}€`
-        });
-      } else if (name) {
-        toast.info("Producto reconocido, falta precio", {
-          description: `"${name}"`
-        });
-      } else if (price) {
-        toast.info("Precio reconocido, falta producto", {
-          description: `${price}€`
-        });
-      } else {
-        toast.warning("No se reconoció correctamente", {
-          description: "Intenta de nuevo con 'producto a precio'"
-        });
-      }
+      // Usar el método avanzado con AI
+      processVoiceInputWithAI(transcript);
     }
   }, [transcript]);
 
@@ -272,6 +358,12 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
       return;
     }
 
+    const quantity = parseInt(itemQuantity, 10);
+    if (isNaN(quantity) || quantity <= 0) {
+      toast.error("Cantidad debe ser un número positivo");
+      return;
+    }
+
     // Check spelling before adding
     const { isMisspelled, suggestions } = checkSpelling(itemName);
     if (isMisspelled && suggestions.length > 0) {
@@ -282,25 +374,28 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     }
     
     // If no spelling issues, add the item directly
-    addItemToList(itemName, price);
+    addItemToList(itemName, price, quantity);
   };
 
   const handleSelectSpellingSuggestion = (suggestion: string) => {
     const price = parseFloat(itemPrice.replace(',', '.'));
-    addItemToList(suggestion, price);
+    const quantity = parseInt(itemQuantity, 10) || 1;
+    addItemToList(suggestion, price, quantity);
     setSpellCheckOpen(false);
   };
 
   const handleIgnoreSpelling = () => {
     const price = parseFloat(itemPrice.replace(',', '.'));
-    addItemToList(misspelledWord, price);
+    const quantity = parseInt(itemQuantity, 10) || 1;
+    addItemToList(misspelledWord, price, quantity);
     setSpellCheckOpen(false);
   };
 
-  const addItemToList = (name: string, price: number) => {
-    onAddItem(name, price);
+  const addItemToList = (name: string, price: number, quantity: number = 1) => {
+    onAddItem(name, price, quantity);
     setItemName('');
     setItemPrice('');
+    setItemQuantity('1');
     setSuggestions([]);
     setShowSuggestions(false);
   };
@@ -348,22 +443,43 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             inputMode="decimal"
           />
 
+          <Input
+            type="number"
+            placeholder="Cantidad"
+            value={itemQuantity}
+            onChange={(e) => setItemQuantity(e.target.value)}
+            className="w-24"
+            min="1"
+            inputMode="numeric"
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <Button 
+            type="submit" 
+            className="flex-1"
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Añadir Artículo
+          </Button>
+
           <Button 
             type="button"
             variant="outline"
-            className={`shrink-0 ${isListening ? 'bg-primary text-primary-foreground animate-pulse' : ''}`}
+            className={`${isListening ? 'bg-primary text-primary-foreground animate-pulse' : ''}`}
             onClick={isListening ? stopListening : startListening}
+            disabled={processingVoiceInput}
           >
-            <Mic className="mr-1 h-4 w-4" />
+            {isListening ? (
+              <MicOff className="mr-1 h-4 w-4" />
+            ) : (
+              <Mic className="mr-1 h-4 w-4" />
+            )}
             <span className="sr-only sm:not-sr-only sm:inline-block">
-              {isListening ? 'Escuchando...' : 'Añadir por voz'}
+              {isListening ? 'Escuchando...' : 'Por voz'}
             </span>
           </Button>
         </div>
-
-        <Button type="submit" className="w-full">
-          Añadir Artículo
-        </Button>
       </form>
 
       {/* Spell check dialog */}
