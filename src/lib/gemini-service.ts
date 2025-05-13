@@ -6,8 +6,13 @@ const GEMINI_API_KEY = "AIzaSyC7LtWs9tYp3deRmfWA6AUUaUajc5KgU0k";
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 export interface GeminiResponse {
-  categories: Record<string, string[]>;
+  categories?: Record<string, string[]>;
   quantities?: Record<string, number>;
+  items?: Array<{
+    name: string;
+    quantity?: number;
+    price?: number;
+  }>;
 }
 
 /**
