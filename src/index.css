@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    --background: 210 30% 98%;
+    --background: 0 0% 98%;
     --foreground: 220 20% 16%;
 
     --card: 0 0% 100%;
@@ -16,16 +16,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 16%;
 
-    --primary: 220 60% 45%;
+    --primary: 220 33% 35%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 20% 96%;
+    --secondary: 220 5% 90%;
     --secondary-foreground: 220 20% 16%;
 
     --muted: 220 10% 96%;
     --muted-foreground: 220 10% 50%;
 
-    --accent: 270 80% 65%;
+    --accent: 270 50% 60%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84% 60%;
@@ -33,39 +33,39 @@
 
     --border: 220 13% 90%;
     --input: 220 13% 90%;
-    --ring: 220 60% 45%;
+    --ring: 220 33% 35%;
 
     --radius: 1rem;
   }
 
   .dark {
-    --background: 220 30% 8%;
+    --background: 220 33% 10%;
     --foreground: 0 0% 98%;
 
-    --card: 220 25% 12%;
+    --card: 220 33% 12%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 220 25% 12%;
+    --popover: 220 33% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 220 60% 50%;
+    --primary: 220 33% 45%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 20% 16%;
+    --secondary: 220 5% 20%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 25% 15%;
+    --muted: 220 33% 15%;
     --muted-foreground: 220 10% 70%;
 
-    --accent: 270 80% 65%;
+    --accent: 270 50% 60%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 25% 18%;
-    --input: 220 25% 18%;
-    --ring: 220 60% 50%;
+    --border: 220 33% 18%;
+    --input: 220 33% 18%;
+    --ring: 220 33% 45%;
   }
 }
 
@@ -85,7 +85,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/80 dark:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-sm rounded-xl;
+    @apply bg-white/80 dark:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-sm;
   }
   
   .shopping-item {
@@ -111,26 +111,6 @@
   .floating-button {
     @apply fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 bg-primary/80 backdrop-blur-sm hover:bg-primary transition-colors;
   }
-
-  .menu-item {
-    @apply flex items-center gap-3 p-4 transition-colors rounded-lg hover:bg-secondary/50;
-  }
-  
-  .menu-item-active {
-    @apply bg-secondary text-primary font-medium;
-  }
-  
-  .category-header {
-    @apply flex items-center gap-2 mb-3 pb-2 border-b text-lg font-medium;
-  }
-  
-  .dialog-content {
-    @apply glass-card p-6 max-w-md w-full mx-auto;
-  }
-  
-  .fancy-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors bg-primary/10 text-primary;
-  }
 }
 
 @layer utilities {
@@ -145,34 +125,4 @@
   .glass-effect {
     @apply bg-white/20 dark:bg-black/20 backdrop-blur-md;
   }
-  
-  .subtle-shadow {
-    @apply shadow-[0_8px_30px_rgb(0,0,0,0.05)];
-  }
-  
-  .animated-bg {
-    @apply bg-gradient-to-br from-background to-secondary/50 animate-gradient;
-  }
-  
-  .frost {
-    @apply bg-white/60 dark:bg-black/40 backdrop-blur-lg border border-white/20 dark:border-white/10;
-  }
 }
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient 15s ease infinite;
-}
-

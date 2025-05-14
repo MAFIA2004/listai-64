@@ -162,9 +162,9 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md glass-card border-0">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
+          <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
             Sugerir Ingredientes
           </DialogTitle>
@@ -180,7 +180,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 placeholder="Ej. Pizza casera para 4 personas"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                className="flex-1 glass-effect"
+                className="flex-1"
                 disabled={isLoading || isListening}
               />
               <Button
@@ -188,7 +188,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 size="icon"
                 onClick={handleVoiceInput}
                 disabled={isLoading}
-                className={isListening ? "border-primary text-primary frost" : "frost"}
+                className={isListening ? "border-primary text-primary" : ""}
               >
                 {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
@@ -221,11 +221,11 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
         ) : (
           <div className="py-4">
             <h3 className="mb-2 font-medium">Ingredientes sugeridos:</h3>
-            <div className="max-h-[240px] overflow-y-auto space-y-2 mb-4 frost p-3 rounded-lg">
+            <div className="max-h-[240px] overflow-y-auto space-y-2 mb-4">
               {suggestions.map((item, index) => (
                 <div 
                   key={index}
-                  className="flex items-center justify-between p-2 glass-card"
+                  className="flex items-center justify-between p-2 border rounded-md"
                 >
                   <div className="flex items-center gap-2 flex-1">
                     <Button
@@ -246,14 +246,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
             </div>
             
             <div className="flex justify-between">
-              <Button variant="outline" onClick={resetDialog} className="frost">
+              <Button variant="outline" onClick={resetDialog}>
                 Cancelar
               </Button>
               <div className="space-x-2">
                 <Button 
                   variant="outline"
                   onClick={handleSaveIngredients}
-                  className="frost"
                 >
                   <BookmarkPlus className="mr-2 h-4 w-4" />
                   Guardar

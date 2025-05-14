@@ -9,7 +9,7 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <main className="min-h-dvh animated-bg transition-colors duration-300">
+        <main className="min-h-dvh bg-gradient-to-br from-background to-secondary/30 transition-colors duration-300">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="*" element={<NotFound />} />

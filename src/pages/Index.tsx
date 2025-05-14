@@ -18,8 +18,7 @@ import {
   Sparkles,
   Trash2,
   History,
-  Save,
-  MenuSquare
+  Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,18 +106,17 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-300 pt-8 pb-20">
+    <div className="min-h-screen bg-background text-foreground pt-8 pb-20">
       <div className="container max-w-md mx-auto px-4">
         <header className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Lista de Compras</h1>
-            <div className="flex gap-2">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-primary">Lista de Compras</h1>
+            <div className="flex gap-1">
               <Button 
                 variant="outline" 
                 size="icon"
                 onClick={() => setHistoryDialogOpen(true)}
                 title="Historial de compras"
-                className="frost"
               >
                 <History className="h-4 w-4" />
               </Button>
@@ -127,8 +125,8 @@ const Index = () => {
           </div>
           
           {budget.enabled && (
-            <div className="glass-card p-4 mb-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium">Presupuesto: {formatPrice(budget.amount)}</span>
                 <span 
                   className={`text-sm font-bold ${isOverBudget ? 'text-destructive' : 'text-primary'}`}
@@ -136,38 +134,43 @@ const Index = () => {
                   {formatPrice(totalPrice)} ({budgetPercentage.toFixed(0)}%)
                 </span>
               </div>
-              <div className="h-2 w-full bg-secondary/50 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full ${isOverBudget ? 'bg-destructive' : 'bg-gradient-to-r from-primary to-accent'}`}
+                  className={`h-full ${isOverBudget ? 'bg-destructive' : 'bg-primary'}`}
                   style={{ width: `${budgetPercentage}%` }}
                 ></div>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="flex gap-2 my-2">
             <Button 
               variant="outline" 
-              className="frost text-xs p-2 h-auto"
+              size="sm"
+              className="flex-1 text-xs"
               onClick={() => setBudgetDialogOpen(true)}
             >
               <PiggyBank className="mr-1 h-3.5 w-3.5" />
-              {budget.enabled ? 'Presupuesto' : 'Añadir Presupuesto'}
+              {budget.enabled ? 'Editar Presupuesto' : 'Añadir Presupuesto'}
             </Button>
+            
+            {budget.enabled && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => setPriorityDialogOpen(true)}
+                disabled={outsideBudget.length === 0}
+              >
+                <AlertCircle className="mr-1 h-3.5 w-3.5" />
+                Priorizar
+              </Button>
+            )}
             
             <Button 
               variant="outline" 
-              className={`frost text-xs p-2 h-auto ${outsideBudget.length === 0 ? 'opacity-50' : ''}`}
-              onClick={() => setPriorityDialogOpen(true)}
-              disabled={outsideBudget.length === 0}
-            >
-              <AlertCircle className="mr-1 h-3.5 w-3.5" />
-              Priorizar
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="frost text-xs p-2 h-auto"
+              size="sm"
+              className="flex-1 text-xs"
               onClick={() => setConfirmClearDialogOpen(true)}
             >
               <Trash2 className="mr-1 h-3.5 w-3.5" />
@@ -175,10 +178,11 @@ const Index = () => {
             </Button>
           </div>
 
+          {/* Nuevo botón para guardar la lista al historial */}
           <Button 
             variant="default" 
             size="sm"
-            className="w-full frost backdrop-blur-md bg-primary/80 border-primary/20 shadow-sm"
+            className="w-full mt-2"
             onClick={handleSaveToHistory}
           >
             <Save className="mr-2 h-4 w-4" />
@@ -193,19 +197,17 @@ const Index = () => {
             <Button 
               variant={viewMode === 'list' ? 'default' : 'outline'} 
               size="sm"
-              className={`flex-1 ${viewMode === 'list' ? '' : 'frost'}`}
+              className="flex-1"
               onClick={() => setViewMode('list')}
             >
-              <MenuSquare className="h-4 w-4 mr-1" />
               Lista
             </Button>
             <Button 
               variant={viewMode === 'category' ? 'default' : 'outline'} 
               size="sm"
-              className={`flex-1 ${viewMode === 'category' ? '' : 'frost'}`}
+              className="flex-1"
               onClick={() => setViewMode('category')}
             >
-              <PieChart className="h-4 w-4 mr-1" />
               Por Categorías
             </Button>
           </div>
@@ -216,8 +218,8 @@ const Index = () => {
           />
         </div>
 
-        <div className="mb-6">
-          <div className="glass-card p-4 flex items-center justify-between">
+        <div className="mb-4">
+          <div className="flex items-center justify-between py-3 px-4 bg-card rounded-lg border shadow-sm">
             <div className="flex items-center gap-2">
               <ShoppingCart className="text-primary" size={20} />
               <span className="font-medium">Total pendiente:</span>
@@ -239,9 +241,9 @@ const Index = () => {
                 />
               ))
             ) : (
-              <div className="py-10 text-center glass-card animate-fade-in">
+              <div className="py-10 text-center text-muted-foreground animate-fade-in">
                 <ShoppingCart className="mx-auto mb-3 opacity-30" size={40} />
-                <p className="text-muted-foreground">Tu lista está vacía. ¡Añade algo!</p>
+                <p>Tu lista está vacía. ¡Añade algo!</p>
               </div>
             )}
           </div>
@@ -250,10 +252,7 @@ const Index = () => {
             {Object.entries(itemsByCategory).length > 0 ? (
               Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                 <div key={category} className="space-y-2">
-                  <div className="category-header">
-                    <span className="size-3 rounded-full bg-primary"></span>
-                    <h2 className="capitalize">{category}</h2>
-                  </div>
+                  <h2 className="font-bold text-lg capitalize text-primary">{category}</h2>
                   {categoryItems.map(item => (
                     <ShoppingListItem
                       key={item.id}
@@ -266,9 +265,9 @@ const Index = () => {
                 </div>
               ))
             ) : (
-              <div className="py-10 text-center glass-card animate-fade-in">
+              <div className="py-10 text-center text-muted-foreground animate-fade-in">
                 <ShoppingCart className="mx-auto mb-3 opacity-30" size={40} />
-                <p className="text-muted-foreground">Tu lista está vacía. ¡Añade algo!</p>
+                <p>Tu lista está vacía. ¡Añade algo!</p>
               </div>
             )}
           </div>
@@ -286,11 +285,11 @@ const Index = () => {
 
       {/* AI Menu Dialog */}
       <Dialog open={aiMenuDialogOpen} onOpenChange={setAiMenuDialogOpen}>
-        <DialogContent className="sm:max-w-xs p-0 glass-card border-0 overflow-hidden">
+        <DialogContent className="sm:max-w-xs p-0">
           <div className="flex flex-col">
             <Button
               variant="ghost" 
-              className="justify-start rounded-none py-6 text-lg text-left menu-item"
+              className="justify-start rounded-none py-6 text-lg"
               onClick={() => handleAiOptionSelect('suggestions')}
             >
               <Sparkles className="mr-2 h-5 w-5 text-primary" />
@@ -298,7 +297,7 @@ const Index = () => {
             </Button>
             <Button 
               variant="ghost" 
-              className="justify-start rounded-none py-6 text-lg text-left menu-item"
+              className="justify-start rounded-none py-6 text-lg"
               onClick={() => handleAiOptionSelect('savedIngredients')}
             >
               <ShoppingCart className="mr-2 h-5 w-5 text-primary" />
@@ -310,9 +309,9 @@ const Index = () => {
 
       {/* Budget Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
-        <DialogContent className="sm:max-w-md glass-card border-0">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">Gestión de Presupuesto</DialogTitle>
+            <DialogTitle>Gestión de Presupuesto</DialogTitle>
             <DialogDescription>
               Establece un límite de gasto para tu lista de compras.
             </DialogDescription>
@@ -339,7 +338,6 @@ const Index = () => {
                   step="any"
                   value={tempBudget.amount} 
                   onChange={(e) => setTempBudget(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-                  className="glass-effect"
                 />
               </div>
               
@@ -351,14 +349,13 @@ const Index = () => {
                   max="99"
                   value={tempBudget.warningThreshold} 
                   onChange={(e) => setTempBudget(prev => ({ ...prev, warningThreshold: Math.min(Math.max(parseInt(e.target.value) || 0, 1), 99) }))}
-                  className="glass-effect"
                 />
               </div>
             </div>
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBudgetDialogOpen(false)} className="frost">
+            <Button variant="outline" onClick={() => setBudgetDialogOpen(false)}>
               Cancelar
             </Button>
             <Button onClick={handleBudgetSave}>
@@ -370,9 +367,9 @@ const Index = () => {
 
       {/* Priority Items Dialog */}
       <Dialog open={priorityDialogOpen} onOpenChange={setPriorityDialogOpen}>
-        <DialogContent className="sm:max-w-md glass-card border-0">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">Priorizar Artículos</DialogTitle>
+            <DialogTitle>Priorizar Artículos</DialogTitle>
             <DialogDescription>
               Estos artículos superan tu presupuesto de {formatPrice(budget.amount)}
             </DialogDescription>
@@ -383,22 +380,20 @@ const Index = () => {
               <div className="space-y-4">
                 <p className="text-sm">Artículos que exceden tu presupuesto:</p>
                 
-                <div className="frost rounded-lg p-3 max-h-[300px] overflow-y-auto">
-                  {outsideBudget.map(item => (
-                    <div key={item.id} className="flex items-center justify-between py-3 px-2 border-b last:border-0">
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.quantity}x {formatPrice(item.price)} = {formatPrice(item.price * item.quantity)}
-                        </p>
-                      </div>
-                      <Badge variant="outline" className="ml-2 fancy-badge">{item.category}</Badge>
+                {outsideBudget.map(item => (
+                  <div key={item.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                    <div>
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.quantity}x {formatPrice(item.price)} = {formatPrice(item.price * item.quantity)}
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    <Badge variant="outline" className="ml-2">{item.category}</Badge>
+                  </div>
+                ))}
                 
-                <Alert className="bg-secondary/50 backdrop-blur-sm border border-primary/20">
-                  <ArrowDown className="h-4 w-4 text-primary" />
+                <Alert>
+                  <ArrowDown className="h-4 w-4" />
                   <AlertTitle>Recomendación</AlertTitle>
                   <AlertDescription>
                     Considera eliminar estos {outsideBudget.length} artículos para ajustarte a tu presupuesto de {formatPrice(budget.amount)}.
@@ -406,11 +401,9 @@ const Index = () => {
                 </Alert>
               </div>
             ) : (
-              <div className="text-center glass-card p-8">
-                <p className="text-muted-foreground py-4">
-                  ¡Genial! Todos tus artículos están dentro del presupuesto.
-                </p>
-              </div>
+              <p className="text-center text-muted-foreground py-4">
+                ¡Genial! Todos tus artículos están dentro del presupuesto.
+              </p>
             )}
           </div>
           
@@ -424,16 +417,16 @@ const Index = () => {
 
       {/* Confirm Clear All Dialog */}
       <Dialog open={confirmClearDialogOpen} onOpenChange={setConfirmClearDialogOpen}>
-        <DialogContent className="sm:max-w-md glass-card border-0">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">¿Borrar toda la lista?</DialogTitle>
+            <DialogTitle>¿Borrar toda la lista?</DialogTitle>
             <DialogDescription>
               Esta acción eliminará todos los artículos de tu lista de compras.
             </DialogDescription>
           </DialogHeader>
           
           <DialogFooter className="sm:justify-between">
-            <Button variant="outline" onClick={() => setConfirmClearDialogOpen(false)} className="frost">
+            <Button variant="outline" onClick={() => setConfirmClearDialogOpen(false)}>
               Cancelar
             </Button>
             <Button variant="destructive" onClick={handleClearAllItems}>
