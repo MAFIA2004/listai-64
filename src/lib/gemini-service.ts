@@ -149,20 +149,23 @@ export async function getAIRecipeSuggestions(request: string): Promise<GeminiRes
   
   try {
     const prompt = `
-      Act as a cooking assistant that helps with shopping lists. Based on my request, suggest a list of ingredients 
-      needed for the recipe or meal I want to prepare. For each ingredient, provide:
-      1. The name of the ingredient
-      2. Approximate quantity needed
-      3. Estimated price in euros (make a reasonable guess)
+      Actúa como un asistente de cocina en español que ayuda con listas de compras. Basado en mi solicitud,
+      sugiere una lista de ingredientes necesarios para la receta o comida que quiero preparar.
+      Para cada ingrediente, proporciona:
+      1. El nombre del ingrediente en español
+      2. Cantidad aproximada necesaria
+      3. Precio estimado en euros (haz una estimación razonable)
       
-      Return your response ONLY as a JSON object with the following format:
+      No incluyas agua en la lista de ingredientes, ya que se asume que el usuario la tiene.
+      
+      Devuelve tu respuesta SOLO como un objeto JSON con el siguiente formato:
       {
         "ingredients": [
-          {"name": "ingredient name", "quantity": number, "price": number}
+          {"name": "nombre del ingrediente", "quantity": número, "price": número}
         ]
       }
       
-      Here is my request:
+      Aquí está mi solicitud:
       "${request}"
     `;
 

@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { categorizeItems } from '@/lib/gemini-service';
 import { toast } from 'sonner';
+import { playBudgetExceededSound } from '@/lib/sound-utils';
 
 export interface ShoppingItem {
   id: string;
@@ -11,6 +11,13 @@ export interface ShoppingItem {
   date: Date;
   category?: string;
   quantity: number;
+}
+
+export interface PurchaseHistoryEntry {
+  id: string;
+  date: Date;
+  items: ShoppingItem[];
+  totalAmount: number;
 }
 
 type SortOption = 'name' | 'price-asc' | 'price-desc' | 'date' | 'category';
@@ -50,6 +57,28 @@ export function useShoppingList() {
   const [sortOption, setSortOption] = useState<SortOption>('date');
   const [categories, setCategories] = useState<Record<string, string[]>>({});
   
+  // Purchase history state
+  const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistoryEntry[]>(() => {
+    const savedHistory = localStorage.getItem('purchaseHistoryEntries');
+    if (savedHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedHistory);
+        return parsedHistory.map((entry: any) => ({
+          ...entry,
+          date: new Date(entry.date),
+          items: entry.items.map((item: any) => ({
+            ...item,
+            date: new Date(item.date)
+          }))
+        }));
+      } catch (e) {
+        console.error('Error parsing saved purchase history', e);
+        return [];
+      }
+    }
+    return [];
+  });
+  
   // Budget management
   const [budget, setBudget] = useState<BudgetAlert>(() => {
     const savedBudget = localStorage.getItem('shoppingBudget');
@@ -77,7 +106,7 @@ export function useShoppingList() {
   });
 
   // Item purchase history for personalized suggestions
-  const [purchaseHistory, setPurchaseHistory] = useState<Record<string, { frequency: number, lastBought: Date }>>(() => {
+  const [purchaseHistoryLocal, setPurchaseHistoryLocal] = useState<Record<string, { frequency: number, lastBought: Date }>>(() => {
     const savedHistory = localStorage.getItem('purchaseHistory');
     if (savedHistory) {
       try {
@@ -115,8 +144,8 @@ export function useShoppingList() {
 
   // Save purchase history to localStorage
   useEffect(() => {
-    localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
-  }, [purchaseHistory]);
+    localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistoryLocal));
+  }, [purchaseHistoryLocal]);
 
   // Categorize items when they change
   useEffect(() => {
@@ -201,6 +230,26 @@ export function useShoppingList() {
     checkBudgetAfterAddingItem(price * quantity);
   };
 
+  // Function to clear the entire shopping list
+  const clearAllItems = () => {
+    // Save completed items to history before clearing
+    const completedItems = items.filter(item => item.completed);
+    
+    if (completedItems.length > 0) {
+      const historyEntry: PurchaseHistoryEntry = {
+        id: crypto.randomUUID(),
+        date: new Date(),
+        items: completedItems,
+        totalAmount: completedItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+      };
+      
+      setPurchaseHistory(prev => [historyEntry, ...prev]);
+    }
+    
+    setItems([]);
+    toast.success('Lista de compras eliminada');
+  };
+
   const removeItem = (id: string) => {
     setItems(prevItems => prevItems.filter(item => item.id !== id));
   };
@@ -230,6 +279,29 @@ export function useShoppingList() {
     setItems(prevItems => prevItems.map(item => 
       item.id === id ? { ...item, quantity } : item
     ));
+  };
+
+  // Save all completed items to history
+  const saveCompletedToHistory = () => {
+    const completedItems = items.filter(item => item.completed);
+    
+    if (completedItems.length > 0) {
+      const historyEntry: PurchaseHistoryEntry = {
+        id: crypto.randomUUID(),
+        date: new Date(),
+        items: completedItems,
+        totalAmount: completedItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+      };
+      
+      setPurchaseHistory(prev => [historyEntry, ...prev]);
+      
+      // Remove completed items from the list
+      setItems(prev => prev.filter(item => !item.completed));
+      
+      toast.success('Compra guardada en el historial');
+    } else {
+      toast.error('No hay artículos completados para guardar');
+    }
   };
 
   const getSortedItems = () => {
@@ -295,6 +367,9 @@ export function useShoppingList() {
       toast.error(`¡Has excedido tu presupuesto!`, {
         description: `Tu presupuesto es de ${budgetAmount}€ y llevas ${currentTotal.toFixed(2)}€`
       });
+      
+      // Play sound when budget is exceeded
+      playBudgetExceededSound();
     }
   };
 
@@ -444,7 +519,7 @@ export function useShoppingList() {
   }
 
   function updatePurchaseHistory(itemName: string) {
-    setPurchaseHistory(prev => {
+    setPurchaseHistoryLocal(prev => {
       const history = { ...prev };
       const normalizedName = itemName.toLowerCase();
       
@@ -477,8 +552,8 @@ export function useShoppingList() {
       const name = item.name.toLowerCase();
       if (name !== newItemName && !items.find(i => i.name.toLowerCase() === name && !i.completed)) {
         // Check purchase history correlation
-        const itemHistory = purchaseHistory[name];
-        const newItemHistory = purchaseHistory[newItemName];
+        const itemHistory = purchaseHistoryLocal[name];
+        const newItemHistory = purchaseHistoryLocal[newItemName];
         
         if (itemHistory && newItemHistory && itemHistory.frequency > 1) {
           // If both items were bought within a day of each other multiple times
@@ -513,19 +588,23 @@ export function useShoppingList() {
     itemsByCategory: getItemsByCategory(),
     addItem,
     removeItem,
+    clearAllItems,
     toggleItemCompletion,
     updateItemQuantity,
     sortOption,
     setSortOption,
     totalPrice: calculateTotal(),
     categories: Object.keys(getItemsByCategory()),
-    // New budget functions
+    // Budget functions
     budget,
     updateBudget,
     getSavingSuggestions,
     getPriorityItems,
-    // New pattern functions
+    // Pattern functions
     commonPatterns,
-    setCommonPatterns
+    setCommonPatterns,
+    // History functions
+    purchaseHistory,
+    saveCompletedToHistory
   };
 }

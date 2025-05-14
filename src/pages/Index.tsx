@@ -5,9 +5,19 @@ import { AddItemForm } from '@/components/AddItemForm';
 import { SortButtons } from '@/components/SortButtons';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AISuggestionDialog } from '@/components/AISuggestionDialog';
+import { HistoryDialog } from '@/components/HistoryDialog';
 import { formatPrice } from '@/lib/utils';
 import { useShoppingList } from '@/hooks/use-shopping-list';
-import { ShoppingCart, PieChart, AlertCircle, TrendingDown, PiggyBank, ArrowDown, Sparkles } from 'lucide-react';
+import { 
+  ShoppingCart, 
+  PieChart, 
+  AlertCircle, 
+  PiggyBank, 
+  ArrowDown, 
+  Sparkles,
+  Trash2,
+  History
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -22,32 +32,33 @@ const Index = () => {
     itemsByCategory,
     addItem, 
     removeItem, 
+    clearAllItems,
     toggleItemCompletion,
     updateItemQuantity,
     sortOption,
     setSortOption,
     totalPrice,
     categories,
-    // New budget features
+    // Budget features
     budget,
     updateBudget,
-    getSavingSuggestions,
-    getPriorityItems
+    getPriorityItems,
+    // History features
+    purchaseHistory,
+    saveCompletedToHistory
   } = useShoppingList();
 
   const [viewMode, setViewMode] = useState<'list' | 'category'>('list');
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [tempBudget, setTempBudget] = useState(budget);
-  const [savingsDialogOpen, setSavingsDialogOpen] = useState(false);
   const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
   const [aiSuggestionDialogOpen, setAiSuggestionDialogOpen] = useState(false);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [confirmClearDialogOpen, setConfirmClearDialogOpen] = useState(false);
 
   // Calculate budget status percentage
   const budgetPercentage = budget.enabled ? Math.min((totalPrice / budget.amount) * 100, 100) : 0;
   const isOverBudget = budget.enabled && totalPrice > budget.amount;
-  
-  // Get saving suggestions
-  const savingSuggestions = getSavingSuggestions();
   
   // Get priority items based on budget
   const { withinBudget, outsideBudget } = budget.enabled ? 
@@ -59,13 +70,28 @@ const Index = () => {
     toast.success("Presupuesto actualizado");
   };
 
+  const handleClearAllItems = () => {
+    clearAllItems();
+    setConfirmClearDialogOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground pt-8 pb-20">
       <div className="container max-w-md mx-auto px-4">
         <header className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-3xl font-bold text-primary">Lista de Compras</h1>
-            <ThemeToggle />
+            <div className="flex gap-1">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setHistoryDialogOpen(true)}
+                title="Historial de compras"
+              >
+                <History className="h-4 w-4" />
+              </Button>
+              <ThemeToggle />
+            </div>
           </div>
           
           {budget.enabled && (
@@ -115,11 +141,10 @@ const Index = () => {
               variant="outline" 
               size="sm"
               className="flex-1 text-xs"
-              onClick={() => setSavingsDialogOpen(true)}
-              disabled={savingSuggestions.length === 0}
+              onClick={() => setConfirmClearDialogOpen(true)}
             >
-              <TrendingDown className="mr-1 h-3.5 w-3.5" />
-              Ahorrar
+              <Trash2 className="mr-1 h-3.5 w-3.5" />
+              Borrar Todo
             </Button>
           </div>
         </header>
@@ -211,7 +236,7 @@ const Index = () => {
       {/* Floating AI Button */}
       <Button
         onClick={() => setAiSuggestionDialogOpen(true)}
-        className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 animate-pulse hover:animate-none"
+        className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 animate-pulse hover:animate-none bg-primary"
       >
         <Sparkles className="h-6 w-6" />
         <span className="sr-only">Asistente IA</span>
@@ -275,49 +300,6 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Savings Suggestions Dialog */}
-      <Dialog open={savingsDialogOpen} onOpenChange={setSavingsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Sugerencias de Ahorro</DialogTitle>
-            <DialogDescription>
-              Alternativas más económicas para tu lista de compras.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            {savingSuggestions.length > 0 ? (
-              <div className="space-y-4">
-                {savingSuggestions.map((suggestion, idx) => (
-                  <Alert key={idx} variant="default">
-                    <TrendingDown className="h-4 w-4" />
-                    <AlertTitle>Ahorro potencial: {suggestion.savings.toFixed(0)}%</AlertTitle>
-                    <AlertDescription className="text-sm">
-                      <p>
-                        <span className="font-medium">{suggestion.original.name}</span> {' '}
-                        ({formatPrice(suggestion.original.price)}) es similar a {' '}
-                        <span className="font-medium">{suggestion.alternative.name}</span> {' '}
-                        ({formatPrice(suggestion.alternative.price)}) pero cuesta más.
-                      </p>
-                    </AlertDescription>
-                  </Alert>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-4">
-                No hay sugerencias de ahorro disponibles en este momento.
-              </p>
-            )}
-          </div>
-          
-          <DialogFooter>
-            <Button onClick={() => setSavingsDialogOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Priority Items Dialog */}
       <Dialog open={priorityDialogOpen} onOpenChange={setPriorityDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -368,11 +350,40 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Confirm Clear All Dialog */}
+      <Dialog open={confirmClearDialogOpen} onOpenChange={setConfirmClearDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>¿Borrar toda la lista?</DialogTitle>
+            <DialogDescription>
+              Esta acción eliminará todos los artículos de tu lista de compras.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <DialogFooter className="sm:justify-between">
+            <Button variant="outline" onClick={() => setConfirmClearDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleClearAllItems}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Borrar todo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* AI Recipe Suggestions Dialog */}
       <AISuggestionDialog 
         open={aiSuggestionDialogOpen} 
         onOpenChange={setAiSuggestionDialogOpen}
         onAddItem={addItem}
+      />
+
+      {/* Purchase History Dialog */}
+      <HistoryDialog 
+        open={historyDialogOpen}
+        onOpenChange={setHistoryDialogOpen}
+        purchaseHistory={purchaseHistory}
       />
     </div>
   );

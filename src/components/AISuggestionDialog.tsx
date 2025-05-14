@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, Loader2, Check, Plus, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -36,22 +36,20 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
   
   const { isListening, transcript, startListening, stopListening } = useSpeechRecognition();
   
-  // Process voice input
+  // Process voice input - update prompt when transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setPrompt(transcript);
+    }
+  }, [transcript]);
+  
   const handleVoiceInput = () => {
     if (isListening) {
       stopListening();
     } else {
       startListening();
-      setPrompt('');
     }
   };
-  
-  // When transcript changes, update prompt
-  useState(() => {
-    if (transcript) {
-      setPrompt(transcript);
-    }
-  });
   
   const handleGenerateSuggestions = async () => {
     if (!prompt.trim()) {
@@ -66,13 +64,17 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       const result = await getAIRecipeSuggestions(prompt);
       
       if (result && result.ingredients && result.ingredients.length > 0) {
-        // Map the ingredients to our format with selected state
-        const mappedSuggestions = result.ingredients.map(ingredient => ({
-          name: ingredient.name,
-          estimatedPrice: ingredient.price || 1.0, // Default price if not provided
-          quantity: ingredient.quantity || 1,
-          selected: true // Default to selected
-        }));
+        // Filter out water and map the ingredients to our format with selected state
+        const mappedSuggestions = result.ingredients
+          .filter(ingredient => 
+            !ingredient.name.toLowerCase().includes('agua') && 
+            !ingredient.name.toLowerCase().includes('water'))
+          .map(ingredient => ({
+            name: ingredient.name,
+            estimatedPrice: ingredient.price || 1.0, // Default price if not provided
+            quantity: ingredient.quantity || 1,
+            selected: true // Default to selected
+          }));
         
         setSuggestions(mappedSuggestions);
         setHasResults(true);
@@ -149,10 +151,17 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 size="icon"
                 onClick={handleVoiceInput}
                 disabled={isLoading}
+                className={isListening ? "border-primary text-primary" : ""}
               >
                 {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
             </div>
+            
+            {isListening && (
+              <div className="text-center text-sm text-muted-foreground">
+                Escuchando... <span className="animate-pulse">●</span>
+              </div>
+            )}
             
             <Button 
               onClick={handleGenerateSuggestions} 
@@ -181,11 +190,11 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                   key={index}
                   className="flex items-center justify-between p-2 border rounded-md"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1">
                     <Button
                       variant={item.selected ? "default" : "outline"}
                       size="icon"
-                      className="h-6 w-6"
+                      className="h-6 w-6 shrink-0"
                       onClick={() => toggleItemSelection(index)}
                     >
                       <Check className="h-3 w-3" />
@@ -195,9 +204,6 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                       {item.quantity > 1 && ` (x${item.quantity})`}
                     </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    ~{item.estimatedPrice.toFixed(2)} €
-                  </span>
                 </div>
               ))}
             </div>
