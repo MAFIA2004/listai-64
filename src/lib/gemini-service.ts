@@ -13,6 +13,11 @@ export interface GeminiResponse {
     quantity?: number;
     price?: number;
   }>;
+  ingredients?: Array<{
+    name: string;
+    quantity?: number;
+    price?: number;
+  }>;
 }
 
 /**
@@ -132,6 +137,68 @@ export async function identifyQuantities(transcript: string): Promise<GeminiResp
     return undefined;
   } catch (error) {
     console.error('Error analyzing voice input:', error);
+    return undefined;
+  }
+}
+
+/**
+ * Uses Gemini AI to generate recipe suggestions
+ */
+export async function getAIRecipeSuggestions(request: string): Promise<GeminiResponse | undefined> {
+  if (!request) return undefined;
+  
+  try {
+    const prompt = `
+      Act as a cooking assistant that helps with shopping lists. Based on my request, suggest a list of ingredients 
+      needed for the recipe or meal I want to prepare. For each ingredient, provide:
+      1. The name of the ingredient
+      2. Approximate quantity needed
+      3. Estimated price in euros (make a reasonable guess)
+      
+      Return your response ONLY as a JSON object with the following format:
+      {
+        "ingredients": [
+          {"name": "ingredient name", "quantity": number, "price": number}
+        ]
+      }
+      
+      Here is my request:
+      "${request}"
+    `;
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Gemini API error:', await response.text());
+      return undefined;
+    }
+
+    const data = await response.json();
+    
+    // Extract JSON from the response text
+    if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      const text = data.candidates[0].content.parts[0].text;
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        const parsedData = JSON.parse(jsonMatch[0]);
+        return parsedData;
+      }
+    }
+    
+    return undefined;
+  } catch (error) {
+    console.error('Error generating recipe suggestions:', error);
     return undefined;
   }
 }

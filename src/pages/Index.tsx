@@ -4,9 +4,10 @@ import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
 import { SortButtons } from '@/components/SortButtons';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AISuggestionDialog } from '@/components/AISuggestionDialog';
 import { formatPrice } from '@/lib/utils';
 import { useShoppingList } from '@/hooks/use-shopping-list';
-import { ShoppingCart, PieChart, AlertCircle, TrendingDown, PiggyBank, ArrowDown } from 'lucide-react';
+import { ShoppingCart, PieChart, AlertCircle, TrendingDown, PiggyBank, ArrowDown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -39,6 +40,7 @@ const Index = () => {
   const [tempBudget, setTempBudget] = useState(budget);
   const [savingsDialogOpen, setSavingsDialogOpen] = useState(false);
   const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
+  const [aiSuggestionDialogOpen, setAiSuggestionDialogOpen] = useState(false);
 
   // Calculate budget status percentage
   const budgetPercentage = budget.enabled ? Math.min((totalPrice / budget.amount) * 100, 100) : 0;
@@ -206,6 +208,15 @@ const Index = () => {
         )}
       </div>
 
+      {/* Floating AI Button */}
+      <Button
+        onClick={() => setAiSuggestionDialogOpen(true)}
+        className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 animate-pulse hover:animate-none"
+      >
+        <Sparkles className="h-6 w-6" />
+        <span className="sr-only">Asistente IA</span>
+      </Button>
+
       {/* Budget Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -356,6 +367,13 @@ const Index = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AI Recipe Suggestions Dialog */}
+      <AISuggestionDialog 
+        open={aiSuggestionDialogOpen} 
+        onOpenChange={setAiSuggestionDialogOpen}
+        onAddItem={addItem}
+      />
     </div>
   );
 };
