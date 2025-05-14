@@ -6,6 +6,7 @@ import { SortButtons } from '@/components/SortButtons';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AISuggestionDialog } from '@/components/AISuggestionDialog';
 import { HistoryDialog } from '@/components/HistoryDialog';
+import { AISavedIngredientsDialog } from '@/components/AISavedIngredientsDialog';
 import { formatPrice } from '@/lib/utils';
 import { useShoppingList } from '@/hooks/use-shopping-list';
 import { 
@@ -16,7 +17,8 @@ import {
   ArrowDown, 
   Sparkles,
   Trash2,
-  History
+  History,
+  Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,9 +54,12 @@ const Index = () => {
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [tempBudget, setTempBudget] = useState(budget);
   const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
+  const [aiDialogMode, setAiDialogMode] = useState<'suggestions' | 'savedIngredients'>('suggestions');
   const [aiSuggestionDialogOpen, setAiSuggestionDialogOpen] = useState(false);
+  const [aiSavedIngredientsDialogOpen, setAiSavedIngredientsDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [confirmClearDialogOpen, setConfirmClearDialogOpen] = useState(false);
+  const [aiMenuDialogOpen, setAiMenuDialogOpen] = useState(false);
 
   // Calculate budget status percentage
   const budgetPercentage = budget.enabled ? Math.min((totalPrice / budget.amount) * 100, 100) : 0;
@@ -73,6 +78,31 @@ const Index = () => {
   const handleClearAllItems = () => {
     clearAllItems();
     setConfirmClearDialogOpen(false);
+  };
+
+  const handleSaveToHistory = () => {
+    const completedItems = items.filter(item => item.completed);
+    if (completedItems.length > 0) {
+      saveCompletedToHistory();
+      toast.success("Lista guardada en el historial");
+    } else {
+      toast.error("No hay artículos completados para guardar");
+    }
+  };
+
+  const handleAiMenuClick = () => {
+    setAiMenuDialogOpen(true);
+  };
+
+  const handleAiOptionSelect = (option: 'suggestions' | 'savedIngredients') => {
+    setAiDialogMode(option);
+    setAiMenuDialogOpen(false);
+    
+    if (option === 'suggestions') {
+      setAiSuggestionDialogOpen(true);
+    } else {
+      setAiSavedIngredientsDialogOpen(true);
+    }
   };
 
   return (
@@ -147,6 +177,17 @@ const Index = () => {
               Borrar Todo
             </Button>
           </div>
+
+          {/* Nuevo botón para guardar la lista al historial */}
+          <Button 
+            variant="default" 
+            size="sm"
+            className="w-full mt-2"
+            onClick={handleSaveToHistory}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Guardar lista en historial
+          </Button>
         </header>
 
         <AddItemForm onAddItem={addItem} />
@@ -233,14 +274,38 @@ const Index = () => {
         )}
       </div>
 
-      {/* Floating AI Button */}
+      {/* Floating AI Button - Ahora abre el menú */}
       <Button
-        onClick={() => setAiSuggestionDialogOpen(true)}
+        onClick={handleAiMenuClick}
         className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 animate-pulse hover:animate-none bg-primary"
       >
         <Sparkles className="h-6 w-6" />
         <span className="sr-only">Asistente IA</span>
       </Button>
+
+      {/* AI Menu Dialog */}
+      <Dialog open={aiMenuDialogOpen} onOpenChange={setAiMenuDialogOpen}>
+        <DialogContent className="sm:max-w-xs p-0">
+          <div className="flex flex-col">
+            <Button
+              variant="ghost" 
+              className="justify-start rounded-none py-6 text-lg"
+              onClick={() => handleAiOptionSelect('suggestions')}
+            >
+              <Sparkles className="mr-2 h-5 w-5 text-primary" />
+              Sugerir ingredientes
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="justify-start rounded-none py-6 text-lg"
+              onClick={() => handleAiOptionSelect('savedIngredients')}
+            >
+              <ShoppingCart className="mr-2 h-5 w-5 text-primary" />
+              Lista de ingredientes IA
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Budget Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
@@ -376,6 +441,13 @@ const Index = () => {
       <AISuggestionDialog 
         open={aiSuggestionDialogOpen} 
         onOpenChange={setAiSuggestionDialogOpen}
+        onAddItem={addItem}
+      />
+
+      {/* AI Saved Ingredients Dialog */}
+      <AISavedIngredientsDialog
+        open={aiSavedIngredientsDialogOpen}
+        onOpenChange={setAiSavedIngredientsDialogOpen}
         onAddItem={addItem}
       />
 

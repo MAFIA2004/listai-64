@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Check, Plus, Mic, MicOff } from 'lucide-react';
+import { Sparkles, Loader2, Check, Plus, Mic, MicOff, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog,
@@ -116,6 +116,43 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     resetDialog();
   };
   
+  const handleSaveIngredients = () => {
+    const selectedItems = suggestions.filter(item => item.selected);
+    
+    if (selectedItems.length === 0) {
+      toast.error('Selecciona al menos un ingrediente');
+      return;
+    }
+    
+    // Guardar ingredientes en localStorage
+    const savedIngredients = localStorage.getItem('aiSuggestedIngredients');
+    let existingIngredients: any[] = [];
+    
+    if (savedIngredients) {
+      try {
+        existingIngredients = JSON.parse(savedIngredients);
+      } catch (e) {
+        console.error('Error parsing saved ingredients', e);
+      }
+    }
+    
+    // Agregar nuevos ingredientes con id único
+    const newIngredients = selectedItems.map(item => ({
+      id: crypto.randomUUID(),
+      name: item.name,
+      price: item.estimatedPrice,
+      quantity: item.quantity,
+      recipe: prompt,
+      date: new Date()
+    }));
+    
+    const updatedIngredients = [...existingIngredients, ...newIngredients];
+    localStorage.setItem('aiSuggestedIngredients', JSON.stringify(updatedIngredients));
+    
+    toast.success(`${selectedItems.length} ingredientes guardados`);
+    resetDialog();
+  };
+  
   const resetDialog = () => {
     setPrompt('');
     setSuggestions([]);
@@ -129,7 +166,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Asistente de Compras IA
+            Sugerir Ingredientes
           </DialogTitle>
           <DialogDescription>
             Describe lo que quieres cocinar y la IA te sugerirá los ingredientes.
@@ -212,10 +249,19 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
               <Button variant="outline" onClick={resetDialog}>
                 Cancelar
               </Button>
-              <Button onClick={handleAddToList}>
-                <Plus className="mr-2 h-4 w-4" />
-                Añadir a la lista
-              </Button>
+              <div className="space-x-2">
+                <Button 
+                  variant="outline"
+                  onClick={handleSaveIngredients}
+                >
+                  <BookmarkPlus className="mr-2 h-4 w-4" />
+                  Guardar
+                </Button>
+                <Button onClick={handleAddToList}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Añadir a lista
+                </Button>
+              </div>
             </div>
           </div>
         )}
