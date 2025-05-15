@@ -162,109 +162,129 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md backdrop-blur-2xl border border-primary/20 bg-background/60 shadow-lg shadow-primary/5">
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary/5 to-background/0 pointer-events-none" />
+        
+        <DialogHeader className="relative z-10">
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Sugerir Ingredientes
+            <div className="relative">
+              <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+              <div className="absolute inset-0 h-5 w-5 bg-primary blur-sm rounded-full opacity-30 animate-pulse" />
+            </div>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
+              Sugerir Ingredientes
+            </span>
           </DialogTitle>
           <DialogDescription>
             Describe lo que quieres cocinar y la IA te sugerirá los ingredientes.
           </DialogDescription>
         </DialogHeader>
         
-        {!hasResults ? (
-          <div className="grid gap-4 py-4">
-            <div className="flex items-center gap-2">
-              <Input
-                placeholder="Ej. Pizza casera para 4 personas"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="flex-1"
-                disabled={isLoading || isListening}
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleVoiceInput}
-                disabled={isLoading}
-                className={isListening ? "border-primary text-primary" : ""}
-              >
-                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
-            </div>
-            
-            {isListening && (
-              <div className="text-center text-sm text-muted-foreground">
-                Escuchando... <span className="animate-pulse">●</span>
-              </div>
-            )}
-            
-            <Button 
-              onClick={handleGenerateSuggestions} 
-              disabled={isLoading || !prompt.trim()}
-              className="w-full"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generando...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generar Sugerencias
-                </>
-              )}
-            </Button>
-          </div>
-        ) : (
-          <div className="py-4">
-            <h3 className="mb-2 font-medium">Ingredientes sugeridos:</h3>
-            <div className="max-h-[240px] overflow-y-auto space-y-2 mb-4">
-              {suggestions.map((item, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center justify-between p-2 border rounded-md"
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <Button
-                      variant={item.selected ? "default" : "outline"}
-                      size="icon"
-                      className="h-6 w-6 shrink-0"
-                      onClick={() => toggleItemSelection(index)}
-                    >
-                      <Check className="h-3 w-3" />
-                    </Button>
-                    <span className={item.selected ? "font-medium" : "text-muted-foreground"}>
-                      {item.name} 
-                      {item.quantity > 1 && ` (x${item.quantity})`}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={resetDialog}>
-                Cancelar
-              </Button>
-              <div className="space-x-2">
-                <Button 
+        <div className="relative z-10">
+          {!hasResults ? (
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Ej. Pizza casera para 4 personas"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="flex-1 bg-background/60 backdrop-blur-sm border-primary/20 focus-visible:ring-primary/30"
+                  disabled={isLoading || isListening}
+                />
+                <Button
                   variant="outline"
-                  onClick={handleSaveIngredients}
+                  size="icon"
+                  onClick={handleVoiceInput}
+                  disabled={isLoading}
+                  className={isListening ? "border-primary text-primary" : "border-primary/30"}
                 >
-                  <BookmarkPlus className="mr-2 h-4 w-4" />
-                  Guardar
-                </Button>
-                <Button onClick={handleAddToList}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Añadir a lista
+                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
               </div>
+              
+              {isListening && (
+                <div className="text-center text-sm text-primary">
+                  Escuchando... <span className="animate-pulse">●</span>
+                </div>
+              )}
+              
+              <Button 
+                onClick={handleGenerateSuggestions} 
+                disabled={isLoading || !prompt.trim()}
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="absolute inset-0 rounded-md overflow-hidden">
+                      <div className="w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />
+                    </div>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generar Sugerencias
+                  </>
+                )}
+              </Button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="py-4">
+              <h3 className="mb-2 font-medium text-primary">Ingredientes sugeridos:</h3>
+              <div className="max-h-[240px] overflow-y-auto space-y-2 mb-4 pr-1">
+                {suggestions.map((item, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center justify-between p-2 border border-border/40 rounded-md bg-card/30 backdrop-blur-sm"
+                  >
+                    <div className="flex items-center gap-2 flex-1">
+                      <Button
+                        variant={item.selected ? "default" : "outline"}
+                        size="icon"
+                        className={`h-6 w-6 shrink-0 ${item.selected ? "bg-primary text-primary-foreground" : "border-primary/30"}`}
+                        onClick={() => toggleItemSelection(index)}
+                      >
+                        <Check className="h-3 w-3" />
+                      </Button>
+                      <span className={item.selected ? "font-medium" : "text-muted-foreground"}>
+                        {item.name} 
+                        {item.quantity > 1 && ` (x${item.quantity})`}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={resetDialog}
+                  className="border-primary/30 hover:bg-primary/10"
+                >
+                  Cancelar
+                </Button>
+                <div className="space-x-2">
+                  <Button 
+                    variant="outline"
+                    onClick={handleSaveIngredients}
+                    className="border-primary/30 bg-primary/10 hover:bg-primary/20"
+                  >
+                    <BookmarkPlus className="mr-2 h-4 w-4" />
+                    Guardar
+                  </Button>
+                  <Button 
+                    onClick={handleAddToList}
+                    className="bg-gradient-to-r from-primary to-blue-500 hover:opacity-90"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Añadir a lista
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

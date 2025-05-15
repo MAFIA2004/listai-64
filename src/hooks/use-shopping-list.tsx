@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { categorizeItems } from '@/lib/gemini-service';
 import { toast } from 'sonner';
 import { playBudgetExceededSound } from '@/lib/sound-utils';
+import { format } from 'date-fns';
 
 export interface ShoppingItem {
   id: string;
@@ -35,7 +36,88 @@ interface ShoppingPattern {
 }
 
 export function useShoppingList() {
+  // Get today's date in yyyy-MM-dd format
+  const getTodayDateString = () => {
+    return format(new Date(), 'yyyy-MM-dd');
+  };
+
+  // Get the last saved date
+  const getLastSavedDate = () => {
+    return localStorage.getItem('lastShoppingDate') || '';
+  };
+
+  // Set the last saved date to today
+  const updateLastSavedDate = () => {
+    localStorage.setItem('lastShoppingDate', getTodayDateString());
+  };
+
   const [items, setItems] = useState<ShoppingItem[]>(() => {
+    const lastSavedDate = getLastSavedDate();
+    const todayDateString = getTodayDateString();
+    
+    // If the last saved date is not today, we should move items to history and start fresh
+    if (lastSavedDate && lastSavedDate !== todayDateString) {
+      // Get saved items to move them to history
+      const savedItems = localStorage.getItem('shoppingItems');
+      if (savedItems) {
+        try {
+          const parsedItems = JSON.parse(savedItems);
+          const validItems = parsedItems.map((item: any) => ({
+            ...item,
+            date: new Date(item.date),
+            quantity: item.quantity || 1,
+            category: item.category || 'uncategorized'
+          }));
+          
+          if (validItems.length > 0) {
+            // Get existing history
+            const savedHistory = localStorage.getItem('purchaseHistoryEntries');
+            let history: PurchaseHistoryEntry[] = [];
+            
+            if (savedHistory) {
+              try {
+                history = JSON.parse(savedHistory).map((entry: any) => ({
+                  ...entry,
+                  date: new Date(entry.date),
+                  items: entry.items.map((item: any) => ({
+                    ...item,
+                    date: new Date(item.date)
+                  }))
+                }));
+              } catch (e) {
+                console.error('Error parsing saved purchase history', e);
+              }
+            }
+            
+            // Create a new history entry with yesterday's date
+            const lastDate = lastSavedDate ? new Date(lastSavedDate) : new Date();
+            const historyEntry: PurchaseHistoryEntry = {
+              id: crypto.randomUUID(),
+              date: lastDate,
+              items: validItems,
+              totalAmount: validItems.reduce((total: number, item: ShoppingItem) => 
+                total + (item.price * item.quantity), 0)
+            };
+            
+            // Add to history and save
+            history = [historyEntry, ...history];
+            localStorage.setItem('purchaseHistoryEntries', JSON.stringify(history));
+            
+            // Clear current items for today
+            localStorage.removeItem('shoppingItems');
+          }
+        } catch (e) {
+          console.error('Error processing previous day items', e);
+        }
+      }
+      
+      // Update the last saved date to today
+      updateLastSavedDate();
+      return [];
+    }
+    
+    // If it's still the same day, load items normally
+    updateLastSavedDate();
     const savedItems = localStorage.getItem('shoppingItems');
     if (savedItems) {
       try {
@@ -43,7 +125,7 @@ export function useShoppingList() {
         return parsedItems.map((item: any) => ({
           ...item,
           date: new Date(item.date),
-          quantity: item.quantity || 1, // Ensure quantity exists
+          quantity: item.quantity || 1,
           category: item.category || 'uncategorized'
         }));
       } catch (e) {
@@ -146,6 +228,11 @@ export function useShoppingList() {
   useEffect(() => {
     localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistoryLocal));
   }, [purchaseHistoryLocal]);
+
+  // Save purchase history entries to localStorage
+  useEffect(() => {
+    localStorage.setItem('purchaseHistoryEntries', JSON.stringify(purchaseHistory));
+  }, [purchaseHistory]);
 
   // Categorize items when they change
   useEffect(() => {
@@ -281,27 +368,28 @@ export function useShoppingList() {
     ));
   };
 
-  // Save all completed items to history
-  const saveCompletedToHistory = () => {
-    const completedItems = items.filter(item => item.completed);
+  // Function to restore a list from history
+  const restoreListFromHistory = (historyEntryId: string) => {
+    const historyEntry = purchaseHistory.find(entry => entry.id === historyEntryId);
     
-    if (completedItems.length > 0) {
-      const historyEntry: PurchaseHistoryEntry = {
-        id: crypto.randomUUID(),
-        date: new Date(),
-        items: completedItems,
-        totalAmount: completedItems.reduce((total, item) => total + (item.price * item.quantity), 0)
-      };
-      
-      setPurchaseHistory(prev => [historyEntry, ...prev]);
-      
-      // Remove completed items from the list
-      setItems(prev => prev.filter(item => !item.completed));
-      
-      toast.success('Compra guardada en el historial');
-    } else {
-      toast.error('No hay artículos completados para guardar');
-    }
+    if (!historyEntry) return;
+    
+    const restoredItems = historyEntry.items.map(item => ({
+      ...item,
+      id: crypto.randomUUID(), // Generate new IDs for the restored items
+      date: new Date(), // Set the date to now
+      completed: false // Reset completion status
+    }));
+    
+    // Add all items from the history entry to the current list
+    setItems(prev => [...prev, ...restoredItems]);
+    toast.success('Lista restaurada correctamente');
+  };
+
+  // Function to delete a history entry
+  const deleteHistoryEntry = (historyEntryId: string) => {
+    setPurchaseHistory(prev => prev.filter(entry => entry.id !== historyEntryId));
+    toast.success('Lista eliminada del historial');
   };
 
   const getSortedItems = () => {
@@ -605,6 +693,7 @@ export function useShoppingList() {
     setCommonPatterns,
     // History functions
     purchaseHistory,
-    saveCompletedToHistory
+    restoreListFromHistory,
+    deleteHistoryEntry
   };
 }
