@@ -1,16 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Plus } from 'lucide-react';
+import { FilePlus, ChefHat, Sparkles, Calendar, Trash2, Plus, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogFooter
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { formatPrice } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface AISavedIngredientsDialogProps {
   open: boolean;
@@ -24,151 +28,225 @@ interface SavedIngredient {
   price: number;
   quantity: number;
   recipe: string;
-  date: Date;
+  recipeId?: string;
+  date: string | Date;
+}
+
+// Función para agrupar ingredientes por receta
+function groupIngredientsByRecipe(ingredients: SavedIngredient[]) {
+  const recipes: Record<string, {
+    name: string,
+    date: Date,
+    id: string,
+    ingredients: SavedIngredient[]
+  }> = {};
+
+  ingredients.forEach(ingredient => {
+    const recipeId = ingredient.recipeId || ingredient.recipe;
+    const recipeName = ingredient.recipe;
+    const date = new Date(ingredient.date);
+
+    if (!recipes[recipeId]) {
+      recipes[recipeId] = {
+        name: recipeName,
+        date: date,
+        id: ingredient.recipeId || ingredient.id,
+        ingredients: []
+      };
+    }
+    
+    recipes[recipeId].ingredients.push(ingredient);
+  });
+
+  // Convertir el objeto a un array y ordenarlo por fecha (más reciente primero)
+  return Object.values(recipes).sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
 export function AISavedIngredientsDialog({ open, onOpenChange, onAddItem }: AISavedIngredientsDialogProps) {
   const [savedIngredients, setSavedIngredients] = useState<SavedIngredient[]>([]);
-  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
-  const [tempPrice, setTempPrice] = useState<number>(0);
+  const [groupedRecipes, setGroupedRecipes] = useState<any[]>([]);
+  const [expandedRecipeId, setExpandedRecipeId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
-  // Cargar ingredientes guardados al abrir el diálogo
   useEffect(() => {
     if (open) {
       loadSavedIngredients();
     }
   }, [open]);
   
+  useEffect(() => {
+    const recipes = groupIngredientsByRecipe(savedIngredients);
+    setGroupedRecipes(recipes);
+  }, [savedIngredients]);
+  
   const loadSavedIngredients = () => {
-    const storedIngredients = localStorage.getItem('aiSuggestedIngredients');
-    if (storedIngredients) {
-      try {
-        const parsed = JSON.parse(storedIngredients);
-        // Convertir fechas de string a Date
-        const ingredients = parsed.map((ing: any) => ({
-          ...ing,
-          date: new Date(ing.date)
-        }));
-        setSavedIngredients(ingredients);
-      } catch (e) {
-        console.error('Error loading saved ingredients', e);
-        setSavedIngredients([]);
+    try {
+      const savedData = localStorage.getItem('aiSuggestedIngredients');
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        setSavedIngredients(parsed);
       }
+    } catch (error) {
+      console.error('Error loading saved ingredients:', error);
+      toast.error('Error al cargar ingredientes guardados');
     }
   };
-
-  const handleEditPrice = (id: string, currentPrice: number) => {
-    setEditingPriceId(id);
-    setTempPrice(currentPrice);
-  };
   
-  const handleSavePrice = (ingredient: SavedIngredient) => {
-    // Actualizar el precio en el almacenamiento local
-    const updatedIngredients = savedIngredients.map(ing => 
-      ing.id === ingredient.id ? { ...ing, price: tempPrice } : ing
+  const handleDeleteRecipe = (recipeId: string) => {
+    const updatedIngredients = savedIngredients.filter(ingredient => 
+      ingredient.recipeId !== recipeId && 
+      // En caso de que no exista recipeId, verifica por recipe como identificador
+      !(ingredient.recipeId === undefined && ingredient.recipe === recipeId)
     );
     
-    setSavedIngredients(updatedIngredients);
     localStorage.setItem('aiSuggestedIngredients', JSON.stringify(updatedIngredients));
-    setEditingPriceId(null);
-  };
-  
-  const handleAddToList = (ingredient: SavedIngredient) => {
-    onAddItem(ingredient.name, ingredient.price, ingredient.quantity);
-    toast.success(`${ingredient.name} añadido a la lista`);
+    setSavedIngredients(updatedIngredients);
+    toast.success('Receta eliminada');
     
-    // Opcional: eliminar el ingrediente de los guardados después de añadirlo
-    const updatedIngredients = savedIngredients.filter(ing => ing.id !== ingredient.id);
-    setSavedIngredients(updatedIngredients);
-    localStorage.setItem('aiSuggestedIngredients', JSON.stringify(updatedIngredients));
+    if (expandedRecipeId === recipeId) {
+      setExpandedRecipeId(null);
+    }
   };
   
-  // Agrupar ingredientes por receta
-  const ingredientsByRecipe = savedIngredients.reduce<Record<string, SavedIngredient[]>>((acc, ingredient) => {
-    if (!acc[ingredient.recipe]) {
-      acc[ingredient.recipe] = [];
-    }
-    acc[ingredient.recipe].push(ingredient);
-    return acc;
-  }, {});
+  const handleAddToList = (ingredients: SavedIngredient[]) => {
+    ingredients.forEach(ingredient => {
+      onAddItem(ingredient.name, 1.0, ingredient.quantity);
+    });
+    
+    toast.success(`${ingredients.length} ingredientes añadidos a la lista`);
+    onOpenChange(false);
+  };
+  
+  const toggleExpandRecipe = (recipeId: string) => {
+    setExpandedRecipeId(expandedRecipeId === recipeId ? null : recipeId);
+  };
+  
+  const formatDate = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    return formatDistanceToNow(date, { addSuffix: true, locale: es });
+  };
+
+  const filteredRecipes = searchTerm.trim() 
+    ? groupedRecipes.filter(recipe => 
+        recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        recipe.ingredients.some((ing: SavedIngredient) => 
+          ing.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      )
+    : groupedRecipes;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md backdrop-blur-2xl border border-primary/20 bg-background/60 shadow-lg shadow-primary/5">
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary/5 to-background/0 pointer-events-none" />
+        
+        <DialogHeader className="relative z-10">
           <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-primary" />
-            Ingredientes Guardados
+            <div className="relative">
+              <ChefHat className="h-5 w-5 text-primary" />
+              <div className="absolute inset-0 h-5 w-5 bg-primary blur-sm rounded-full opacity-30" />
+            </div>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
+              Recetas guardadas
+            </span>
           </DialogTitle>
+          <DialogDescription>
+            Recetas e ingredientes generados por IA.
+          </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4 max-h-[400px] overflow-y-auto">
-          {Object.keys(ingredientsByRecipe).length > 0 ? (
-            Object.entries(ingredientsByRecipe).map(([recipe, ingredients]) => (
-              <div key={recipe} className="mb-6 last:mb-0">
-                <h3 className="font-medium text-lg mb-2">{recipe}</h3>
-                <div className="space-y-3">
-                  {ingredients.map(ingredient => (
+        <div className="py-4 relative z-10">
+          <div className="mb-4">
+            <Input
+              placeholder="Buscar recetas o ingredientes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-background/60 border-primary/20"
+            />
+          </div>
+          
+          {filteredRecipes.length > 0 ? (
+            <ScrollArea className="max-h-[350px] pr-4">
+              <div className="space-y-3">
+                {filteredRecipes.map((recipe) => (
+                  <div key={recipe.id} className="border border-border/40 rounded-md overflow-hidden bg-card/30 backdrop-blur-sm">
                     <div 
-                      key={ingredient.id}
-                      className="border rounded-md p-3 flex flex-col"
+                      className="p-3 cursor-pointer flex items-center justify-between hover:bg-primary/5 transition-colors"
+                      onClick={() => toggleExpandRecipe(recipe.id)}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">{ingredient.name}</span>
-                        <span className="text-sm">
-                          {ingredient.quantity > 1 && `${ingredient.quantity}x `}
-                        </span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-4 w-4 text-primary" />
+                          <h3 className="font-medium">{recipe.name}</h3>
+                        </div>
+                        <div className="flex items-center text-xs text-muted-foreground mt-1">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          <span>{formatDate(recipe.date)}</span>
+                          <span className="mx-2">•</span>
+                          <span>{recipe.ingredients.length} ingredientes</span>
+                        </div>
                       </div>
-                      
-                      {editingPriceId === ingredient.id ? (
-                        <div className="flex items-center gap-2 mt-1">
-                          <Input
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            value={tempPrice}
-                            onChange={(e) => setTempPrice(parseFloat(e.target.value) || 0)}
-                            className="flex-1"
-                          />
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleSavePrice(ingredient)}
-                          >
-                            Guardar
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between mt-1">
-                          <Button 
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditPrice(ingredient.id, ingredient.price)}
-                          >
-                            Precio: {formatPrice(ingredient.price)}
-                          </Button>
-                          
-                          <Button 
-                            size="sm"
-                            onClick={() => handleAddToList(ingredient)}
-                          >
-                            <Plus className="mr-1 h-4 w-4" />
-                            Añadir
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="h-8 w-8 p-0 border-primary/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteRecipe(recipe.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive/70" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="h-8 w-8 p-0 border-primary/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToList(recipe.ingredients);
+                          }}
+                        >
+                          <Plus className="h-4 w-4 text-primary" />
+                        </Button>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    
+                    {expandedRecipeId === recipe.id && (
+                      <div className="border-t border-border/40 divide-y divide-border/20">
+                        {recipe.ingredients.map((ingredient: SavedIngredient) => (
+                          <div 
+                            key={ingredient.id} 
+                            className="p-2 px-4 flex items-center justify-between hover:bg-primary/5"
+                          >
+                            <span className="text-sm">
+                              {ingredient.name}
+                              {ingredient.quantity > 1 && ` (x${ingredient.quantity})`}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))
+            </ScrollArea>
           ) : (
-            <div className="text-center py-10 text-muted-foreground">
-              <ShoppingCart className="mx-auto mb-3 opacity-30" size={40} />
-              <p>No hay ingredientes guardados</p>
-              <p className="text-sm mt-2">Usa el asistente IA para sugerir ingredientes</p>
+            <div className="text-center py-8 text-muted-foreground">
+              <Sparkles className="h-12 w-12 mx-auto mb-2 opacity-20" />
+              <p>{searchTerm ? 'No se encontraron resultados' : 'No hay recetas guardadas'}</p>
+              <p className="text-sm mt-2">
+                Usa el asistente IA para generar y guardar recetas
+              </p>
             </div>
           )}
         </div>
+        
+        <DialogFooter>
+          <Button onClick={() => onOpenChange(false)} className="bg-gradient-to-r from-primary to-blue-500 hover:opacity-90">
+            Cerrar
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

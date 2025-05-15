@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -17,7 +16,9 @@ import {
   ArrowDown, 
   Sparkles,
   Trash2,
-  History
+  History,
+  ChefHat,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -254,55 +255,58 @@ const Index = () => {
         )}
       </div>
 
-      {/* Floating AI Button - Ahora abre el menú */}
+      {/* Floating AI Button */}
       <Button
         onClick={handleAiMenuClick}
-        className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 animate-pulse hover:animate-none bg-gradient-to-r from-primary to-blue-500"
+        className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 bg-gradient-to-r from-primary to-blue-500 hover:shadow-xl hover:scale-105 transition-all duration-300"
       >
         <Sparkles className="h-6 w-6" />
         <span className="sr-only">Asistente IA</span>
       </Button>
 
-      {/* AI Menu Dialog */}
+      {/* AI Menu Dialog - Nuevo diseño más moderno */}
       <Dialog open={aiMenuDialogOpen} onOpenChange={setAiMenuDialogOpen}>
-        <DialogContent className="sm:max-w-xs p-0 backdrop-blur-2xl bg-background/60 border border-primary/20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background/0 to-blue-500/5 pointer-events-none" />
+        <DialogContent className="sm:max-w-[380px] p-0 overflow-hidden backdrop-blur-xl border border-primary/30 bg-background/50 shadow-xl rounded-xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background/0 to-blue-500/10 pointer-events-none rounded-xl" />
           
-          <div className="flex flex-col relative z-10">
-            <Button
-              variant="ghost" 
-              className="justify-start rounded-none py-8 text-lg hover:bg-primary/10 group transition-all relative overflow-hidden"
-              onClick={() => handleAiOptionSelect('suggestions')}
-            >
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-[shimmer_2s_infinite] z-0" style={{ backgroundSize: '200% 100%' }}></span>
-              <div className="relative z-10 flex items-center">
-                <div className="mr-4 relative">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <div className="absolute inset-0 h-5 w-5 bg-primary blur-sm rounded-full opacity-30 animate-pulse"></div>
+          <div className="relative z-10">
+            <div className="p-5 pb-3 bg-gradient-to-r from-primary/10 to-blue-500/10">
+              <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                Asistente IA
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">¿Qué quieres hacer hoy?</p>
+            </div>
+            
+            <div className="grid grid-cols-1 divide-y divide-border/10">
+              <Button
+                variant="ghost" 
+                className="flex items-start gap-4 p-5 rounded-none hover:bg-primary/5 text-left justify-start h-auto transition-all"
+                onClick={() => handleAiOptionSelect('suggestions')}
+              >
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <ChefHat className="h-5 w-5" />
                 </div>
-                <div>
-                  <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">Sugerir ingredientes</span>
-                  <p className="text-xs text-muted-foreground">Genera ingredientes para una receta</p>
+                <div className="flex-1">
+                  <p className="font-medium">Generar ingredientes</p>
+                  <p className="text-xs text-muted-foreground">Crea una lista de ingredientes para una receta</p>
                 </div>
-              </div>
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="justify-start rounded-none py-8 text-lg hover:bg-primary/10 group transition-all relative overflow-hidden"
-              onClick={() => handleAiOptionSelect('savedIngredients')}
-            >
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-[shimmer_2s_infinite] z-0" style={{ backgroundSize: '200% 100%' }}></span>
-              <div className="relative z-10 flex items-center">
-                <div className="mr-4 relative">
-                  <ShoppingCart className="h-5 w-5 text-primary" />
-                  <div className="absolute inset-0 h-5 w-5 bg-primary blur-sm rounded-full opacity-30 animate-pulse"></div>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="flex items-start gap-4 p-5 rounded-none hover:bg-primary/5 text-left justify-start h-auto transition-all"
+                onClick={() => handleAiOptionSelect('savedIngredients')}
+              >
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <FileText className="h-5 w-5" />
                 </div>
-                <div>
-                  <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">Lista de ingredientes IA</span>
-                  <p className="text-xs text-muted-foreground">Ver ingredientes guardados</p>
+                <div className="flex-1">
+                  <p className="font-medium">Recetas guardadas</p>
+                  <p className="text-xs text-muted-foreground">Ver tus recetas e ingredientes guardados</p>
                 </div>
-              </div>
-            </Button>
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

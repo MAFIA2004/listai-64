@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Check, Plus, Mic, MicOff, BookmarkPlus } from 'lucide-react';
+import { Sparkles, Loader2, Check, Plus, Mic, MicOff, BookmarkPlus, ListPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog,
@@ -23,7 +23,6 @@ interface AISuggestionDialogProps {
 
 interface RecipeSuggestion {
   name: string;
-  estimatedPrice: number;
   quantity: number;
   selected: boolean;
 }
@@ -71,7 +70,6 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
             !ingredient.name.toLowerCase().includes('water'))
           .map(ingredient => ({
             name: ingredient.name,
-            estimatedPrice: ingredient.price || 1.0, // Default price if not provided
             quantity: ingredient.quantity || 1,
             selected: true // Default to selected
           }));
@@ -106,9 +104,10 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       return;
     }
     
-    // Add all selected items to the shopping list
+    // Para cada ingrediente, solicitamos un precio
     selectedItems.forEach(item => {
-      onAddItem(item.name, item.estimatedPrice, item.quantity);
+      const defaultPrice = 1.0; // Precio por defecto  
+      onAddItem(item.name, defaultPrice, item.quantity);
     });
     
     // Close the dialog and reset state
@@ -124,7 +123,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       return;
     }
     
-    // Guardar ingredientes en localStorage
+    // Guardar ingredientes en localStorage con el nombre de la receta
     const savedIngredients = localStorage.getItem('aiSuggestedIngredients');
     let existingIngredients: any[] = [];
     
@@ -136,20 +135,24 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       }
     }
     
-    // Agregar nuevos ingredientes con id único
+    // Agregar nuevos ingredientes con id único y el nombre de la receta
+    const recipeName = prompt.trim();
+    const recipeId = crypto.randomUUID();
+    
     const newIngredients = selectedItems.map(item => ({
       id: crypto.randomUUID(),
       name: item.name,
-      price: item.estimatedPrice,
+      price: 0, // No guardamos precio para ingredientes generados por IA
       quantity: item.quantity,
-      recipe: prompt,
+      recipe: recipeName,
+      recipeId: recipeId,
       date: new Date()
     }));
     
     const updatedIngredients = [...existingIngredients, ...newIngredients];
     localStorage.setItem('aiSuggestedIngredients', JSON.stringify(updatedIngredients));
     
-    toast.success(`${selectedItems.length} ingredientes guardados`);
+    toast.success(`Receta "${recipeName}" guardada con ${selectedItems.length} ingredientes`);
     resetDialog();
   };
   
@@ -231,7 +234,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
             </div>
           ) : (
             <div className="py-4">
-              <h3 className="mb-2 font-medium text-primary">Ingredientes sugeridos:</h3>
+              <h3 className="mb-2 font-medium text-primary">{prompt}</h3>
               <div className="max-h-[240px] overflow-y-auto space-y-2 mb-4 pr-1">
                 {suggestions.map((item, index) => (
                   <div 
@@ -271,13 +274,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                     className="border-primary/30 bg-primary/10 hover:bg-primary/20"
                   >
                     <BookmarkPlus className="mr-2 h-4 w-4" />
-                    Guardar
+                    Guardar receta
                   </Button>
                   <Button 
                     onClick={handleAddToList}
                     className="bg-gradient-to-r from-primary to-blue-500 hover:opacity-90"
                   >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <ListPlus className="mr-2 h-4 w-4" />
                     Añadir a lista
                   </Button>
                 </div>
