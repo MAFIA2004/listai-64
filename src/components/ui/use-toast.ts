@@ -1,5 +1,6 @@
 
 import { toast as sonnerToast } from "sonner";
+import { type ReactNode } from "react";
 
 type Toast = {
   success: (message: string) => void;
@@ -8,14 +9,22 @@ type Toast = {
   info: (message: string) => void;
 };
 
-// Extender el toast original de sonner con métodos adicionales
-export const toast: typeof sonnerToast & Toast = {
-  ...sonnerToast,
-  success: (message) => sonnerToast.success(message),
-  error: (message) => sonnerToast.error(message),
-  warning: (message) => sonnerToast.error(message),
-  info: (message) => sonnerToast.info(message),
-};
+// Create a function that extends the sonner toast with additional methods
+const extendedToast = Object.assign(
+  // Preserve the original function
+  (message: ReactNode, data?: any) => sonnerToast(message, data),
+  {
+    // Add our custom methods
+    ...sonnerToast,
+    success: (message: string) => sonnerToast.success(message),
+    error: (message: string) => sonnerToast.error(message),
+    warning: (message: string) => sonnerToast.error(message),
+    info: (message: string) => sonnerToast.info(message),
+  }
+);
+
+// Export the extended toast
+export const toast = extendedToast;
 
 export const useToast = () => {
   return { toast };
