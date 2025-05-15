@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Check, Plus, Mic, MicOff, BookmarkPlus } from 'lucide-react';
+import { Sparkles, Loader2, Check, Plus, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog,
@@ -11,7 +11,7 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { getAIRecipeSuggestions } from '@/lib/gemini-service';
 import {
@@ -138,48 +138,11 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     );
     
     toast.success(`${selectedItemForAdd.name} añadido a la lista`);
+    
+    // Remove the item from the suggestions list after adding it to the shopping list
+    setSuggestions(prev => prev.filter(item => item.name !== selectedItemForAdd.name));
+    
     setSelectedItemForAdd(null);
-  };
-  
-  const handleSaveIngredients = () => {
-    const selectedItems = suggestions.filter(item => item.selected);
-    
-    if (selectedItems.length === 0) {
-      toast.error('Selecciona al menos un ingrediente');
-      return;
-    }
-    
-    // Guardar ingredientes en localStorage con el nombre de la receta
-    const savedIngredients = localStorage.getItem('aiSuggestedIngredients');
-    let existingIngredients: any[] = [];
-    
-    if (savedIngredients) {
-      try {
-        existingIngredients = JSON.parse(savedIngredients);
-      } catch (e) {
-        console.error('Error parsing saved ingredients', e);
-      }
-    }
-    
-    // Agregar nuevos ingredientes con id único y el nombre de la receta
-    const recipeName = prompt.trim();
-    const recipeId = crypto.randomUUID();
-    
-    const newIngredients = selectedItems.map(item => ({
-      id: crypto.randomUUID(),
-      name: item.name,
-      price: 0, // No guardamos precio para ingredientes generados por IA
-      quantity: item.quantity,
-      recipe: recipeName,
-      recipeId: recipeId,
-      date: new Date()
-    }));
-    
-    const updatedIngredients = [...existingIngredients, ...newIngredients];
-    localStorage.setItem('aiSuggestedIngredients', JSON.stringify(updatedIngredients));
-    
-    toast.success(`Receta "${recipeName}" guardada con ${selectedItems.length} ingredientes`);
-    resetDialog();
   };
   
   const resetDialog = () => {
@@ -279,8 +242,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                           <Check className="h-3 w-3" />
                         </Button>
                         <span className={item.selected ? "font-medium" : "text-muted-foreground"}>
-                          {getItemEmoji(item.name)} {item.name} 
-                          {item.quantity > 1 && ` (x${item.quantity})`}
+                          {getItemEmoji(item.name)} {item.name}
                         </span>
                       </div>
                       
@@ -306,14 +268,6 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                     className="border-primary/30 hover:bg-primary/10"
                   >
                     Cancelar
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={handleSaveIngredients}
-                    className="border-primary/30 bg-primary/10 hover:bg-primary/20"
-                  >
-                    <BookmarkPlus className="mr-2 h-4 w-4" />
-                    Guardar receta
                   </Button>
                 </div>
               </div>

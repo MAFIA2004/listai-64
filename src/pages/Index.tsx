@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -48,7 +49,9 @@ const Index = () => {
     // History features
     purchaseHistory,
     restoreListFromHistory,
-    deleteHistoryEntry
+    deleteHistoryEntry,
+    // Auto save to history
+    saveCurrentListToHistory
   } = useShoppingList();
 
   const [viewMode, setViewMode] = useState<'list' | 'category'>('list');
@@ -60,7 +63,6 @@ const Index = () => {
   const [aiSavedIngredientsDialogOpen, setAiSavedIngredientsDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [confirmClearDialogOpen, setConfirmClearDialogOpen] = useState(false);
-  const [aiMenuDialogOpen, setAiMenuDialogOpen] = useState(false);
 
   // Calculate budget status percentage
   const budgetPercentage = budget.enabled ? Math.min((totalPrice / budget.amount) * 100, 100) : 0;
@@ -81,19 +83,22 @@ const Index = () => {
     setConfirmClearDialogOpen(false);
   };
 
-  const handleAiMenuClick = () => {
-    setAiMenuDialogOpen(true);
+  // Modified to open AI suggestions dialog directly
+  const handleAiButtonClick = () => {
+    setAiSuggestionDialogOpen(true);
   };
 
-  const handleAiOptionSelect = (option: 'suggestions' | 'savedIngredients') => {
-    setAiDialogMode(option);
-    setAiMenuDialogOpen(false);
+  // Check if the total price is over 15 euros and save to history if needed
+  const handleAddItem = (name: string, price: number, quantity: number = 1) => {
+    addItem(name, price, quantity);
     
-    if (option === 'suggestions') {
-      setAiSuggestionDialogOpen(true);
-    } else {
-      setAiSavedIngredientsDialogOpen(true);
-    }
+    // Check if the total is now over 15 euros after adding the item
+    setTimeout(() => {
+      if (totalPrice + (price * quantity) > 15) {
+        saveCurrentListToHistory();
+        toast.info("Lista guardada en el historial (supera los 15€)");
+      }
+    }, 100);
   };
 
   return (
@@ -171,7 +176,7 @@ const Index = () => {
           </div>
         </header>
 
-        <AddItemForm onAddItem={addItem} />
+        <AddItemForm onAddItem={handleAddItem} />
 
         <div className="mb-4 flex flex-col gap-2">
           <div className="flex gap-2 mb-2">
@@ -255,61 +260,14 @@ const Index = () => {
         )}
       </div>
 
-      {/* Floating AI Button */}
+      {/* Floating AI Button - Now opens AISuggestionDialog directly */}
       <Button
-        onClick={handleAiMenuClick}
+        onClick={handleAiButtonClick}
         className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 bg-gradient-to-r from-primary to-blue-500 hover:shadow-xl hover:scale-105 transition-all duration-300"
       >
         <Sparkles className="h-6 w-6" />
         <span className="sr-only">Asistente IA</span>
       </Button>
-
-      {/* AI Menu Dialog - Nuevo diseño más moderno */}
-      <Dialog open={aiMenuDialogOpen} onOpenChange={setAiMenuDialogOpen}>
-        <DialogContent className="sm:max-w-[380px] p-0 overflow-hidden backdrop-blur-xl border border-primary/30 bg-background/50 shadow-xl rounded-xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background/0 to-blue-500/10 pointer-events-none rounded-xl" />
-          
-          <div className="relative z-10">
-            <div className="p-5 pb-3 bg-gradient-to-r from-primary/10 to-blue-500/10">
-              <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
-                Asistente IA
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">¿Qué quieres hacer hoy?</p>
-            </div>
-            
-            <div className="grid grid-cols-1 divide-y divide-border/10">
-              <Button
-                variant="ghost" 
-                className="flex items-start gap-4 p-5 rounded-none hover:bg-primary/5 text-left justify-start h-auto transition-all"
-                onClick={() => handleAiOptionSelect('suggestions')}
-              >
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <ChefHat className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">Generar ingredientes</p>
-                  <p className="text-xs text-muted-foreground">Crea una lista de ingredientes para una receta</p>
-                </div>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="flex items-start gap-4 p-5 rounded-none hover:bg-primary/5 text-left justify-start h-auto transition-all"
-                onClick={() => handleAiOptionSelect('savedIngredients')}
-              >
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <FileText className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">Recetas guardadas</p>
-                  <p className="text-xs text-muted-foreground">Ver tus recetas e ingredientes guardados</p>
-                </div>
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Budget Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
@@ -447,14 +405,14 @@ const Index = () => {
       <AISuggestionDialog 
         open={aiSuggestionDialogOpen} 
         onOpenChange={setAiSuggestionDialogOpen}
-        onAddItem={addItem}
+        onAddItem={handleAddItem}
       />
 
       {/* AI Saved Ingredients Dialog */}
       <AISavedIngredientsDialog
         open={aiSavedIngredientsDialogOpen}
         onOpenChange={setAiSavedIngredientsDialogOpen}
-        onAddItem={addItem}
+        onAddItem={handleAddItem}
       />
 
       {/* Purchase History Dialog */}

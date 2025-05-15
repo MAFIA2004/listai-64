@@ -1,107 +1,233 @@
-
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { COMMON_MISSPELLINGS_MAP, EMOJI_MAP, KNOWN_WORDS_FOR_SPELLCHECK } from "./constants";
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
-// Get emoji for a given item name
+export const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(price);
+};
+
 export function getItemEmoji(itemName: string): string {
-  if (!itemName) return EMOJI_MAP.default;
+  const name = itemName.toLowerCase().trim();
+
+  // Match list expanded with more products
+  const emojiMap: Record<string, string> = {
+    // Fruits
+    'manzana': '🍎',
+    'plátano': '🍌',
+    'banana': '🍌',
+    'naranja': '🍊',
+    'limón': '🍋',
+    'lima': '🍈',
+    'pera': '🍐',
+    'melocotón': '🍑',
+    'durazno': '🍑',
+    'cereza': '🍒',
+    'fresa': '🍓',
+    'frambuesa': '🍓',
+    'mora': '🍓',
+    'uva': '🍇',
+    'uvas': '🍇',
+    'sandía': '🍉',
+    'melón': '🍈',
+    'piña': '🍍',
+    'coco': '🥥',
+    'aguacate': '🥑',
+    'kiwi': '🥝',
+    'mango': '🥭',
+
+    // Vegetables
+    'tomate': '🍅',
+    'patata': '🥔',
+    'papa': '🥔',
+    'zanahoria': '🥕',
+    'maíz': '🌽',
+    'choclo': '🌽',
+    'pimiento': '🫑',
+    'ají': '🫑',
+    'berenjena': '🍆',
+    'pepino': '🥒',
+    'brócoli': '🥦',
+    'coliflor': '🥦',
+    'lechuga': '🥬',
+    'espinaca': '🥬',
+    'espárragos': '🥦',
+    'ajo': '🧄',
+    'cebolla': '🧅',
+    'champiñón': '🍄',
+    'seta': '🍄',
+    'hongos': '🍄',
+
+    // Bread & baked goods
+    'pan': '🍞',
+    'baguette': '🥖',
+    'croissant': '🥐',
+    'pretzel': '🥨',
+    'bagel': '🥯',
+    'panqueque': '🥞',
+    'waffle': '🧇',
+    'galleta': '🍪',
+    'torta': '🍰',
+    'pastel': '🍰',
+    'tarta': '🥧',
+    'pie': '🥧',
+    'donut': '🍩',
+    'rosquilla': '🍩',
+    'muffin': '🧁',
+    'magdalena': '🧁',
+
+    // Dairy & eggs
+    'leche': '🥛',
+    'queso': '🧀',
+    'huevo': '🥚',
+    'huevos': '🥚',
+    'mantequilla': '🧈',
+    'yogur': '🥛',
+    'yogurt': '🥛',
+
+    // Meat
+    'carne': '🥩',
+    'filete': '🥩',
+    'bistec': '🥩',
+    'pollo': '🍗',
+    'pavo': '🦃',
+    'salchicha': '🌭',
+    'hot dog': '🌭',
+    'hamburguesa': '🍔',
+    'tocino': '🥓',
+    'bacon': '🥓',
+    'jamón': '🍖',
+    'jamón serrano': '🍖',
+    'chorizo': '🌭',
+    'salami': '🥩',
+
+    // Seafood
+    'pescado': '🐟',
+    'atún': '🐟',
+    'salmón': '🍣',
+    'sardina': '🐟',
+    'camarón': '🦐',
+    'gamba': '🦐',
+    'langosta': '🦞',
+    'cangrejo': '🦀',
+    'pulpo': '🐙',
+    'calamar': '🦑',
+    'mariscos': '🦞',
+
+    // Fast food & prepared
+    'pizza': '🍕',
+    'taco': '🌮',
+    'burrito': '🌯',
+    'sandwich': '🥪',
+    'sándwich': '🥪',
+    'sushi': '🍣',
+    'ramen': '🍜',
+    'pasta': '🍝',
+    'espagueti': '🍝',
+    'fideos': '🍜',
+    
+    // Sweets & desserts
+    'chocolate': '🍫',
+    'caramelo': '🍬',
+    'dulce': '🍭',
+    'helado': '🍦',
+    'nieve': '🍦',
+    'paleta': '🍦',
+
+    // Drinks
+    'agua': '💧',
+    'café': '☕',
+    'té': '🍵',
+    'jugo': '🧃',
+    'zumo': '🧃',
+    'refresco': '🥤',
+    'gaseosa': '🥤',
+    'soda': '🥤',
+    'cerveza': '🍺',
+    'vino': '🍷',
+    'champán': '🍾',
+    'champagne': '🍾',
+    'cóctel': '🍸',
+    'coctel': '🍸',
+    'coco': '🥥',
+
+    // Condiments & spices
+    'sal': '🧂',
+    'pimienta': '🌶️',
+    'chile': '🌶️',
+    'aceite': '🫒',
+    'vinagre': '🧴',
+    'miel': '🍯',
+    'azúcar': '🧁',
+
+    // Nuts & grains
+    'nuez': '🌰',
+    'nueces': '🌰',
+    'maní': '🥜',
+    'cacahuete': '🥜',
+    'almendra': '🥜',
+    'arroz': '🍚',
+    'avena': '🥣',
+    'cereal': '🥣',
+    'trigo': '🌾',
+    'cebada': '🌾',
+
+    // Household & cleaning
+    'papel higiénico': '🧻',
+    'detergente': '🧴',
+    'jabón': '🧼',
+    'champú': '🧴',
+    'shampoo': '🧴',
+    'toallas': '🧻',
+    'servilletas': '🧻',
+
+    // Default categories
+    'fruta': '🍎',
+    'frutas': '🍎',
+    'verdura': '🥕',
+    'verduras': '🥕',
+    'carne': '🥩',
+    'pescado': '🐟',
+    'lácteos': '🥛',
+    'panadería': '🍞',
+    'bebida': '🥤',
+    'bebidas': '🥤',
+    'snack': '🍿',
+    'aperitivo': '🍿',
+    'postre': '🍰',
+    'limpieza': '🧹',
+  };
+
+  // Try to find exact matches or partial matches in the words
+  let emoji = '';
   
-  const lowercaseName = itemName.toLowerCase().trim();
-  
-  // Check direct match first
-  if (EMOJI_MAP[lowercaseName]) {
-    return EMOJI_MAP[lowercaseName];
+  // First try direct match
+  if (emojiMap[name]) {
+    return emojiMap[name];
   }
   
-  // Check partial match
-  for (const [key, emoji] of Object.entries(EMOJI_MAP)) {
-    if (key !== 'default' && lowercaseName.includes(key)) {
-      return emoji;
+  // Then try matching individual words
+  const words = name.split(' ');
+  for (const word of words) {
+    if (word.length > 2 && emojiMap[word]) {
+      return emojiMap[word];
     }
   }
   
-  // Check for plural forms (simple Spanish plural detection)
-  const singularForm = lowercaseName.endsWith('s') ? lowercaseName.slice(0, -1) : null;
-  if (singularForm && EMOJI_MAP[singularForm]) {
-    return EMOJI_MAP[singularForm];
-  }
-  
-  // If no match found, return shopping cart emoji
-  return '🛒';
-}
-
-// Check if word is misspelled and get suggestions
-export function checkSpelling(word: string): { 
-  isMisspelled: boolean; 
-  suggestions: string[];
-  corrected?: string; 
-} {
-  const lowercaseWord = word.toLowerCase();
-  
-  // Check if word is in our known words list
-  if (KNOWN_WORDS_FOR_SPELLCHECK.includes(lowercaseWord)) {
-    return { isMisspelled: false, suggestions: [] };
-  }
-  
-  // Check if word is in our common misspellings map
-  if (COMMON_MISSPELLINGS_MAP[lowercaseWord]) {
-    return { 
-      isMisspelled: true, 
-      suggestions: [COMMON_MISSPELLINGS_MAP[lowercaseWord]],
-      corrected: COMMON_MISSPELLINGS_MAP[lowercaseWord]
-    };
-  }
-  
-  // Generate suggestions for misspelled words using Levenshtein distance
-  const suggestions = KNOWN_WORDS_FOR_SPELLCHECK
-    .filter(knownWord => levenshteinDistance(lowercaseWord, knownWord) <= 2)
-    .sort((a, b) => levenshteinDistance(lowercaseWord, a) - levenshteinDistance(lowercaseWord, b))
-    .slice(0, 3);
-  
-  return {
-    isMisspelled: suggestions.length > 0,
-    suggestions
-  };
-}
-
-// Calculate Levenshtein distance between two strings
-function levenshteinDistance(a: string, b: string): number {
-  const matrix: number[][] = [];
-
-  // Increment along the first column of each row
-  for (let i = 0; i <= b.length; i++) {
-    matrix[i] = [i];
-  }
-
-  // Increment each column in the first row
-  for (let j = 0; j <= a.length; j++) {
-    matrix[0][j] = j;
-  }
-
-  // Fill in the rest of the matrix
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
-        );
+  // Try partial match for any word longer than 3 characters
+  for (const key in emojiMap) {
+    for (const word of words) {
+      if (word.length > 3 && (key.includes(word) || word.includes(key))) {
+        return emojiMap[key];
       }
     }
   }
-
-  return matrix[b.length][a.length];
-}
-
-// Format price with Euro symbol
-export function formatPrice(price: number): string {
-  return `${price.toFixed(2).replace('.', ',')} €`;
+  
+  // Default emoji if no match found
+  return '🛒';
 }

@@ -1,4 +1,3 @@
-
 import { Dispatch, SetStateAction } from 'react';
 
 export interface ShoppingItem {
@@ -46,16 +45,28 @@ export interface ShoppingListHook {
   toggleItemCompletion: (id: string) => void;
   updateItemQuantity: (id: string, quantity: number) => void;
   sortOption: SortOption;
-  setSortOption: Dispatch<SetStateAction<SortOption>>;
+  setSortOption: (option: SortOption) => void;
   totalPrice: number;
   categories: string[];
+  // Budget
   budget: BudgetAlert;
-  updateBudget: (newBudget: Partial<BudgetAlert>) => void;
-  getSavingSuggestions: () => { original: ShoppingItem; alternative: ShoppingItem; savings: number }[];
-  getPriorityItems: (maxBudget: number) => { withinBudget: ShoppingItem[]; outsideBudget: ShoppingItem[] };
+  updateBudget: (budget: Partial<BudgetAlert>) => void;
+  getSavingSuggestions: () => {
+    original: ShoppingItem;
+    alternative: ShoppingItem;
+    savings: number;
+  }[];
+  getPriorityItems: (maxBudget: number) => {
+    withinBudget: ShoppingItem[];
+    outsideBudget: ShoppingItem[];
+  };
+  // Patterns
   commonPatterns: ShoppingPattern[];
-  setCommonPatterns: Dispatch<SetStateAction<ShoppingPattern[]>>;
+  setCommonPatterns: React.Dispatch<React.SetStateAction<ShoppingPattern[]>>;
+  // History
   purchaseHistory: PurchaseHistoryEntry[];
-  restoreListFromHistory: (historyEntryId: string) => void;
-  deleteHistoryEntry: (historyEntryId: string) => void;
+  restoreListFromHistory: (id: string) => void;
+  deleteHistoryEntry: (id: string) => void;
+  // New function for auto-save to history
+  saveCurrentListToHistory: () => void;
 }

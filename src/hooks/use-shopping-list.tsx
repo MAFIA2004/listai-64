@@ -218,6 +218,21 @@ export function useShoppingList(): ShoppingListHook {
     checkBudgetAfterAddingItem(price * quantity, budget, calculateTotal);
   };
 
+  // Function to save the current list to purchase history
+  const saveCurrentListToHistory = () => {
+    // Only save if there are items in the list
+    if (items.length === 0) return;
+    
+    const historyEntry: PurchaseHistoryEntry = {
+      id: crypto.randomUUID(),
+      date: new Date(),
+      items: [...items],
+      totalAmount: calculateTotal()
+    };
+    
+    setPurchaseHistory(prev => [historyEntry, ...prev]);
+  };
+
   // Function to clear the entire shopping list
   const clearAllItems = () => {
     // Save completed items to history before clearing
@@ -360,6 +375,8 @@ export function useShoppingList(): ShoppingListHook {
     // History functions
     purchaseHistory,
     restoreListFromHistory,
-    deleteHistoryEntry
+    deleteHistoryEntry,
+    // Auto save to history function
+    saveCurrentListToHistory
   };
 }
