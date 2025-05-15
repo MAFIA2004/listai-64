@@ -9,16 +9,30 @@ export function cn(...inputs: ClassValue[]) {
 
 // Get emoji for a given item name
 export function getItemEmoji(itemName: string): string {
-  const lowercaseName = itemName.toLowerCase();
+  if (!itemName) return EMOJI_MAP.default;
   
-  // Check direct match
+  const lowercaseName = itemName.toLowerCase().trim();
+  
+  // Check direct match first
+  if (EMOJI_MAP[lowercaseName]) {
+    return EMOJI_MAP[lowercaseName];
+  }
+  
+  // Check partial match
   for (const [key, emoji] of Object.entries(EMOJI_MAP)) {
-    if (lowercaseName.includes(key)) {
+    if (key !== 'default' && lowercaseName.includes(key)) {
       return emoji;
     }
   }
   
-  return EMOJI_MAP.default;
+  // Check for plural forms (simple Spanish plural detection)
+  const singularForm = lowercaseName.endsWith('s') ? lowercaseName.slice(0, -1) : null;
+  if (singularForm && EMOJI_MAP[singularForm]) {
+    return EMOJI_MAP[singularForm];
+  }
+  
+  // If no match found, return shopping cart emoji
+  return '🛒';
 }
 
 // Check if word is misspelled and get suggestions
