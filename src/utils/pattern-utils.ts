@@ -1,78 +1,86 @@
 
-import { ShoppingItem, ShoppingPattern } from "@/types/shopping";
+import { ShoppingItem, ShoppingPattern } from '@/types/shopping';
 import { toast } from 'sonner';
 
 export function getDefaultPatterns(): ShoppingPattern[] {
   return [
-    { trigger: ['cereales'], suggestion: '¿Necesitas leche también?' },
-    { trigger: ['pasta', 'espaguetis', 'macarrones'], suggestion: '¿Quieres añadir salsa de tomate?' },
-    { trigger: ['harina', 'azúcar', 'levadura'], suggestion: '¿Estás horneando? ¿Necesitas huevos?' },
-    { trigger: ['queso', 'jamón', 'pan de molde'], suggestion: '¿Vas a hacer sandwiches? ¿Necesitas mayonesa?' },
-    { trigger: ['hamburguesa', 'salchichas'], suggestion: '¿Necesitas pan de hamburguesa?' },
-    { trigger: ['pizza', 'base de pizza', 'masa de pizza'], suggestion: '¿Has incluido queso mozzarella?' }
+    {
+      trigger: ["pan", "baguette", "hogaza"],
+      suggestion: "mantequilla"
+    },
+    {
+      trigger: ["pasta", "espagueti", "macarrones"],
+      suggestion: "salsa de tomate"
+    },
+    {
+      trigger: ["leche"],
+      suggestion: "cereales"
+    },
+    {
+      trigger: ["queso", "jamón"],
+      suggestion: "pan"
+    },
+    {
+      trigger: ["hamburguesa", "salchichas"],
+      suggestion: "ketchup"
+    }
   ];
 }
 
-export function hasSuggestedItemsAlready(
-  pattern: ShoppingPattern, 
-  excludeItem: string,
-  items: ShoppingItem[]
-): boolean {
-  // This is a simple check - in a real app, we'd use NLP to match related items
-  const suggestion = pattern.suggestion.toLowerCase();
-  
-  // Extract item names from the suggestion
-  const possibleItems = suggestion.match(/(?:añadir|necesitas|incluido)\s+([a-zñáéíóú\s]+?)(?:\?|$)/i);
-  
-  if (possibleItems && possibleItems[1]) {
-    const suggestedItem = possibleItems[1].trim();
-    
-    // Check if we already have this item
-    return items.some(item => 
-      item.name.toLowerCase().includes(suggestedItem) && 
-      !item.completed &&
-      !item.name.toLowerCase().includes(excludeItem)
-    );
-  }
-  
-  return false;
-}
-
 export function checkForForgottenItems(
-  itemName: string,
-  items: ShoppingItem[],
-  commonPatterns: ShoppingPattern[],
-  setCommonPatterns: React.Dispatch<React.SetStateAction<ShoppingPattern[]>>,
-  checkPersonalizedSuggestions: (newItemName: string) => void
-) {
-  const normalizedName = itemName.toLowerCase();
+  newItemName: string,
+  currentItems: ShoppingItem[],
+  patterns: ShoppingPattern[],
+  setPatterns: React.Dispatch<React.SetStateAction<ShoppingPattern[]>>,
+  onSuggestionCallback?: (suggestion: string) => void
+): void {
+  const normalizedName = newItemName.toLowerCase().trim();
   
-  // Check against predefined patterns
-  for (const pattern of commonPatterns) {
-    // Skip if suggestion was shown recently (in the last hour)
-    if (pattern.lastShown && (new Date().getTime() - pattern.lastShown.getTime() < 3600000)) {
-      continue;
-    }
+  // 1. Check if we should suggest any items based on common patterns
+  for (let i = 0; i < patterns.length; i++) {
+    const pattern = patterns[i];
     
-    // Check if the new item is in any trigger list
-    if (pattern.trigger.some(trigger => normalizedName.includes(trigger.toLowerCase()))) {
-      // Check if we already have any of the implied items
-      if (!hasSuggestedItemsAlready(pattern, normalizedName, items)) {
-        // Show suggestion toast
-        toast('Sugerencia de lista', {
-          description: pattern.suggestion,
-          action: {
-            label: "Cerrar",
-            onClick: () => {}
-          },
+    // Check if this pattern is triggered by the new item
+    if (pattern.trigger.some(trigger => 
+      normalizedName.includes(trigger) || 
+      trigger.includes(normalizedName)
+    )) {
+      // Check if suggested item is already in the list
+      const suggestionNormalized = pattern.suggestion.toLowerCase();
+      const isSuggestionInList = currentItems.some(item => 
+        item.name.toLowerCase().includes(suggestionNormalized) ||
+        suggestionNormalized.includes(item.name.toLowerCase())
+      );
+      
+      // Check if we recently showed this suggestion (within last hour)
+      const now = new Date();
+      const recentlySuggested = pattern.lastShown instanceof Date && 
+        ((now.getTime() - pattern.lastShown.getTime()) < 60 * 60 * 1000);
+      
+      // If suggestion is not in list and not recently suggested, show it
+      if (!isSuggestionInList && !recentlySuggested) {
+        // Update the lastShown timestamp
+        setPatterns(prevPatterns => {
+          const updatedPatterns = [...prevPatterns];
+          updatedPatterns[i] = {
+            ...updatedPatterns[i],
+            lastShown: new Date()
+          };
+          return updatedPatterns;
         });
         
-        // Update the lastShown timestamp
-        setCommonPatterns(prev => prev.map(p => 
-          p.trigger.join(',') === pattern.trigger.join(',') 
-            ? { ...p, lastShown: new Date() } 
-            : p
-        ));
+        // Show the suggestion
+        toast('Sugerencia', {
+          description: `¿Quieres añadir "${pattern.suggestion}" a tu lista?`,
+          action: {
+            label: "Añadir",
+            onClick: () => {
+              if (onSuggestionCallback) {
+                onSuggestionCallback(pattern.suggestion);
+              }
+            }
+          },
+        });
         
         // Only show one suggestion at a time
         break;
@@ -80,6 +88,6 @@ export function checkForForgottenItems(
     }
   }
   
-  // Also check personalized purchase patterns
-  checkPersonalizedSuggestions(normalizedName);
+  // 2. Learn new patterns from user behavior (basic implementation)
+  // This would typically be implemented with more sophisticated logic
 }
