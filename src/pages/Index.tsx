@@ -6,20 +6,16 @@ import { SortButtons } from '@/components/SortButtons';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AISuggestionDialog } from '@/components/AISuggestionDialog';
 import { HistoryDialog } from '@/components/HistoryDialog';
-import { AISavedIngredientsDialog } from '@/components/AISavedIngredientsDialog';
 import { formatPrice } from '@/lib/utils';
 import { useShoppingList } from '@/hooks/use-shopping-list';
 import { 
   ShoppingCart, 
-  PieChart, 
-  AlertCircle, 
   PiggyBank, 
+  AlertCircle, 
   ArrowDown, 
   Sparkles,
   Trash2,
   History,
-  ChefHat,
-  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,9 +54,7 @@ const Index = () => {
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [tempBudget, setTempBudget] = useState(budget);
   const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
-  const [aiDialogMode, setAiDialogMode] = useState<'suggestions' | 'savedIngredients'>('suggestions');
   const [aiSuggestionDialogOpen, setAiSuggestionDialogOpen] = useState(false);
-  const [aiSavedIngredientsDialogOpen, setAiSavedIngredientsDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [confirmClearDialogOpen, setConfirmClearDialogOpen] = useState(false);
 
@@ -83,7 +77,7 @@ const Index = () => {
     setConfirmClearDialogOpen(false);
   };
 
-  // Modified to open AI suggestions dialog directly
+  // Open AI suggestions dialog directly
   const handleAiButtonClick = () => {
     setAiSuggestionDialogOpen(true);
   };
@@ -102,36 +96,36 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/80 text-foreground pt-8 pb-20">
-      <div className="container max-w-md mx-auto px-4">
-        <header className="mb-6 backdrop-blur-md bg-background/40 p-4 rounded-lg border border-border/20 shadow-sm">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="minimal-container">
+        <header className="minimal-header">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">Lista de Compras</h1>
+            <h1 className="text-xl font-medium">Mi Lista de Compras</h1>
             <div className="flex gap-1">
               <Button 
                 variant="outline" 
                 size="icon"
                 onClick={() => setHistoryDialogOpen(true)}
                 title="Historial de compras"
-                className="border-primary/20 bg-background/60"
+                className="h-8 w-8"
               >
-                <History className="h-4 w-4 text-primary" />
+                <History className="h-4 w-4" />
               </Button>
               <ThemeToggle />
             </div>
           </div>
           
           {budget.enabled && (
-            <div className="mb-4">
+            <div className="mt-3">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium">Presupuesto: {formatPrice(budget.amount)}</span>
+                <span className="text-sm">Presupuesto: {formatPrice(budget.amount)}</span>
                 <span 
-                  className={`text-sm font-bold ${isOverBudget ? 'text-destructive' : 'text-primary'}`}
+                  className={`text-sm font-medium ${isOverBudget ? 'text-destructive' : ''}`}
                 >
-                  {formatPrice(totalPrice)} ({budgetPercentage.toFixed(0)}%)
+                  {formatPrice(totalPrice)}
                 </span>
               </div>
-              <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
                 <div 
                   className={`h-full ${isOverBudget ? 'bg-destructive' : 'bg-primary'}`}
                   style={{ width: `${budgetPercentage}%` }}
@@ -140,14 +134,14 @@ const Index = () => {
             </div>
           )}
 
-          <div className="flex gap-2 my-2">
+          <div className="flex gap-2 mt-3">
             <Button 
               variant="outline" 
               size="sm"
-              className="flex-1 text-xs border-primary/20 bg-background/60"
+              className="flex-1 text-xs"
               onClick={() => setBudgetDialogOpen(true)}
             >
-              <PiggyBank className="mr-1 h-3.5 w-3.5 text-primary" />
+              <PiggyBank className="mr-1 h-3.5 w-3.5" />
               {budget.enabled ? 'Editar Presupuesto' : 'Añadir Presupuesto'}
             </Button>
             
@@ -155,11 +149,11 @@ const Index = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="flex-1 text-xs border-primary/20 bg-background/60"
+                className="flex-1 text-xs"
                 onClick={() => setPriorityDialogOpen(true)}
                 disabled={outsideBudget.length === 0}
               >
-                <AlertCircle className="mr-1 h-3.5 w-3.5 text-primary" />
+                <AlertCircle className="mr-1 h-3.5 w-3.5" />
                 Priorizar
               </Button>
             )}
@@ -167,23 +161,23 @@ const Index = () => {
             <Button 
               variant="outline" 
               size="sm"
-              className="flex-1 text-xs border-destructive/20 bg-background/60 text-destructive hover:text-destructive hover:border-destructive/40"
+              className="flex-1 text-xs text-destructive"
               onClick={() => setConfirmClearDialogOpen(true)}
             >
               <Trash2 className="mr-1 h-3.5 w-3.5" />
-              Borrar Todo
+              Borrar
             </Button>
           </div>
         </header>
 
         <AddItemForm onAddItem={handleAddItem} />
 
-        <div className="mb-4 flex flex-col gap-2">
+        <div className="mb-4">
           <div className="flex gap-2 mb-2">
             <Button 
               variant={viewMode === 'list' ? 'default' : 'outline'} 
               size="sm"
-              className={`flex-1 ${viewMode !== 'list' ? 'border-primary/20 bg-background/60' : 'bg-gradient-to-r from-primary to-primary/80'}`}
+              className="flex-1"
               onClick={() => setViewMode('list')}
             >
               Lista
@@ -191,10 +185,10 @@ const Index = () => {
             <Button 
               variant={viewMode === 'category' ? 'default' : 'outline'} 
               size="sm"
-              className={`flex-1 ${viewMode !== 'category' ? 'border-primary/20 bg-background/60' : 'bg-gradient-to-r from-primary to-primary/80'}`}
+              className="flex-1"
               onClick={() => setViewMode('category')}
             >
-              Por Categorías
+              Categorías
             </Button>
           </div>
 
@@ -204,13 +198,13 @@ const Index = () => {
           />
         </div>
 
-        <div className="mb-4">
-          <div className="flex items-center justify-between py-3 px-4 bg-card/30 backdrop-blur-sm rounded-lg border border-border/40 shadow-sm">
+        <div className="mb-3">
+          <div className="flex items-center justify-between py-2 px-3 bg-card rounded-md">
             <div className="flex items-center gap-2">
-              <ShoppingCart className="text-primary" size={20} />
-              <span className="font-medium">Total pendiente:</span>
+              <ShoppingCart className="text-primary" size={18} />
+              <span className="text-sm">Total:</span>
             </div>
-            <span className="text-lg font-bold">{formatPrice(totalPrice)}</span>
+            <span className="font-medium">{formatPrice(totalPrice)}</span>
           </div>
         </div>
 
@@ -227,18 +221,18 @@ const Index = () => {
                 />
               ))
             ) : (
-              <div className="py-10 text-center text-muted-foreground animate-fade-in backdrop-blur-sm bg-card/20 rounded-lg border border-border/10 p-4">
-                <ShoppingCart className="mx-auto mb-3 opacity-30" size={40} />
-                <p>Tu lista está vacía. ¡Añade algo!</p>
+              <div className="py-8 text-center text-muted-foreground rounded-md bg-card">
+                <ShoppingCart className="mx-auto mb-2 opacity-30" size={24} />
+                <p className="text-sm">Tu lista está vacía</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {Object.entries(itemsByCategory).length > 0 ? (
               Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                 <div key={category} className="space-y-2">
-                  <h2 className="font-bold text-lg capitalize text-primary">{category}</h2>
+                  <h2 className="text-sm font-medium capitalize">{category}</h2>
                   {categoryItems.map(item => (
                     <ShoppingListItem
                       key={item.id}
@@ -251,27 +245,27 @@ const Index = () => {
                 </div>
               ))
             ) : (
-              <div className="py-10 text-center text-muted-foreground animate-fade-in backdrop-blur-sm bg-card/20 rounded-lg border border-border/10 p-4">
-                <ShoppingCart className="mx-auto mb-3 opacity-30" size={40} />
-                <p>Tu lista está vacía. ¡Añade algo!</p>
+              <div className="py-8 text-center text-muted-foreground rounded-md bg-card">
+                <ShoppingCart className="mx-auto mb-2 opacity-30" size={24} />
+                <p className="text-sm">Tu lista está vacía</p>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Floating AI Button - Now opens AISuggestionDialog directly */}
+      {/* Floating AI Button */}
       <Button
         onClick={handleAiButtonClick}
-        className="fixed bottom-6 right-6 shadow-lg h-14 w-14 rounded-full p-0 bg-gradient-to-r from-primary to-blue-500 hover:shadow-xl hover:scale-105 transition-all duration-300"
+        className="floating-button"
       >
-        <Sparkles className="h-6 w-6" />
+        <Sparkles className="h-5 w-5" />
         <span className="sr-only">Asistente IA</span>
       </Button>
 
       {/* Budget Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
-        <DialogContent className="sm:max-w-md backdrop-blur-md bg-background/60 border border-border/50">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Gestión de Presupuesto</DialogTitle>
             <DialogDescription>
@@ -300,7 +294,6 @@ const Index = () => {
                   step="any"
                   value={tempBudget.amount} 
                   onChange={(e) => setTempBudget(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-                  className="bg-background/60"
                 />
               </div>
               
@@ -312,17 +305,16 @@ const Index = () => {
                   max="99"
                   value={tempBudget.warningThreshold} 
                   onChange={(e) => setTempBudget(prev => ({ ...prev, warningThreshold: Math.min(Math.max(parseInt(e.target.value) || 0, 1), 99) }))}
-                  className="bg-background/60"
                 />
               </div>
             </div>
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBudgetDialogOpen(false)} className="border-primary/20">
+            <Button variant="outline" onClick={() => setBudgetDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleBudgetSave} className="bg-gradient-to-r from-primary to-primary/80">
+            <Button onClick={handleBudgetSave}>
               Guardar
             </Button>
           </DialogFooter>
@@ -331,7 +323,7 @@ const Index = () => {
 
       {/* Priority Items Dialog */}
       <Dialog open={priorityDialogOpen} onOpenChange={setPriorityDialogOpen}>
-        <DialogContent className="sm:max-w-md backdrop-blur-md bg-background/60 border border-border/50">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Priorizar Artículos</DialogTitle>
             <DialogDescription>
@@ -352,15 +344,15 @@ const Index = () => {
                         {item.quantity}x {formatPrice(item.price)} = {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
-                    <Badge variant="outline" className="ml-2 border-primary/20">{item.category}</Badge>
+                    <Badge variant="outline" className="ml-2">{item.category}</Badge>
                   </div>
                 ))}
                 
-                <Alert className="bg-background/60 border-primary/20">
-                  <ArrowDown className="h-4 w-4 text-primary" />
+                <Alert>
+                  <ArrowDown className="h-4 w-4" />
                   <AlertTitle>Recomendación</AlertTitle>
                   <AlertDescription>
-                    Considera eliminar estos {outsideBudget.length} artículos para ajustarte a tu presupuesto de {formatPrice(budget.amount)}.
+                    Considera eliminar estos {outsideBudget.length} artículos para ajustarte a tu presupuesto.
                   </AlertDescription>
                 </Alert>
               </div>
@@ -372,7 +364,7 @@ const Index = () => {
           </div>
           
           <DialogFooter>
-            <Button onClick={() => setPriorityDialogOpen(false)} className="bg-gradient-to-r from-primary to-primary/80">
+            <Button onClick={() => setPriorityDialogOpen(false)}>
               Cerrar
             </Button>
           </DialogFooter>
@@ -381,7 +373,7 @@ const Index = () => {
 
       {/* Confirm Clear All Dialog */}
       <Dialog open={confirmClearDialogOpen} onOpenChange={setConfirmClearDialogOpen}>
-        <DialogContent className="sm:max-w-md backdrop-blur-md bg-background/60 border border-border/50">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>¿Borrar toda la lista?</DialogTitle>
             <DialogDescription>
@@ -390,7 +382,7 @@ const Index = () => {
           </DialogHeader>
           
           <DialogFooter className="sm:justify-between">
-            <Button variant="outline" onClick={() => setConfirmClearDialogOpen(false)} className="border-primary/20">
+            <Button variant="outline" onClick={() => setConfirmClearDialogOpen(false)}>
               Cancelar
             </Button>
             <Button variant="destructive" onClick={handleClearAllItems}>
@@ -405,13 +397,6 @@ const Index = () => {
       <AISuggestionDialog 
         open={aiSuggestionDialogOpen} 
         onOpenChange={setAiSuggestionDialogOpen}
-        onAddItem={handleAddItem}
-      />
-
-      {/* AI Saved Ingredients Dialog */}
-      <AISavedIngredientsDialog
-        open={aiSavedIngredientsDialogOpen}
-        onOpenChange={setAiSavedIngredientsDialogOpen}
         onAddItem={handleAddItem}
       />
 

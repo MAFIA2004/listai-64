@@ -27,7 +27,7 @@ export function checkSpelling(text: string): { isMisspelled: boolean; suggestion
     'agua': ['augua', 'agwa', 'aqua'],
     'tomate': ['tomatte', 'tomat', 'tomaate'],
     'pollo': ['poyo', 'poyito', 'poio'],
-    'carne': ['carne', 'karne', 'carn'],
+    'carne': ['karne', 'carn'],
     'pescado': ['pescao', 'pezcado', 'peskado'],
     'patata': ['patatta', 'potato', 'pataca'],
     'arroz': ['aros', 'aroz', 'arros'],
