@@ -80,22 +80,6 @@
 }
 
 @layer components {
-  .app-layout {
-    @apply min-h-dvh bg-background flex flex-col;
-  }
-
-  .app-header {
-    @apply bg-primary text-primary-foreground rounded-b-3xl py-6 px-6 mb-6 flex items-center sticky top-0 z-20;
-  }
-  
-  .app-icon {
-    @apply bg-primary-foreground/20 p-3 rounded-xl mr-4 flex items-center justify-center;
-  }
-
-  .scrollable-content {
-    @apply flex-1 overflow-y-auto pb-32;
-  }
-  
   .shopping-item {
     @apply relative border rounded-2xl p-4 mb-3 transition-all duration-200 bg-card shadow-sm flex items-center;
   }
@@ -119,17 +103,21 @@
   .floating-button {
     @apply fixed bottom-20 right-6 shadow-lg h-14 w-14 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center;
   }
+
+  .app-header {
+    @apply bg-primary text-primary-foreground rounded-b-3xl py-6 px-6 mb-6 flex items-center;
+  }
+  
+  .app-icon {
+    @apply bg-primary-foreground/20 p-3 rounded-xl mr-4 flex items-center justify-center;
+  }
   
   .search-input {
     @apply w-full py-3 px-4 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30;
   }
   
   .fixed-total {
-    @apply fixed bottom-0 left-0 right-0 bg-primary text-white py-4 px-6 flex justify-between items-center rounded-t-3xl z-20;
-  }
-
-  .fixed-actions {
-    @apply sticky top-[calc(var(--app-header-height)+1rem)] z-10 bg-background/80 backdrop-blur-sm py-2;
+    @apply fixed bottom-0 left-0 right-0 bg-primary text-white py-4 px-6 flex justify-between items-center rounded-t-3xl;
   }
 
   .quantity-control {
