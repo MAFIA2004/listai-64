@@ -16,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 10% 25%;
 
-    --primary: 220 70% 45%;
+    --primary: 255 70% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 10% 95%;
@@ -25,7 +25,7 @@
     --muted: 220 10% 96%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 220 70% 45%;
+    --accent: 255 70% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -33,9 +33,9 @@
 
     --border: 220 13% 90%;
     --input: 220 13% 90%;
-    --ring: 220 70% 45%;
+    --ring: 255 70% 55%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 
   .dark {
@@ -48,7 +48,7 @@
     --popover: 220 10% 15%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 220 70% 50%;
+    --primary: 255 70% 60%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 220 10% 20%;
@@ -57,7 +57,7 @@
     --muted: 220 10% 20%;
     --muted-foreground: 220 10% 70%;
 
-    --accent: 220 70% 50%;
+    --accent: 255 70% 60%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62% 50%;
@@ -65,7 +65,7 @@
 
     --border: 220 10% 25%;
     --input: 220 10% 25%;
-    --ring: 220 70% 50%;
+    --ring: 255 70% 60%;
   }
 }
 
@@ -81,7 +81,7 @@
 
 @layer components {
   .shopping-item {
-    @apply relative border rounded-md p-3 mb-2 transition-all duration-200 bg-card shadow-sm;
+    @apply relative border rounded-2xl p-4 mb-3 transition-all duration-200 bg-card shadow-sm flex items-center;
   }
 
   .shopping-item.completed {
@@ -93,7 +93,7 @@
   }
 
   .btn-sort {
-    @apply flex items-center justify-center p-2 rounded-md border border-border hover:bg-muted/50 transition-colors;
+    @apply flex items-center justify-center p-2 rounded-full border border-border hover:bg-muted/50 transition-colors;
   }
 
   .btn-sort.active {
@@ -101,23 +101,51 @@
   }
   
   .floating-button {
-    @apply fixed bottom-6 right-6 shadow-lg h-12 w-12 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors;
+    @apply fixed bottom-20 right-6 shadow-lg h-14 w-14 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center;
   }
 
-  .minimal-container {
-    @apply max-w-md mx-auto px-4 py-6;
+  .app-header {
+    @apply bg-primary text-primary-foreground rounded-b-3xl py-6 px-6 mb-6 flex items-center;
   }
   
-  .minimal-header {
-    @apply mb-6 p-3 rounded-md bg-card;
+  .app-icon {
+    @apply bg-primary-foreground/20 p-3 rounded-xl mr-4 flex items-center justify-center;
   }
   
-  .minimal-form {
-    @apply p-3 rounded-md bg-card mb-4;
+  .search-input {
+    @apply w-full py-3 px-4 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30;
   }
   
-  .minimal-button {
-    @apply w-full bg-primary text-primary-foreground py-3 rounded-md font-medium;
+  .fixed-total {
+    @apply fixed bottom-0 left-0 right-0 bg-primary text-white py-4 px-6 flex justify-between items-center rounded-t-3xl;
+  }
+
+  .quantity-control {
+    @apply flex items-center justify-between bg-gray-100 rounded-full;
+  }
+
+  .quantity-control button {
+    @apply rounded-full p-2 text-gray-700;
+  }
+  
+  .quantity-control span {
+    @apply px-3 font-medium;
+  }
+
+  .delete-button {
+    @apply rounded-full p-2 bg-gray-100 text-gray-500;
+  }
+  
+  .filter-button {
+    @apply px-5 py-3 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center;
+  }
+  
+  .filter-button.active {
+    @apply bg-primary text-white;
+  }
+  
+  .add-button {
+    @apply bg-primary text-white rounded-full py-3 px-6 font-medium w-full flex items-center justify-center;
   }
 }
 

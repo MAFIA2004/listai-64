@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Trash2, Check, X, Plus, Minus } from 'lucide-react';
+import { Trash2, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn, getItemEmoji, formatPrice } from '@/lib/utils';
 import { ShoppingItem } from '@/hooks/use-shopping-list';
@@ -43,67 +43,53 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
       <div className={cn('shopping-item', 
         item.completed ? 'completed' : ''
       )}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg" role="img" aria-label={`Emoji for ${item.name}`}>
-              {emoji}
-            </span>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center">
+            <div 
+              className="mr-3 rounded-xl bg-blue-100 size-14 flex items-center justify-center"
+              role="img" 
+              aria-label={`Emoji for ${item.name}`}
+            >
+              <span className="text-2xl">{emoji}</span>
+            </div>
             <div>
-              <p className={cn(
-                "item-name font-medium", 
-                item.completed && "line-through text-muted-foreground"
-              )}>
-                {item.name}
-              </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  {onUpdateQuantity && (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-5 w-5 p-0" 
-                        onClick={handleDecrementQuantity}
-                        disabled={item.quantity <= 1 || item.completed}
-                      >
-                        <Minus size={12} />
-                      </Button>
-                      <span className="w-4 text-center">{item.quantity}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-5 w-5 p-0"
-                        onClick={handleIncrementQuantity}
-                        disabled={item.completed}
-                      >
-                        <Plus size={12} />
-                      </Button>
-                    </>
-                  )}
-                  {!onUpdateQuantity && <span>x{item.quantity}</span>}
-                </div>
-                <span className="ml-1">
-                  {formatPrice(item.price)}
-                </span>
+              <p className="font-medium text-lg">{item.name}</p>
+              <div className="text-sm text-primary opacity-80">
+                {item.quantity} unid. · {formatPrice(item.price)}/unid.
               </div>
             </div>
           </div>
-          <div className="flex space-x-1">
+          
+          <div className="flex items-center gap-3">
+            <div className="quantity-control">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="h-8 w-8 p-0" 
+                onClick={handleDecrementQuantity}
+                disabled={item.quantity <= 1 || item.completed}
+              >
+                <Minus size={16} />
+              </Button>
+              <span>{item.quantity}</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={handleIncrementQuantity}
+                disabled={item.completed}
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
+            
             <Button
               variant="ghost"
               size="sm"
-              className="size-7 p-0 text-muted-foreground hover:text-foreground"
-              onClick={() => onToggleComplete(item.id)}
-            >
-              {item.completed ? <X size={16} /> : <Check size={16} />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="size-7 p-0 text-muted-foreground hover:text-destructive"
+              className="delete-button"
               onClick={() => setShowDeleteDialog(true)}
             >
-              <Trash2 size={16} />
+              <Trash2 size={18} />
             </Button>
           </div>
         </div>
