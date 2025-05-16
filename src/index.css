@@ -147,6 +147,59 @@
   .add-button {
     @apply bg-primary text-white rounded-full py-3 px-6 font-medium w-full flex items-center justify-center;
   }
+  
+  /* New dialog styles */
+  .app-dialog {
+    @apply backdrop-blur-md bg-background/60 border-primary/20 rounded-3xl shadow-lg;
+  }
+  
+  .app-dialog-content {
+    @apply border border-primary/20 bg-background/60 shadow-lg shadow-primary/5;
+  }
+  
+  .app-dialog-header {
+    @apply bg-gradient-to-br from-primary/10 to-transparent rounded-t-3xl pb-4;
+  }
+  
+  .app-dialog-footer {
+    @apply border-t border-primary/10 pt-4 mt-4;
+  }
+  
+  .app-dialog-title {
+    @apply text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500;
+  }
+  
+  .primary-gradient-button {
+    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all text-white;
+  }
+  
+  .alert-dialog {
+    @apply rounded-3xl overflow-hidden;
+  }
+  
+  .alert-dialog-content {
+    @apply p-6;
+  }
+  
+  .alert-dialog-title {
+    @apply text-xl font-semibold mb-2;
+  }
+  
+  .alert-dialog-description {
+    @apply text-muted-foreground mb-6;
+  }
+  
+  .alert-dialog-footer {
+    @apply flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2;
+  }
+  
+  .alert-action-cancel {
+    @apply rounded-full border border-gray-200 py-2.5 px-5;
+  }
+  
+  .alert-action-destructive {
+    @apply rounded-full bg-destructive text-white py-2.5 px-5;
+  }
 }
 
 @layer utilities {

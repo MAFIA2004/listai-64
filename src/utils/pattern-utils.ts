@@ -58,13 +58,14 @@ export function checkForForgottenItems(
     if (pattern.trigger.some(trigger => normalizedName.includes(trigger.toLowerCase()))) {
       // Check if we already have any of the implied items
       if (!hasSuggestedItemsAlready(pattern, normalizedName, items)) {
-        // Show suggestion toast
+        // Show suggestion toast with improved styling
         toast('Sugerencia de lista', {
           description: pattern.suggestion,
           action: {
             label: "Cerrar",
             onClick: () => {}
           },
+          className: "rounded-2xl border border-primary/20 bg-background/80 backdrop-blur-md",
         });
         
         // Update the lastShown timestamp
