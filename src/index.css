@@ -105,11 +105,11 @@
   }
 
   .app-header {
-    @apply bg-primary text-primary-foreground rounded-b-3xl py-6 px-6 mb-6 flex items-center;
+    @apply bg-primary text-primary-foreground rounded-b-3xl py-3 px-6 mb-4 flex items-center fixed top-0 left-0 right-0 z-20;
   }
   
   .app-icon {
-    @apply bg-primary-foreground/20 p-3 rounded-xl mr-4 flex items-center justify-center;
+    @apply bg-primary-foreground/20 p-2 rounded-xl mr-4 flex items-center justify-center;
   }
   
   .search-input {
@@ -117,7 +117,7 @@
   }
   
   .fixed-total {
-    @apply fixed bottom-0 left-0 right-0 bg-primary text-white py-4 px-6 flex justify-between items-center rounded-t-3xl;
+    @apply fixed bottom-0 left-0 right-0 bg-primary text-white py-4 px-6 flex justify-between items-center rounded-t-3xl z-20;
   }
 
   .quantity-control {
@@ -136,8 +136,16 @@
     @apply rounded-full p-2 bg-gray-100 text-gray-500;
   }
   
+  .filter-buttons-container {
+    @apply fixed top-[72px] left-0 right-0 bg-background z-10 px-4 py-2;
+  }
+  
+  .scrollable-content {
+    @apply mt-[140px] mb-20 px-4 max-w-xl mx-auto pb-20;
+  }
+  
   .filter-button {
-    @apply px-5 py-3 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center;
+    @apply px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center text-sm;
   }
   
   .filter-button.active {
@@ -148,7 +156,7 @@
     @apply bg-primary text-white rounded-full py-3 px-6 font-medium w-full flex items-center justify-center;
   }
   
-  /* New dialog styles */
+  /* Dialog styles */
   .app-dialog {
     @apply backdrop-blur-md bg-background/60 border-primary/20 rounded-3xl shadow-lg;
   }
@@ -200,10 +208,29 @@
   .alert-action-destructive {
     @apply rounded-full bg-destructive text-white py-2.5 px-5;
   }
+
+  /* Organizar buttons container */
+  .organize-buttons-container {
+    @apply bg-card/50 backdrop-blur-sm rounded-2xl border border-border/30 p-2 mb-4;
+  }
+
+  /* Improved delete all button */
+  .delete-all-button {
+    @apply rounded-full flex items-center justify-center text-sm bg-background border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

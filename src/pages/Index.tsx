@@ -10,11 +10,12 @@ import { formatPrice } from '@/lib/utils';
 import { useShoppingList } from '@/hooks/use-shopping-list';
 import { 
   ShoppingCart, 
-  Clock,
   ArrowUpDown,
   Sparkles,
   Trash2,
   History,
+  Clock,
+  Calculator,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -32,6 +33,11 @@ const Index = () => {
     sortOption,
     setSortOption,
     totalPrice,
+    // Budget features
+    budget,
+    updateBudget,
+    getSavingSuggestions,
+    getPriorityItems,
     // History features
     purchaseHistory,
     restoreListFromHistory,
@@ -45,22 +51,21 @@ const Index = () => {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [confirmClearDialogOpen, setConfirmClearDialogOpen] = useState(false);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
 
   const handleClearAllItems = () => {
     clearAllItems();
     setConfirmClearDialogOpen(false);
+    toast.success('Lista eliminada');
   };
 
-  // Open AI suggestions dialog directly
   const handleAiButtonClick = () => {
     setAiSuggestionDialogOpen(true);
   };
 
-  // Check if the total price is over 15 euros and save to history if needed
   const handleAddItem = (name: string, price: number, quantity: number = 1) => {
     addItem(name, price, quantity);
     
-    // Check if the total is now over 15 euros after adding the item
     setTimeout(() => {
       if (totalPrice + (price * quantity) > 15) {
         saveCurrentListToHistory();
@@ -70,19 +75,21 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header - Reduced size by approximately 50% */}
       <header className="app-header">
         <div className="app-icon">
-          <ShoppingCart size={24} />
+          <ShoppingCart size={20} />
         </div>
-        <h1 className="text-2xl font-bold flex-1">ListAI</h1>
+        <h1 className="text-xl font-bold flex-1">ListAI</h1>
         <ThemeToggle />
       </header>
 
-      <div className="px-4 max-w-xl mx-auto">
+      {/* Fixed Filter Buttons */}
+      <div className="filter-buttons-container max-w-xl mx-auto">
         <AddItemForm onAddItem={handleAddItem} />
         
-        <div className="flex gap-2 my-4 overflow-x-auto hide-scrollbar pb-1">
+        <div className="flex gap-2 my-3 overflow-x-auto hide-scrollbar pb-1">
           <Button 
             variant={viewMode === 'list' ? "default" : "outline"} 
             size="sm"
@@ -103,10 +110,10 @@ const Index = () => {
             variant="outline" 
             size="sm"
             className="filter-button"
-            onClick={() => setSortMenuOpen(!sortMenuOpen)}
+            onClick={() => setBudgetDialogOpen(true)}
           >
-            <ArrowUpDown className="mr-2 h-4 w-4" />
-            Ordenar
+            <Calculator className="mr-1 h-4 w-4" />
+            Presupuesto
           </Button>
           <Button 
             variant="outline" 
@@ -114,31 +121,49 @@ const Index = () => {
             className="filter-button"
             onClick={() => setHistoryDialogOpen(true)}
           >
-            <Clock className="mr-2 h-4 w-4" />
-            Fecha
+            <Clock className="mr-1 h-4 w-4" />
+            Historial
           </Button>
+        </div>
+
+        {/* Organizar y Eliminar buttons in a nicer container */}
+        <div className="organize-buttons-container flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="rounded-full flex items-center"
+              onClick={() => setSortMenuOpen(!sortMenuOpen)}
+            >
+              <ArrowUpDown className="h-4 w-4 mr-1" />
+              <span className="text-sm">Organizar</span>
+            </Button>
+          </div>
           <Button 
-            variant="outline" 
+            variant="ghost"
             size="sm"
-            className="filter-button text-destructive border-destructive/30"
             onClick={() => setConfirmClearDialogOpen(true)}
+            className="delete-all-button"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Eliminar todo
+            <Trash2 className="h-4 w-4 mr-1" />
+            <span className="text-sm">Eliminar todo</span>
           </Button>
         </div>
         
         {sortMenuOpen && (
-          <div className="mb-4">
+          <div className="mb-3">
             <SortButtons
               activeSort={sortOption}
               onSort={(option) => setSortOption(option as any)}
             />
           </div>
         )}
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="scrollable-content">
         {viewMode === 'list' ? (
-          <div className="space-y-1 mt-6">
+          <div className="space-y-1">
             {items.length > 0 ? (
               items.map(item => (
                 <ShoppingListItem
@@ -157,7 +182,7 @@ const Index = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-4 mt-6">
+          <div className="space-y-4">
             {Object.entries(itemsByCategory).length > 0 ? (
               Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                 <div key={category} className="space-y-1">
@@ -198,9 +223,79 @@ const Index = () => {
         <span className="text-2xl font-bold">{formatPrice(totalPrice)}</span>
       </div>
 
-      {/* Confirm Clear All Dialog */}
+      {/* Budget Dialog */}
+      <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
+        <DialogContent className="sm:max-w-md backdrop-blur-lg bg-background/80 border border-border/50 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-primary" />
+              Configurar Presupuesto
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="flex items-center justify-between mb-4">
+              <span>Activar presupuesto</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={budget.enabled}
+                  onChange={() => updateBudget({ enabled: !budget.enabled })}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
+            </div>
+            
+            {budget.enabled && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    Cantidad máxima (€)
+                  </label>
+                  <input 
+                    type="number" 
+                    className="w-full p-2 border border-border rounded-lg"
+                    value={budget.amount}
+                    onChange={(e) => updateBudget({ amount: Number(e.target.value) })}
+                    min="1"
+                    step="1"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    Aviso al alcanzar % del presupuesto
+                  </label>
+                  <input 
+                    type="range" 
+                    className="w-full accent-primary"
+                    min="10"
+                    max="100"
+                    step="5" 
+                    value={budget.warningThreshold}
+                    onChange={(e) => updateBudget({ warningThreshold: Number(e.target.value) })}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>10%</span>
+                    <span>{budget.warningThreshold}%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button onClick={() => setBudgetDialogOpen(false)}>
+              Aceptar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Clear All Dialog - with improved styling */}
       <Dialog open={confirmClearDialogOpen} onOpenChange={setConfirmClearDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md backdrop-blur-lg bg-background/80 border border-border/50 rounded-2xl">
           <DialogHeader>
             <DialogTitle>¿Borrar toda la lista?</DialogTitle>
             <DialogDescription>

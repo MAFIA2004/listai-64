@@ -66,6 +66,7 @@ export function checkForForgottenItems(
             onClick: () => {}
           },
           className: "rounded-2xl border border-primary/20 bg-background/80 backdrop-blur-md",
+          duration: 5000,
         });
         
         // Update the lastShown timestamp
