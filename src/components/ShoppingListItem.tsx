@@ -40,56 +40,68 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
 
   return (
     <>
-      <div className={cn('shopping-item', 
-        item.completed ? 'completed' : ''
-      )}>
+      <div 
+        className={cn('shopping-item', 
+          item.completed ? 'completed' : ''
+        )}
+        onClick={() => onToggleComplete(item.id)}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
             <div 
-              className="mr-3 rounded-xl bg-blue-100 size-14 flex items-center justify-center"
+              className="mr-2 rounded-lg bg-blue-100 size-10 flex items-center justify-center"
               role="img" 
               aria-label={`Emoji for ${item.name}`}
             >
-              <span className="text-2xl">{emoji}</span>
+              <span className="text-xl">{emoji}</span>
             </div>
             <div>
-              <p className="font-medium text-lg">{item.name}</p>
-              <div className="text-sm text-primary opacity-80">
-                {item.quantity} unid. · {formatPrice(item.price)}/unid.
+              <p className="font-medium text-base">{item.name}</p>
+              <div className="text-xs text-primary opacity-80">
+                {item.quantity} unid. · <span className="text-sm">{formatPrice(item.price)}/unid.</span>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="quantity-control">
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="h-8 w-8 p-0" 
-                onClick={handleDecrementQuantity}
+                className="h-6 w-6 p-0" 
+                onClick={(e) => {
+                  e.stopPropagation(); 
+                  handleDecrementQuantity();
+                }}
                 disabled={item.quantity <= 1 || item.completed}
               >
-                <Minus size={16} />
+                <Minus size={14} />
               </Button>
-              <span>{item.quantity}</span>
+              <span className="text-sm">{item.quantity}</span>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={handleIncrementQuantity}
+                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleIncrementQuantity();
+                }}
                 disabled={item.completed}
               >
-                <Plus size={16} />
+                <Plus size={14} />
               </Button>
             </div>
             
             <Button
               variant="ghost"
               size="sm"
-              className="delete-button"
-              onClick={() => setShowDeleteDialog(true)}
+              className="delete-button h-6 w-6"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteDialog(true);
+              }}
             >
-              <Trash2 size={18} />
+              <Trash2 size={14} />
             </Button>
           </div>
         </div>

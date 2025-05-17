@@ -81,7 +81,7 @@
 
 @layer components {
   .shopping-item {
-    @apply relative border rounded-2xl p-4 mb-3 transition-all duration-200 bg-card shadow-sm flex items-center;
+    @apply relative border rounded-xl p-3 mb-2 transition-all duration-200 bg-card shadow-sm flex items-center;
   }
 
   .shopping-item.completed {
@@ -101,15 +101,15 @@
   }
   
   .floating-button {
-    @apply fixed bottom-20 right-6 shadow-lg h-14 w-14 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center;
+    @apply fixed bottom-20 right-6 shadow-lg h-12 w-12 rounded-full p-0 bg-gradient-to-br from-purple-500 to-blue-500 text-primary-foreground hover:opacity-90 transition-opacity flex items-center justify-center;
   }
 
   .app-header {
-    @apply bg-primary text-primary-foreground rounded-b-3xl py-3 px-6 mb-4 flex items-center fixed top-0 left-0 right-0 z-20;
+    @apply bg-primary text-primary-foreground rounded-b-2xl py-2 px-6 mb-4 flex items-center fixed top-0 left-0 right-0 z-20;
   }
   
   .app-icon {
-    @apply bg-primary-foreground/20 p-2 rounded-xl mr-4 flex items-center justify-center;
+    @apply bg-primary-foreground/20 p-1.5 rounded-xl mr-3 flex items-center justify-center;
   }
   
   .search-input {
@@ -117,7 +117,7 @@
   }
   
   .fixed-total {
-    @apply fixed bottom-0 left-0 right-0 bg-primary text-white py-4 px-6 flex justify-between items-center rounded-t-3xl z-20;
+    @apply fixed bottom-0 left-0 right-0 bg-primary text-white py-3 px-6 flex justify-between items-center rounded-t-2xl z-20;
   }
 
   .quantity-control {
@@ -125,23 +125,23 @@
   }
 
   .quantity-control button {
-    @apply rounded-full p-2 text-gray-700;
+    @apply rounded-full p-1.5 text-gray-700;
   }
   
   .quantity-control span {
-    @apply px-3 font-medium;
+    @apply px-2 font-medium;
   }
 
   .delete-button {
-    @apply rounded-full p-2 bg-gray-100 text-gray-500;
+    @apply rounded-full p-1.5 bg-gray-100 text-gray-500;
   }
   
   .filter-buttons-container {
-    @apply fixed top-[72px] left-0 right-0 bg-background z-10 px-4 py-2;
+    @apply fixed top-[52px] left-0 right-0 bg-background z-10 px-4 py-2;
   }
   
   .scrollable-content {
-    @apply mt-[140px] mb-20 px-4 max-w-xl mx-auto pb-20;
+    @apply mt-[120px] mb-20 px-4 max-w-xl mx-auto pb-20 z-0;
   }
   
   .filter-button {
@@ -182,15 +182,15 @@
   }
   
   .alert-dialog {
-    @apply rounded-3xl overflow-hidden;
+    @apply rounded-3xl overflow-hidden backdrop-blur-lg;
   }
   
   .alert-dialog-content {
-    @apply p-6;
+    @apply p-6 border border-primary/20 bg-background/60;
   }
   
   .alert-dialog-title {
-    @apply text-xl font-semibold mb-2;
+    @apply text-xl font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500;
   }
   
   .alert-dialog-description {
@@ -218,6 +218,20 @@
   .delete-all-button {
     @apply rounded-full flex items-center justify-center text-sm bg-background border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors;
   }
+  
+  /* AI dialog styling */
+  .ai-dialog {
+    @apply backdrop-blur-xl bg-gradient-to-br from-background/80 to-background/60 border border-primary/30 rounded-3xl shadow-lg;
+  }
+  
+  .history-card {
+    @apply bg-card/70 backdrop-blur-sm border border-border/50 rounded-xl p-3 mb-3 transition-all hover:bg-accent/10;
+  }
+  
+  /* Back button for history */
+  .back-button {
+    @apply rounded-full p-2 bg-background/80 backdrop-blur-sm border border-border/30 hover:bg-background transition-colors;
+  }
 }
 
 @layer utilities {
@@ -232,5 +246,13 @@
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-md bg-background/60 border border-primary/20 shadow-lg;
+  }
+  
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500;
   }
 }

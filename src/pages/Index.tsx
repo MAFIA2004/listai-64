@@ -13,7 +13,6 @@ import {
   ArrowUpDown,
   Sparkles,
   Trash2,
-  History,
   Clock,
   Calculator,
 } from 'lucide-react';
@@ -42,6 +41,7 @@ const Index = () => {
     purchaseHistory,
     restoreListFromHistory,
     deleteHistoryEntry,
+    deleteAllHistory,
     // Auto save to history
     saveCurrentListToHistory
   } = useShoppingList();
@@ -73,15 +73,25 @@ const Index = () => {
       }
     }, 100);
   };
+  
+  const toggleViewMode = () => {
+    if (viewMode === 'list') {
+      setViewMode('category');
+    } else {
+      setViewMode('list');
+      // Reset to sorting by name when switching back to list view
+      setSortOption('name');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header - Reduced size by approximately 50% */}
+      {/* Header - Reduced size by 15% more */}
       <header className="app-header">
         <div className="app-icon">
-          <ShoppingCart size={20} />
+          <ShoppingCart size={18} />
         </div>
-        <h1 className="text-xl font-bold flex-1">ListAI</h1>
+        <h1 className="text-lg font-bold flex-1">ListAI</h1>
         <ThemeToggle />
       </header>
 
@@ -91,20 +101,12 @@ const Index = () => {
         
         <div className="flex gap-2 my-3 overflow-x-auto hide-scrollbar pb-1">
           <Button 
-            variant={viewMode === 'list' ? "default" : "outline"} 
+            variant="outline" 
             size="sm"
-            className={`filter-button ${viewMode === 'list' ? 'active' : ''}`}
-            onClick={() => setViewMode('list')}
+            className={`filter-button ${viewMode === 'category' ? '' : 'active'}`}
+            onClick={toggleViewMode}
           >
-            Nombre
-          </Button>
-          <Button 
-            variant={viewMode === 'category' ? "default" : "outline"} 
-            size="sm" 
-            className={`filter-button ${viewMode === 'category' ? 'active' : ''}`}
-            onClick={() => setViewMode('category')}
-          >
-            Categorías
+            {viewMode === 'category' ? 'Nombre' : 'Categorías'}
           </Button>
           <Button 
             variant="outline" 
@@ -208,28 +210,28 @@ const Index = () => {
         )}
       </div>
 
-      {/* Floating AI Button */}
+      {/* Floating AI Button with improved style */}
       <Button
         onClick={handleAiButtonClick}
         className="floating-button"
       >
-        <Sparkles className="h-6 w-6" />
+        <Sparkles className="h-5 w-5" />
         <span className="sr-only">Asistente IA</span>
       </Button>
 
       {/* Fixed Total Bar */}
       <div className="fixed-total">
-        <span className="text-xl font-medium">Total a pagar:</span>
-        <span className="text-2xl font-bold">{formatPrice(totalPrice)}</span>
+        <span className="text-lg font-medium">Total a pagar:</span>
+        <span className="text-xl font-bold">{formatPrice(totalPrice)}</span>
       </div>
 
       {/* Budget Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
-        <DialogContent className="sm:max-w-md backdrop-blur-lg bg-background/80 border border-border/50 rounded-2xl">
+        <DialogContent className="sm:max-w-md ai-dialog">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Calculator className="h-5 w-5 text-primary" />
-              Configurar Presupuesto
+              <span className="gradient-text">Configurar Presupuesto</span>
             </DialogTitle>
           </DialogHeader>
           
@@ -295,9 +297,9 @@ const Index = () => {
 
       {/* Confirm Clear All Dialog - with improved styling */}
       <Dialog open={confirmClearDialogOpen} onOpenChange={setConfirmClearDialogOpen}>
-        <DialogContent className="sm:max-w-md backdrop-blur-lg bg-background/80 border border-border/50 rounded-2xl">
+        <DialogContent className="sm:max-w-md ai-dialog">
           <DialogHeader>
-            <DialogTitle>¿Borrar toda la lista?</DialogTitle>
+            <DialogTitle className="gradient-text">¿Borrar toda la lista?</DialogTitle>
             <DialogDescription>
               Esta acción eliminará todos los artículos de tu lista de compras.
             </DialogDescription>
@@ -329,6 +331,7 @@ const Index = () => {
         purchaseHistory={purchaseHistory}
         onRestoreList={restoreListFromHistory}
         onDeleteList={deleteHistoryEntry}
+        onDeleteAllHistory={deleteAllHistory}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 
-import { SortAsc, ArrowDownAZ, ArrowUp, Clock } from 'lucide-react';
+import { SortAsc, ArrowUp, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SortButtonsProps {
@@ -10,16 +10,6 @@ interface SortButtonsProps {
 export function SortButtons({ activeSort, onSort }: SortButtonsProps) {
   return (
     <div className="flex flex-wrap gap-2 mb-4">
-      <button 
-        className={cn('btn-sort', activeSort === 'name' && 'active')}
-        onClick={() => onSort('name')}
-        aria-label="Ordenar por nombre"
-        title="Ordenar por nombre (A-Z)"
-      >
-        <ArrowDownAZ size={18} />
-        <span className="ml-2 hidden sm:inline">Nombre</span>
-      </button>
-      
       <button 
         className={cn('btn-sort', activeSort === 'price-asc' && 'active')}
         onClick={() => onSort('price-asc')}
