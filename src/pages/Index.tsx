@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -128,7 +129,7 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Organizar y Eliminar buttons */}
+        {/* Organizar y Eliminar buttons - Con margen inferior más claro */}
         <div className="organize-buttons-container flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Button 
@@ -162,7 +163,7 @@ const Index = () => {
         )}
       </div>
 
-      {/* Main content with improved layout */}
+      {/* Main content con espacio claro después de la sección de organizar */}
       <div className="main-content-wrapper">
         <div className="shopping-list-container">
           {viewMode === 'list' ? (

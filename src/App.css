@@ -91,25 +91,26 @@
   display: none;
 }
 
-/* New main content wrapper to control layout */
+/* Modificado: Contenedor principal con espacio claro después de los botones de organizar */
 .main-content-wrapper {
   display: flex;
   flex-direction: column;
-  margin-top: 1rem;
-  height: calc(100vh - 14rem);
-  margin-bottom: 5rem; /* Increased spacing from the bottom of the page */
+  margin-top: 0; /* Eliminado el margen superior */
+  padding-top: 1.5rem; /* Añadido padding para separar de la sección de organizar */
+  height: calc(100vh - 16rem); /* Ajustado para dar más espacio */
+  margin-bottom: 6rem; /* Aumentado el margen inferior */
   position: relative;
   z-index: 10;
 }
 
-/* List container that holds the items */
+/* Contenedor de la lista de compras con más padding inferior */
 .shopping-list-container {
   width: 90%;
   margin: 0 auto;
   overflow-y: auto;
-  max-height: calc(100% - 2rem);
+  max-height: calc(100% - 1rem);
   padding-top: 0.5rem;
-  padding-bottom: 7rem; /* Further increased padding to ensure last items are fully visible */
+  padding-bottom: 9rem; /* Aumentado significativamente para evitar que los elementos se oculten */
   position: relative;
 }
 
