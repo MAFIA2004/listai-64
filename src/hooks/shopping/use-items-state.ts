@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ShoppingItem, SortOption } from '@/types/shopping';
 import { toast } from 'sonner';
@@ -102,7 +103,18 @@ export function useItemsState(
       category: category || 'uncategorized',
     };
     
-    setItems(prevItems => [...prevItems, newItem]);
+    // Find the index of the last phantom item (item with name "5")
+    const lastPhantomIndex = [...items].reverse().findIndex(item => item.phantom && item.name === "5");
+    
+    // If found, insert after that item, otherwise add to the end
+    if (lastPhantomIndex !== -1) {
+      const insertIndex = items.length - lastPhantomIndex;
+      const newItems = [...items];
+      newItems.splice(insertIndex, 0, newItem);
+      setItems(newItems);
+    } else {
+      setItems(prevItems => [...prevItems, newItem]);
+    }
     
     // Check for forgotten related items
     checkForForgottenItems(
