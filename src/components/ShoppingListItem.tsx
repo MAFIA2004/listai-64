@@ -41,8 +41,8 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
   return (
     <>
       <div 
-        className={cn('shopping-item', 
-          item.completed ? 'completed' : ''
+        className={cn('shopping-item bg-card border border-border rounded-lg p-3 mb-2', 
+          item.completed ? 'completed opacity-70' : ''
         )}
         onClick={() => onToggleComplete(item.id)}
       >

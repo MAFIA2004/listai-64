@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -17,6 +16,7 @@ import {
   Calculator,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
@@ -85,9 +85,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Header - Reduced size by 15% more */}
-      <header className="app-header">
+      <header className="app-header sticky top-0 z-10 bg-background">
         <div className="app-icon">
           <ShoppingCart size={18} />
         </div>
@@ -96,7 +96,7 @@ const Index = () => {
       </header>
 
       {/* Fixed Filter Buttons */}
-      <div className="filter-buttons-container max-w-xl mx-auto">
+      <div className="filter-buttons-container max-w-xl mx-auto sticky top-[40px] z-10 bg-background pt-1 pb-2">
         <AddItemForm onAddItem={handleAddItem} />
         
         <div className="flex gap-2 my-3 overflow-x-auto hide-scrollbar pb-1">
@@ -162,10 +162,10 @@ const Index = () => {
         )}
       </div>
 
-      {/* Scrollable Content */}
-      <div className="scrollable-content">
+      {/* Scrollable Content - Improved with ScrollArea and flex-1 for auto-sizing */}
+      <ScrollArea className="flex-1 overflow-y-auto px-4 pb-20">
         {viewMode === 'list' ? (
-          <div className="space-y-1">
+          <div className="space-y-1 max-w-xl mx-auto">
             {items.length > 0 ? (
               items.map(item => (
                 <ShoppingListItem
@@ -184,7 +184,7 @@ const Index = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-w-xl mx-auto">
             {Object.entries(itemsByCategory).length > 0 ? (
               Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                 <div key={category} className="space-y-1">
@@ -208,7 +208,7 @@ const Index = () => {
             )}
           </div>
         )}
-      </div>
+      </ScrollArea>
 
       {/* Floating AI Button with improved style */}
       <Button
@@ -220,7 +220,7 @@ const Index = () => {
       </Button>
 
       {/* Fixed Total Bar */}
-      <div className="fixed-total">
+      <div className="fixed-total sticky bottom-0 left-0 right-0 z-10 bg-background">
         <span className="text-lg font-medium">Total a pagar:</span>
         <span className="text-xl font-bold">{formatPrice(totalPrice)}</span>
       </div>
