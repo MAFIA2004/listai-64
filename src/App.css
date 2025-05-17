@@ -114,7 +114,7 @@
 
 /* Contenedor de la lista de compras */
 .shopping-list-container {
-  width: 90%;
+  width: 95%; /* Modificado de 90% a 95% */
   margin: 0 auto;
   overflow-y: auto;
   max-height: 100%;
