@@ -11,7 +11,10 @@ export function SortButtons({ activeSort, onSort }: SortButtonsProps) {
   return (
     <div className="flex flex-wrap gap-2 mb-4">
       <button 
-        className={cn('btn-sort', activeSort === 'price-asc' && 'active')}
+        className={cn(
+          'btn-sort', 
+          activeSort === 'price-asc' && 'active'
+        )}
         onClick={() => onSort('price-asc')}
         aria-label="Ordenar por precio ascendente"
         title="Ordenar por precio (menor a mayor)"
@@ -21,7 +24,10 @@ export function SortButtons({ activeSort, onSort }: SortButtonsProps) {
       </button>
       
       <button 
-        className={cn('btn-sort', activeSort === 'price-desc' && 'active')}
+        className={cn(
+          'btn-sort', 
+          activeSort === 'price-desc' && 'active'
+        )}
         onClick={() => onSort('price-desc')}
         aria-label="Ordenar por precio descendente"
         title="Ordenar por precio (mayor a menor)"
@@ -31,7 +37,10 @@ export function SortButtons({ activeSort, onSort }: SortButtonsProps) {
       </button>
       
       <button 
-        className={cn('btn-sort', activeSort === 'date' && 'active')}
+        className={cn(
+          'btn-sort', 
+          activeSort === 'date' && 'active'
+        )}
         onClick={() => onSort('date')}
         aria-label="Ordenar por fecha"
         title="Ordenar por fecha (más recientes primero)"

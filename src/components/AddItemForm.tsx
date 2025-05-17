@@ -84,7 +84,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             onChange={handleNameChange} 
             onFocus={() => itemName.length >= 2 && setShowSuggestions(true)} 
             autoComplete="off" 
-            className="w-full bg-slate-50" 
+            className="w-full bg-card dark:bg-card/50 border-input" 
           />
 
           <ItemSuggestions 
@@ -100,7 +100,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             placeholder="Precio (€)" 
             value={itemPrice} 
             onChange={(e) => setVoiceRecognitionValues(undefined, e.target.value, undefined)} 
-            className="w-full" 
+            className="w-full bg-card dark:bg-card/50 border-input" 
             inputMode="decimal" 
           />
 
@@ -109,7 +109,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             placeholder="Cantidad" 
             value={itemQuantity} 
             onChange={(e) => setVoiceRecognitionValues(undefined, undefined, e.target.value)} 
-            className="w-24" 
+            className="w-24 bg-card dark:bg-card/50 border-input" 
             min="1" 
             inputMode="numeric" 
           />
