@@ -96,7 +96,15 @@ const Index = () => {
         <ThemeToggle />
       </header>
 
-      {/* Form and filter buttons - Fixed position */}
+      {/* Total Price Bar - Moved to the top position, right below header */}
+      <div className="total-price-bar">
+        <div className="flex justify-between items-center px-4 py-2">
+          <span className="text-sm font-medium">Total a pagar:</span>
+          <span className="text-lg font-bold">{formatPrice(totalPrice)}</span>
+        </div>
+      </div>
+
+      {/* Form and filter buttons */}
       <div className="filter-buttons-container max-w-xl mx-auto w-full">
         <AddItemForm onAddItem={handleAddItem} />
         
@@ -129,7 +137,7 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Organizar y Eliminar buttons - Con margen inferior más claro */}
+        {/* Organizar y Eliminar buttons */}
         <div className="organize-buttons-container flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Button 
@@ -163,7 +171,7 @@ const Index = () => {
         )}
       </div>
 
-      {/* Main content con espacio claro después de la sección de organizar */}
+      {/* Main content */}
       <div className="main-content-wrapper">
         <div className="shopping-list-container">
           {viewMode === 'list' ? (
@@ -221,12 +229,6 @@ const Index = () => {
         <Sparkles className="h-5 w-5" />
         <span className="sr-only">Asistente IA</span>
       </Button>
-
-      {/* Fixed Total Bar */}
-      <div className="fixed-total">
-        <span className="text-lg font-medium">Total a pagar:</span>
-        <span className="text-xl font-bold">{formatPrice(totalPrice)}</span>
-      </div>
 
       {/* Budget Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>

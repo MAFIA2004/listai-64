@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -65,9 +66,19 @@
   color: hsl(var(--primary-foreground));
 }
 
-.filter-buttons-container {
+/* Nuevo estilo para la barra de Total a Pagar */
+.total-price-bar {
   position: sticky;
   top: 3.5rem;
+  z-index: 35;
+  background-color: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filter-buttons-container {
+  position: sticky;
+  top: 6rem; /* Ajustado para quedar debajo de la barra de total */
   z-index: 30;
   padding: 0.5rem 0.75rem;
   background-color: hsl(var(--background));
@@ -90,27 +101,24 @@
   display: none;
 }
 
-/* Modificado: Contenedor principal con espacio claro después de los botones de organizar */
+/* Contenedor principal con espacio adaptado */
 .main-content-wrapper {
   display: flex;
   flex-direction: column;
-  margin-top: 0; /* Eliminado el margen superior */
-  padding-top: 1.5rem; /* Añadido padding para separar de la sección de organizar */
-  height: calc(100vh - 16rem); /* Ajustado para dar más espacio */
-  margin-bottom: 7rem; /* Aumentado el margen inferior para evitar superposición */
+  padding-top: 1rem;
+  height: calc(100vh - 14rem); /* Ajustado para el nuevo diseño */
   position: relative;
   z-index: 10;
+  overflow: hidden;
 }
 
-/* Contenedor de la lista de compras con más padding inferior */
+/* Contenedor de la lista de compras */
 .shopping-list-container {
   width: 90%;
   margin: 0 auto;
   overflow-y: auto;
-  max-height: calc(100% - 1rem);
-  padding-top: 0.5rem;
-  padding-bottom: 12rem; /* Aumentado significativamente para evitar que los elementos se oculten bajo el panel inferior */
-  position: relative;
+  max-height: 100%;
+  padding-bottom: 5rem; /* Espacio para evitar que el último elemento quede oculto */
 }
 
 .shopping-item {
@@ -160,7 +168,7 @@
 .floating-button {
   position: fixed;
   right: 1rem;
-  bottom: 5.5rem;
+  bottom: 1.5rem; /* Ajustado ya que el panel de total ya no está en la parte inferior */
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
@@ -173,21 +181,7 @@
   z-index: 50;
 }
 
-.fixed-total {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  background-color: hsl(var(--card));
-  border-top: 1px solid hsl(var(--border));
-  z-index: 50;
-  /* Añadido sombra sutil para mejorar la separación visual */
-  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
-}
+/* Se eliminó el estilo fixed-total ya que ahora está en la parte superior */
 
 .ai-dialog {
   background: linear-gradient(to bottom, hsl(var(--background)), hsl(var(--background)/0.95));
@@ -201,3 +195,4 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
