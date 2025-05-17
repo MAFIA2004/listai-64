@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 // Definimos los tipos que faltan para Speech Recognition
 interface SpeechRecognitionEvent extends Event {
@@ -91,10 +92,11 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | undefined>();
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [isNative] = useState(Capacitor.isNativePlatform());
 
   // Initialize speech recognition
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isNative) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
       if (!SpeechRecognition) {
@@ -125,11 +127,18 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
       setRecognition(recognitionInstance);
     }
-  }, []);
+  }, [isNative]);
 
   const startListening = useCallback(() => {
     setError(undefined);
     setTranscript('');
+
+    if (isNative) {
+      // On native platforms, inform that we'd use a different approach
+      // You would typically implement native voice recognition here
+      setError("El reconocimiento de voz necesita permisos en Android");
+      return;
+    }
 
     if (recognition) {
       try {
@@ -140,14 +149,14 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         setIsListening(false);
       }
     }
-  }, [recognition]);
+  }, [recognition, isNative]);
 
   const stopListening = useCallback(() => {
-    if (recognition && isListening) {
+    if (recognition && isListening && !isNative) {
       recognition.stop();
       setIsListening(false);
     }
-  }, [recognition, isListening]);
+  }, [recognition, isListening, isNative]);
 
   return { isListening, transcript, error, startListening, stopListening };
 }
