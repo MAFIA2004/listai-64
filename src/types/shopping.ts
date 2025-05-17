@@ -40,6 +40,8 @@ export interface ItemPurchaseHistory {
 
 export interface ShoppingListHook {
   items: ShoppingItem[];
+  phantomItems: ShoppingItem[]; // Nueva propiedad
+  regularItems: ShoppingItem[]; // Nueva propiedad
   itemsByCategory: Record<string, ShoppingItem[]>;
   addItem: (name: string, price: number, quantity?: number, category?: string) => void;
   removeItem: (id: string) => void;

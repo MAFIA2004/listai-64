@@ -223,6 +223,32 @@ export function useItemsState(
     });
   };
 
+  // Nueva función para obtener solo los productos fantasma
+  const getPhantomItems = () => {
+    return items.filter(item => item.phantom);
+  };
+
+  // Nueva función para obtener solo los productos normales
+  const getRegularItems = () => {
+    const regularItems = items.filter(item => !item.phantom);
+    return regularItems.sort((a, b) => {
+      switch (sortOption) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'price-asc':
+          return (a.price * a.quantity) - (b.price * b.quantity);
+        case 'price-desc':
+          return (b.price * b.quantity) - (a.price * a.quantity);
+        case 'category':
+          return (a.category || '').localeCompare(b.category || '');
+        case 'date':
+          return b.date.getTime() - a.date.getTime();
+        default:
+          return 0;
+      }
+    });
+  };
+
   const getItemsByCategory = () => {
     const categorizedItems: Record<string, ShoppingItem[]> = {};
     
@@ -251,7 +277,9 @@ export function useItemsState(
     clearAllItems,
     calculateTotal,
     getSortedItems,
-    getItemsByCategory
+    getItemsByCategory,
+    getPhantomItems, // Exportamos la nueva función
+    getRegularItems // Exportamos la nueva función
   };
 }
 

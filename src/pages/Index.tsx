@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -23,7 +22,8 @@ import { toast } from 'sonner';
 
 const Index = () => {
   const { 
-    items, 
+    phantomItems, // Nueva propiedad
+    regularItems, // Nueva propiedad
     itemsByCategory,
     addItem, 
     removeItem, 
@@ -175,27 +175,52 @@ const Index = () => {
       <div className="main-content-wrapper">
         <div className="shopping-list-container">
           {viewMode === 'list' ? (
-            <div className="space-y-2">
-              {items.length > 0 ? (
-                items.map(item => (
-                  <div 
-                    key={item.id} 
-                    data-phantom={item.phantom ? "true" : "false"}
-                  >
-                    <ShoppingListItem
-                      item={item}
-                      onToggleComplete={toggleItemCompletion}
-                      onDelete={removeItem}
-                      onUpdateQuantity={updateItemQuantity}
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
-                  <ShoppingCart className="mx-auto mb-3 opacity-30" size={32} />
-                  <p>Tu lista está vacía</p>
+            <div className="space-y-4">
+              {/* Lista 1: Productos Fantasma */}
+              <div className="mb-4">
+                <h2 className="text-sm font-medium text-primary mb-2">Lista Rápida</h2>
+                <div className="space-y-2">
+                  {phantomItems.map(item => (
+                    <div 
+                      key={item.id} 
+                      data-phantom={item.phantom ? "true" : "false"}
+                    >
+                      <ShoppingListItem
+                        item={item}
+                        onToggleComplete={toggleItemCompletion}
+                        onDelete={removeItem}
+                        onUpdateQuantity={updateItemQuantity}
+                      />
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+
+              {/* Separador entre listas */}
+              <div className="border-b border-border my-4"></div>
+
+              {/* Lista 2: Productos Regulares */}
+              <div>
+                <h2 className="text-sm font-medium mb-2">Mis Productos</h2>
+                <div className="space-y-2">
+                  {regularItems.length > 0 ? (
+                    regularItems.map(item => (
+                      <div key={item.id}>
+                        <ShoppingListItem
+                          item={item}
+                          onToggleComplete={toggleItemCompletion}
+                          onDelete={removeItem}
+                          onUpdateQuantity={updateItemQuantity}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-muted-foreground rounded-md bg-card">
+                      <p>No hay productos en tu lista</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">

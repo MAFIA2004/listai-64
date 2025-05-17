@@ -52,7 +52,9 @@ export function useShoppingList(): ShoppingListHook {
     clearAllItems,
     calculateTotal,
     getSortedItems,
-    getItemsByCategory
+    getItemsByCategory,
+    getPhantomItems, // Nueva función
+    getRegularItems // Nueva función
   } = useItemsState(
     budget, 
     commonPatterns, 
@@ -76,6 +78,8 @@ export function useShoppingList(): ShoppingListHook {
 
   return {
     items: getSortedItems(),
+    phantomItems: getPhantomItems(), // Retornamos los productos fantasma
+    regularItems: getRegularItems(), // Retornamos los productos normales
     itemsByCategory: getItemsByCategory(),
     addItem,
     removeItem,
