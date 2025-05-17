@@ -379,7 +379,7 @@ export function AddItemForm({
   return <>
       <form onSubmit={handleSubmit} className="space-y-4 mb-6">
         <div className="relative">
-          <Input type="text" placeholder="Artículo" value={itemName} onChange={handleNameChange} onFocus={() => itemName.length >= 2 && setShowSuggestions(true)} autoComplete="off" className="w-full bg-slate-950" />
+          <Input type="text" placeholder="Artículo" value={itemName} onChange={handleNameChange} onFocus={() => itemName.length >= 2 && setShowSuggestions(true)} autoComplete="off" className="w-full bg-slate-50" />
 
           {/* Suggestions dropdown */}
           {showSuggestions && <div className="absolute z-10 mt-1 w-full bg-popover border rounded-md shadow-lg max-h-60 overflow-auto" ref={suggestionsRef}>
