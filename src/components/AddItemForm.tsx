@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -401,8 +402,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
 
   return (
     <>
-      {/* Añadida clase w-[70%] mx-auto para reducir el ancho en un 30% */}
-      <form onSubmit={handleSubmit} className="space-y-4 mb-6 w-[70%] mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
         <div className="relative">
           <Input
             type="text"
