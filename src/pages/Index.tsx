@@ -89,7 +89,7 @@ const Index = () => {
         
         <div className="flex gap-2 my-3 overflow-x-auto hide-scrollbar pb-1">
           <Button variant="outline" size="sm" className={`filter-button ${viewMode === 'category' ? '' : 'active'}`} onClick={toggleViewMode}>
-            {viewMode === 'category' ? 'Nombre' : 'Categorías'}
+            {viewMode === 'category' ? 'Nombre' : 'Categori'}
           </Button>
           <Button variant="outline" size="sm" className="filter-button" onClick={() => setBudgetDialogOpen(true)}>
             <Calculator className="mr-1 h-4 w-4" />
@@ -97,7 +97,7 @@ const Index = () => {
           </Button>
           <Button variant="outline" size="sm" className="filter-button" onClick={() => setHistoryDialogOpen(true)}>
             <Clock className="mr-1 h-4 w-4" />
-            Historial
+            Histori
           </Button>
         </div>
 

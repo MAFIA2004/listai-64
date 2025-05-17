@@ -106,7 +106,7 @@ export function HistoryDialog({
               ) : (
                 <>
                   <History className="h-5 w-5 text-primary" />
-                  <span className="gradient-text">Historial de Compras</span>
+                  <span className="gradient-text">Histori</span>
                 </>
               )}
             </DialogTitle>
