@@ -22,6 +22,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     itemQuantity,
     suggestions,
     showSuggestions,
+    setShowSuggestions,
     processingVoiceInput,
     spellCheckOpen,
     setSpellCheckOpen,
