@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -98,7 +97,7 @@
   margin-top: 0; /* Eliminado el margen superior */
   padding-top: 1.5rem; /* Añadido padding para separar de la sección de organizar */
   height: calc(100vh - 16rem); /* Ajustado para dar más espacio */
-  margin-bottom: 6rem; /* Aumentado el margen inferior */
+  margin-bottom: 7rem; /* Aumentado el margen inferior para evitar superposición */
   position: relative;
   z-index: 10;
 }
@@ -110,7 +109,7 @@
   overflow-y: auto;
   max-height: calc(100% - 1rem);
   padding-top: 0.5rem;
-  padding-bottom: 9rem; /* Aumentado significativamente para evitar que los elementos se oculten */
+  padding-bottom: 12rem; /* Aumentado significativamente para evitar que los elementos se oculten bajo el panel inferior */
   position: relative;
 }
 
@@ -186,6 +185,8 @@
   background-color: hsl(var(--card));
   border-top: 1px solid hsl(var(--border));
   z-index: 50;
+  /* Añadido sombra sutil para mejorar la separación visual */
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .ai-dialog {
