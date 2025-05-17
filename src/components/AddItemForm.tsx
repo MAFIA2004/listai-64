@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -7,59 +6,58 @@ import { COMMON_SHOPPING_ITEMS } from '@/lib/constants';
 import { checkSpelling } from '@/lib/utils';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { identifyQuantities } from '@/lib/gemini-service';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from "sonner";
-
 interface AddItemFormProps {
   onAddItem: (name: string, price: number, quantity?: number) => void;
 }
 
 // Constantes para patrones de reconocimiento
 const PRICE_PATTERNS = [
-  // Patrones de precio con palabras clave
-  /(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))/i,  // "10 euros", "10€"
-  /(\d+)[.,](\d{1,2})(?:\s*(?:euros?|€))?/i,  // "10.50", "10,50" con o sin "euros"
-  /(\d+)\s*con\s*(\d{1,2})(?:\s*(?:euros?|€))?/i,  // "10 con 50" con o sin "euros"
-  /a\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,  // "a 10 euros", "a 10€"
-  /por\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,  // "por 10 euros"
-  /vale\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,  // "vale 10 euros"
-  /cuesta\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,  // "cuesta 10 euros"
-  /precio\s*(?:de|es|:)?\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,  // "precio 10 euros"
+// Patrones de precio con palabras clave
+/(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))/i,
+// "10 euros", "10€"
+/(\d+)[.,](\d{1,2})(?:\s*(?:euros?|€))?/i,
+// "10.50", "10,50" con o sin "euros"
+/(\d+)\s*con\s*(\d{1,2})(?:\s*(?:euros?|€))?/i,
+// "10 con 50" con o sin "euros"
+/a\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,
+// "a 10 euros", "a 10€"
+/por\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,
+// "por 10 euros"
+/vale\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,
+// "vale 10 euros"
+/cuesta\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i,
+// "cuesta 10 euros"
+/precio\s*(?:de|es|:)?\s*(\d+([.,]\d{1,2})?)(?:\s*(?:euros?|€))?/i // "precio 10 euros"
 ];
 
 // Palabras clave que indican la separación entre producto y precio
-const SEPARATOR_KEYWORDS = [
-  'a', 'por', 'vale', 'cuesta', 'precio', 'de', 'euros', 'euro', '€'
-];
+const SEPARATOR_KEYWORDS = ['a', 'por', 'vale', 'cuesta', 'precio', 'de', 'euros', 'euro', '€'];
 
 // Palabras relacionadas con peso/kilo
-const WEIGHT_KEYWORDS = [
-  'kilo', 'kilos', 'kg', 'gramos', 'g', 'medio kilo', 'cuarto de kilo'
-];
+const WEIGHT_KEYWORDS = ['kilo', 'kilos', 'kg', 'gramos', 'g', 'medio kilo', 'cuarto de kilo'];
 
 // Patrones para productos por peso
-const WEIGHT_PATTERNS = [
-  /(\d+(?:[.,]\d+)?)\s*(?:kilo|kilos|kg)s?\s+de\s+(.+)/i,  // "2 kilos de manzanas"
-  /(\d+(?:[.,]\d+)?)\s*(?:gramos?|g)\s+de\s+(.+)/i,  // "500 gramos de queso"
-  /(?:un\s+)?(?:kilo|kg)\s+de\s+(.+)/i,  // "un kilo de patatas" o "kilo de patatas"
-  /(?:medio|mitad de un)\s+(?:kilo|kg)\s+de\s+(.+)/i,  // "medio kilo de cebollas"
-  /(?:cuarto de)\s+(?:kilo|kg)\s+de\s+(.+)/i,  // "cuarto de kilo de tomates"
+const WEIGHT_PATTERNS = [/(\d+(?:[.,]\d+)?)\s*(?:kilo|kilos|kg)s?\s+de\s+(.+)/i,
+// "2 kilos de manzanas"
+/(\d+(?:[.,]\d+)?)\s*(?:gramos?|g)\s+de\s+(.+)/i,
+// "500 gramos de queso"
+/(?:un\s+)?(?:kilo|kg)\s+de\s+(.+)/i,
+// "un kilo de patatas" o "kilo de patatas"
+/(?:medio|mitad de un)\s+(?:kilo|kg)\s+de\s+(.+)/i,
+// "medio kilo de cebollas"
+/(?:cuarto de)\s+(?:kilo|kg)\s+de\s+(.+)/i // "cuarto de kilo de tomates"
 ];
 
 // Patrones para cantidades
-const QUANTITY_PATTERNS = [
-  /(\d+)\s+(unidad(?:es)?|paquete(?:s)?|caja(?:s)?|botella(?:s)?|lata(?:s)?)\s+de\s+(.+)/i,  // "2 paquetes de galletas"
-  /(\d+)\s+(.+)/i,  // "3 manzanas"
+const QUANTITY_PATTERNS = [/(\d+)\s+(unidad(?:es)?|paquete(?:s)?|caja(?:s)?|botella(?:s)?|lata(?:s)?)\s+de\s+(.+)/i,
+// "2 paquetes de galletas"
+/(\d+)\s+(.+)/i // "3 manzanas"
 ];
-
-export function AddItemForm({ onAddItem }: AddItemFormProps) {
+export function AddItemForm({
+  onAddItem
+}: AddItemFormProps) {
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [itemQuantity, setItemQuantity] = useState('1');
@@ -67,10 +65,16 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [processingVoiceInput, setProcessingVoiceInput] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  
+
   // Voice recognition
-  const { isListening, transcript, error, startListening, stopListening } = useSpeechRecognition();
-  
+  const {
+    isListening,
+    transcript,
+    error,
+    startListening,
+    stopListening
+  } = useSpeechRecognition();
+
   // Spell check dialog
   const [spellCheckOpen, setSpellCheckOpen] = useState(false);
   const [spellCheckSuggestions, setSpellCheckSuggestions] = useState<string[]>([]);
@@ -79,40 +83,32 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   // Función para procesar la entrada de voz usando Gemini AI
   const processVoiceInputWithAI = async (transcript: string) => {
     setProcessingVoiceInput(true);
-    
     try {
       // Usar Gemini para analizar la entrada de voz
       const result = await identifyQuantities(transcript);
-      
       if (result && result.items && result.items.length > 0) {
         const item = result.items[0];
-        
         if (item.name) {
           setItemName(item.name);
         }
-        
         if (item.quantity && item.quantity > 0) {
           setItemQuantity(item.quantity.toString());
         }
-        
         if (item.price) {
           setItemPrice(item.price.toString());
         }
-        
+
         // Mostrar toast con lo que se entendió
         const quantityText = item.quantity && item.quantity > 1 ? ` (${item.quantity}x)` : '';
         const priceText = item.price ? ` por ${item.price}€` : '';
-        
         toast.success("Entrada por voz reconocida", {
           description: `"${item.name}"${quantityText}${priceText}`
         });
-        
         return;
       }
-      
+
       // Si Gemini falla, usar el procesamiento clásico
       processVoiceInputClassic(transcript);
-      
     } catch (error) {
       console.error("Error procesando entrada de voz con AI:", error);
       // Fallback al procesamiento clásico
@@ -127,10 +123,10 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     let name = '';
     let price = '';
     let quantity = 1;
-    
+
     // Normalizar el texto
     const normalizedTranscript = transcript.toLowerCase().trim();
-    
+
     // 1. Verificar productos por peso
     for (const pattern of WEIGHT_PATTERNS) {
       const match = normalizedTranscript.match(pattern);
@@ -145,10 +141,10 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           // Si solo tiene nombre
           name = `${match[1]} (1 kg)`.trim();
         }
-        
+
         // Buscar precio después de la parte de peso
         const remainingText = normalizedTranscript.replace(match[0], '').trim();
-        
+
         // Buscar precio en el texto restante
         for (const pricePattern of PRICE_PATTERNS) {
           const priceMatch = remainingText.match(pricePattern);
@@ -157,31 +153,29 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             break;
           }
         }
-        
         setItemName(name);
         if (price) setItemPrice(price);
         setItemQuantity("1"); // El peso ya está incluido en el nombre
-        
+
         return;
       }
     }
-    
+
     // 2. Verificar cantidades específicas
     for (const pattern of QUANTITY_PATTERNS) {
       const match = normalizedTranscript.match(pattern);
       if (match && match[1] && (match[2] || match[3])) {
         quantity = parseInt(match[1], 10);
-        
+
         // Obtener el nombre del producto
         if (match[3]) {
           name = match[3].trim(); // Para el patrón con unidad específica
         } else {
           name = match[2].trim(); // Para el patrón genérico
         }
-        
+
         // Buscar precio en el texto restante
         const remainingText = normalizedTranscript.replace(match[0], '').trim();
-        
         for (const pricePattern of PRICE_PATTERNS) {
           const priceMatch = remainingText.match(pricePattern);
           if (priceMatch && priceMatch[1]) {
@@ -189,31 +183,27 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             break;
           }
         }
-        
         setItemName(name);
         if (price) setItemPrice(price);
         setItemQuantity(quantity.toString());
-        
         return;
       }
     }
-    
+
     // 3. Buscar el precio utilizando patrones comunes
     let foundPrice = false;
     let priceValue = '';
-    
     for (const pattern of PRICE_PATTERNS) {
       const match = normalizedTranscript.match(pattern);
       if (match && match[1]) {
         priceValue = match[1].replace(',', '.');
         foundPrice = true;
-        
+
         // Extraer el nombre eliminando la parte del precio
         name = normalizedTranscript.replace(match[0], '').trim();
         break;
       }
     }
-    
     if (foundPrice) {
       price = priceValue;
     } else {
@@ -222,7 +212,6 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
       let beforeSeparator = [];
       let afterSeparator = [];
       let foundSeparator = false;
-      
       for (let i = 0; i < words.length; i++) {
         if (!foundSeparator && SEPARATOR_KEYWORDS.some(keyword => words[i].includes(keyword))) {
           foundSeparator = true;
@@ -239,7 +228,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           beforeSeparator.push(words[i]);
         }
       }
-      
+
       // Si no se encontró separador, usar todo como nombre
       if (beforeSeparator.length > 0 && !foundSeparator) {
         name = beforeSeparator.join(' ');
@@ -247,26 +236,26 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         name = beforeSeparator.join(' ');
       }
     }
-    
+
     // 4. Limpiar el nombre final quitando palabras clave redundantes
     for (const keyword of [...SEPARATOR_KEYWORDS, ...WEIGHT_KEYWORDS]) {
       name = name.replace(new RegExp(`\\b${keyword}\\b`, 'gi'), '');
     }
-    
+
     // Eliminar palabras de precio comunes y artículos
     const wordsToRemove = ['añadir', 'añade', 'agregar', 'agrega', 'add', 'pon', 'poner'];
     for (const word of wordsToRemove) {
       const regex = new RegExp(`^${word}\\s+`, 'i');
       name = name.replace(regex, '');
     }
-    
+
     // Limpiar espacios múltiples
     name = name.replace(/\s+/g, ' ').trim();
-    
+
     // Establecer los valores reconocidos en los estados
     if (name) setItemName(name);
     if (price) setItemPrice(price);
-    
+
     // Mostrar toast con lo que se entendió
     if (name && price) {
       toast.success("Entrada por voz reconocida", {
@@ -311,53 +300,41 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         setShowSuggestions(false);
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
   const updateSuggestions = (input: string) => {
     if (input.length < 2) {
       setSuggestions([]);
       return;
     }
-
     const inputLower = input.toLowerCase();
-    const filtered = COMMON_SHOPPING_ITEMS.filter(item => 
-      item.toLowerCase().includes(inputLower)
-    ).slice(0, 5);
-
+    const filtered = COMMON_SHOPPING_ITEMS.filter(item => item.toLowerCase().includes(inputLower)).slice(0, 5);
     setSuggestions(filtered);
     setShowSuggestions(filtered.length > 0);
   };
-
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setItemName(value);
     updateSuggestions(value);
   };
-
   const handleSuggestionClick = (suggestion: string) => {
     setItemName(suggestion);
     setShowSuggestions(false);
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!itemName.trim()) {
       toast.error("Nombre no puede estar vacío");
       return;
     }
-    
     const price = parseFloat(itemPrice.replace(',', '.'));
     if (isNaN(price) || price <= 0) {
       toast.error("Precio debe ser un número positivo");
       return;
     }
-
     const quantity = parseInt(itemQuantity, 10);
     if (isNaN(quantity) || quantity <= 0) {
       toast.error("Cantidad debe ser un número positivo");
@@ -365,32 +342,32 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     }
 
     // Check spelling before adding
-    const { isMisspelled, suggestions } = checkSpelling(itemName);
+    const {
+      isMisspelled,
+      suggestions
+    } = checkSpelling(itemName);
     if (isMisspelled && suggestions.length > 0) {
       setMisspelledWord(itemName);
       setSpellCheckSuggestions(suggestions);
       setSpellCheckOpen(true);
       return;
     }
-    
+
     // If no spelling issues, add the item directly
     addItemToList(itemName, price, quantity);
   };
-
   const handleSelectSpellingSuggestion = (suggestion: string) => {
     const price = parseFloat(itemPrice.replace(',', '.'));
     const quantity = parseInt(itemQuantity, 10) || 1;
     addItemToList(suggestion, price, quantity);
     setSpellCheckOpen(false);
   };
-
   const handleIgnoreSpelling = () => {
     const price = parseFloat(itemPrice.replace(',', '.'));
     const quantity = parseInt(itemQuantity, 10) || 1;
     addItemToList(misspelledWord, price, quantity);
     setSpellCheckOpen(false);
   };
-
   const addItemToList = (name: string, price: number, quantity: number = 1) => {
     onAddItem(name, price, quantity);
     setItemName('');
@@ -399,82 +376,33 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     setSuggestions([]);
     setShowSuggestions(false);
   };
-
-  return (
-    <>
+  return <>
       <form onSubmit={handleSubmit} className="space-y-4 mb-6">
         <div className="relative">
-          <Input
-            type="text"
-            placeholder="Artículo"
-            value={itemName}
-            onChange={handleNameChange}
-            onFocus={() => itemName.length >= 2 && setShowSuggestions(true)}
-            className="w-full"
-            autoComplete="off"
-          />
+          <Input type="text" placeholder="Artículo" value={itemName} onChange={handleNameChange} onFocus={() => itemName.length >= 2 && setShowSuggestions(true)} autoComplete="off" className="w-full bg-slate-950" />
 
           {/* Suggestions dropdown */}
-          {showSuggestions && (
-            <div 
-              className="absolute z-10 mt-1 w-full bg-popover border rounded-md shadow-lg max-h-60 overflow-auto"
-              ref={suggestionsRef}
-            >
-              {suggestions.map((suggestion, idx) => (
-                <div 
-                  key={idx} 
-                  className="p-2 hover:bg-muted cursor-pointer"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
+          {showSuggestions && <div className="absolute z-10 mt-1 w-full bg-popover border rounded-md shadow-lg max-h-60 overflow-auto" ref={suggestionsRef}>
+              {suggestions.map((suggestion, idx) => <div key={idx} className="p-2 hover:bg-muted cursor-pointer" onClick={() => handleSuggestionClick(suggestion)}>
                   {suggestion}
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
         </div>
 
         <div className="flex gap-2">
-          <Input
-            type="text"
-            placeholder="Precio (€)"
-            value={itemPrice}
-            onChange={(e) => setItemPrice(e.target.value)}
-            className="w-full"
-            inputMode="decimal"
-          />
+          <Input type="text" placeholder="Precio (€)" value={itemPrice} onChange={e => setItemPrice(e.target.value)} className="w-full" inputMode="decimal" />
 
-          <Input
-            type="number"
-            placeholder="Cantidad"
-            value={itemQuantity}
-            onChange={(e) => setItemQuantity(e.target.value)}
-            className="w-24"
-            min="1"
-            inputMode="numeric"
-          />
+          <Input type="number" placeholder="Cantidad" value={itemQuantity} onChange={e => setItemQuantity(e.target.value)} className="w-24" min="1" inputMode="numeric" />
         </div>
 
         <div className="flex gap-2">
-          <Button 
-            type="submit" 
-            className="flex-1"
-          >
+          <Button type="submit" className="flex-1">
             <Plus className="mr-1 h-4 w-4" />
             Añadir Artículo
           </Button>
 
-          <Button 
-            type="button"
-            variant="outline"
-            className={`${isListening ? 'bg-primary text-primary-foreground animate-pulse' : ''}`}
-            onClick={isListening ? stopListening : startListening}
-            disabled={processingVoiceInput}
-          >
-            {isListening ? (
-              <MicOff className="mr-1 h-4 w-4" />
-            ) : (
-              <Mic className="mr-1 h-4 w-4" />
-            )}
+          <Button type="button" variant="outline" className={`${isListening ? 'bg-primary text-primary-foreground animate-pulse' : ''}`} onClick={isListening ? stopListening : startListening} disabled={processingVoiceInput}>
+            {isListening ? <MicOff className="mr-1 h-4 w-4" /> : <Mic className="mr-1 h-4 w-4" />}
             <span className="sr-only sm:not-sr-only sm:inline-block">
               {isListening ? 'Escuchando...' : 'Por voz'}
             </span>
@@ -493,16 +421,9 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           </DialogHeader>
 
           <div className="grid gap-2 py-4">
-            {spellCheckSuggestions.map((suggestion, idx) => (
-              <Button
-                key={idx}
-                variant="outline"
-                onClick={() => handleSelectSpellingSuggestion(suggestion)}
-                className="w-full justify-start"
-              >
+            {spellCheckSuggestions.map((suggestion, idx) => <Button key={idx} variant="outline" onClick={() => handleSelectSpellingSuggestion(suggestion)} className="w-full justify-start">
                 {suggestion}
-              </Button>
-            ))}
+              </Button>)}
           </div>
 
           <DialogFooter>
@@ -512,6 +433,5 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>;
 }
