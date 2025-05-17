@@ -1,3 +1,4 @@
+
 import { Dispatch, SetStateAction } from 'react';
 
 export interface ShoppingItem {
@@ -67,6 +68,8 @@ export interface ShoppingListHook {
   purchaseHistory: PurchaseHistoryEntry[];
   restoreListFromHistory: (id: string) => void;
   deleteHistoryEntry: (id: string) => void;
+  deleteAllHistory: () => void; // Added the missing function
   // New function for auto-save to history
   saveCurrentListToHistory: () => void;
 }
+

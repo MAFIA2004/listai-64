@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { categorizeItems } from '@/lib/gemini-service';
 import { toast } from 'sonner';
@@ -308,6 +307,12 @@ export function useShoppingList(): ShoppingListHook {
     toast.success('Lista eliminada del historial');
   };
 
+  // Add the deleteAllHistory function
+  const deleteAllHistory = () => {
+    setPurchaseHistory([]);
+    toast.success('Historial eliminado completamente');
+  };
+
   const getSortedItems = () => {
     return [...items].sort((a, b) => {
       switch (sortOption) {
@@ -376,6 +381,7 @@ export function useShoppingList(): ShoppingListHook {
     purchaseHistory,
     restoreListFromHistory,
     deleteHistoryEntry,
+    deleteAllHistory, // Add the new function to the return object
     // Auto save to history function
     saveCurrentListToHistory
   };
