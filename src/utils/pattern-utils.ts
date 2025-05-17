@@ -67,7 +67,7 @@ export function checkForForgottenItems(
           },
           className: "rounded-xl border border-primary/20 bg-background/80 backdrop-blur-md",
           duration: 5000,
-          icon: <span className="text-xl">💡</span>
+          icon: "💡"
         });
         
         // Update the lastShown timestamp
