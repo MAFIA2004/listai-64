@@ -68,17 +68,17 @@
 
 /* Nuevo estilo para la barra de Total a Pagar */
 .total-price-bar {
-  position: sticky;
-  top: 3.5rem;
+  position: relative;
   z-index: 35;
-  background-color: hsl(var(--card));
-  border-bottom: 1px solid hsl(var(--border));
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: hsl(var(--background));
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .filter-buttons-container {
   position: sticky;
-  top: 6rem; /* Ajustado para quedar debajo de la barra de total */
+  top: 3.5rem; /* Ajustado ya que la barra de total ya no está en posición fija */
   z-index: 30;
   padding: 0.5rem 0.75rem;
   background-color: hsl(var(--background));

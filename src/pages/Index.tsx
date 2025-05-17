@@ -96,14 +96,6 @@ const Index = () => {
         <ThemeToggle />
       </header>
 
-      {/* Total Price Bar - Moved to the top position, right below header */}
-      <div className="total-price-bar">
-        <div className="flex justify-between items-center px-4 py-2">
-          <span className="text-sm font-medium">Total a pagar:</span>
-          <span className="text-lg font-bold">{formatPrice(totalPrice)}</span>
-        </div>
-      </div>
-
       {/* Form and filter buttons */}
       <div className="filter-buttons-container max-w-xl mx-auto w-full">
         <AddItemForm onAddItem={handleAddItem} />
@@ -135,6 +127,14 @@ const Index = () => {
             <Clock className="mr-1 h-4 w-4" />
             Historial
           </Button>
+        </div>
+
+        {/* Total Price Bar - Moved just before the delete button */}
+        <div className="total-price-bar">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Total a pagar:</span>
+            <span className="text-lg font-bold">{formatPrice(totalPrice)}</span>
+          </div>
         </div>
 
         {/* Organizar y Eliminar buttons */}
