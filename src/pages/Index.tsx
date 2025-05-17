@@ -8,6 +8,7 @@ import { AISuggestionDialog } from '@/components/AISuggestionDialog';
 import { HistoryDialog } from '@/components/HistoryDialog';
 import { formatPrice } from '@/lib/utils';
 import { useShoppingList } from '@/hooks/use-shopping-list';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   ShoppingCart, 
   ArrowUpDown,
@@ -85,8 +86,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header - Reduced size by 15% more */}
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      {/* Header - Ahora con posición fija */}
       <header className="app-header">
         <div className="app-icon">
           <ShoppingCart size={18} />
@@ -95,101 +96,82 @@ const Index = () => {
         <ThemeToggle />
       </header>
 
-      {/* Fixed Filter Buttons */}
-      <div className="filter-buttons-container max-w-xl mx-auto">
-        <AddItemForm onAddItem={handleAddItem} />
-        
-        <div className="flex gap-2 my-3 overflow-x-auto hide-scrollbar pb-1">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className={`filter-button ${viewMode === 'category' ? '' : 'active'}`}
-            onClick={toggleViewMode}
-          >
-            {viewMode === 'category' ? 'Nombre' : 'Categorías'}
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="filter-button"
-            onClick={() => setBudgetDialogOpen(true)}
-          >
-            <Calculator className="mr-1 h-4 w-4" />
-            Presupuesto
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="filter-button"
-            onClick={() => setHistoryDialogOpen(true)}
-          >
-            <Clock className="mr-1 h-4 w-4" />
-            Historial
-          </Button>
-        </div>
-
-        {/* Organizar y Eliminar buttons in a nicer container */}
-        <div className="organize-buttons-container flex justify-between items-center">
-          <div className="flex items-center gap-2">
+      {/* Contenedor principal con flexbox */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Fixed Filter Buttons */}
+        <div className="filter-buttons-container max-w-xl mx-auto w-full">
+          <AddItemForm onAddItem={handleAddItem} />
+          
+          <div className="flex gap-2 my-3 overflow-x-auto hide-scrollbar pb-1">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm"
-              className="rounded-full flex items-center"
-              onClick={() => setSortMenuOpen(!sortMenuOpen)}
+              className={`filter-button ${viewMode === 'category' ? '' : 'active'}`}
+              onClick={toggleViewMode}
             >
-              <ArrowUpDown className="h-4 w-4 mr-1" />
-              <span className="text-sm">Organizar</span>
+              {viewMode === 'category' ? 'Nombre' : 'Categorías'}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="filter-button"
+              onClick={() => setBudgetDialogOpen(true)}
+            >
+              <Calculator className="mr-1 h-4 w-4" />
+              Presupuesto
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="filter-button"
+              onClick={() => setHistoryDialogOpen(true)}
+            >
+              <Clock className="mr-1 h-4 w-4" />
+              Historial
             </Button>
           </div>
-          <Button 
-            variant="ghost"
-            size="sm"
-            onClick={() => setConfirmClearDialogOpen(true)}
-            className="delete-all-button"
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            <span className="text-sm">Eliminar todo</span>
-          </Button>
-        </div>
-        
-        {sortMenuOpen && (
-          <div className="mb-3">
-            <SortButtons
-              activeSort={sortOption}
-              onSort={(option) => setSortOption(option as any)}
-            />
-          </div>
-        )}
-      </div>
 
-      {/* Scrollable Content */}
-      <div className="scrollable-content">
-        {viewMode === 'list' ? (
-          <div className="space-y-1">
-            {items.length > 0 ? (
-              items.map(item => (
-                <ShoppingListItem
-                  key={item.id}
-                  item={item}
-                  onToggleComplete={toggleItemCompletion}
-                  onDelete={removeItem}
-                  onUpdateQuantity={updateItemQuantity}
-                />
-              ))
-            ) : (
-              <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
-                <ShoppingCart className="mx-auto mb-3 opacity-30" size={32} />
-                <p>Tu lista está vacía</p>
-              </div>
-            )}
+          {/* Organizar y Eliminar buttons */}
+          <div className="organize-buttons-container flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="rounded-full flex items-center"
+                onClick={() => setSortMenuOpen(!sortMenuOpen)}
+              >
+                <ArrowUpDown className="h-4 w-4 mr-1" />
+                <span className="text-sm">Organizar</span>
+              </Button>
+            </div>
+            <Button 
+              variant="ghost"
+              size="sm"
+              onClick={() => setConfirmClearDialogOpen(true)}
+              className="delete-all-button"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              <span className="text-sm">Eliminar todo</span>
+            </Button>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {Object.entries(itemsByCategory).length > 0 ? (
-              Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                <div key={category} className="space-y-1">
-                  <h2 className="text-sm font-medium capitalize mb-2">{category}</h2>
-                  {categoryItems.map(item => (
+          
+          {sortMenuOpen && (
+            <div className="mb-3">
+              <SortButtons
+                activeSort={sortOption}
+                onSort={(option) => setSortOption(option as any)}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Área de contenido con scroll */}
+        <ScrollArea className="flex-1 overflow-y-auto px-3">
+          <div className="max-w-xl mx-auto pb-20 pt-2">
+            {viewMode === 'list' ? (
+              <div className="space-y-2">
+                {items.length > 0 ? (
+                  items.map(item => (
                     <ShoppingListItem
                       key={item.id}
                       item={item}
@@ -197,20 +179,44 @@ const Index = () => {
                       onDelete={removeItem}
                       onUpdateQuantity={updateItemQuantity}
                     />
-                  ))}
-                </div>
-              ))
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
+                    <ShoppingCart className="mx-auto mb-3 opacity-30" size={32} />
+                    <p>Tu lista está vacía</p>
+                  </div>
+                )}
+              </div>
             ) : (
-              <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
-                <ShoppingCart className="mx-auto mb-3 opacity-30" size={32} />
-                <p>Tu lista está vacía</p>
+              <div className="space-y-4">
+                {Object.entries(itemsByCategory).length > 0 ? (
+                  Object.entries(itemsByCategory).map(([category, categoryItems]) => (
+                    <div key={category} className="space-y-2">
+                      <h2 className="text-sm font-medium capitalize mb-2">{category}</h2>
+                      {categoryItems.map(item => (
+                        <ShoppingListItem
+                          key={item.id}
+                          item={item}
+                          onToggleComplete={toggleItemCompletion}
+                          onDelete={removeItem}
+                          onUpdateQuantity={updateItemQuantity}
+                        />
+                      ))}
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
+                    <ShoppingCart className="mx-auto mb-3 opacity-30" size={32} />
+                    <p>Tu lista está vacía</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
+        </ScrollArea>
       </div>
 
-      {/* Floating AI Button with improved style */}
+      {/* Floating AI Button */}
       <Button
         onClick={handleAiButtonClick}
         className="floating-button"
@@ -295,7 +301,7 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm Clear All Dialog - with improved styling */}
+      {/* Confirm Clear All Dialog */}
       <Dialog open={confirmClearDialogOpen} onOpenChange={setConfirmClearDialogOpen}>
         <DialogContent className="sm:max-w-md ai-dialog">
           <DialogHeader>

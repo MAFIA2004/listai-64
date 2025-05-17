@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,145 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Estilos específicos para la aplicación de lista de compras */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.app-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0.75rem;
+  background-color: hsl(var(--primary));
+  border-radius: 0.5rem;
+  color: hsl(var(--primary-foreground));
+}
+
+.filter-buttons-container {
+  position: sticky;
+  top: 3.5rem;
+  z-index: 30;
+  padding: 0.5rem 0.75rem;
+  background-color: hsl(var(--background));
+}
+
+.organize-buttons-container {
+  margin-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollable-content {
+  margin-top: 0.5rem;
+  padding: 0 0.75rem;
+  overflow-y: auto;
+  height: calc(100vh - 14rem);
+}
+
+.shopping-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: hsl(var(--card));
+  border-radius: 0.5rem;
+  cursor: pointer;
+  border: 1px solid hsl(var(--border));
+  position: relative;
+}
+
+.shopping-item.completed {
+  opacity: 0.6;
+}
+
+.shopping-item.completed p {
+  text-decoration: line-through;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.delete-button {
+  color: hsl(var(--destructive));
+}
+
+.filter-button {
+  white-space: nowrap;
+}
+
+.filter-button.active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.delete-all-button {
+  color: hsl(var(--destructive));
+}
+
+.floating-button {
+  position: fixed;
+  right: 1rem;
+  bottom: 5.5rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.8) 100%);
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.fixed-total {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  z-index: 50;
+}
+
+.ai-dialog {
+  background: linear-gradient(to bottom, hsl(var(--background)), hsl(var(--background)/0.95));
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border));
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.8) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
