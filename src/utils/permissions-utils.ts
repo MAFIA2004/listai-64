@@ -37,8 +37,8 @@ export const writeToFile = async (fileName: string, data: string): Promise<strin
       path: fileName,
       data: data,
       directory: Directory.Documents,
-      // Using a valid Encoding type from @capacitor/filesystem
-      encoding: Filesystem.Encoding.UTF8
+      // Use a string literal for encoding, as defined in @capacitor/filesystem
+      encoding: 'utf8'
     });
     
     toast.success(`Archivo guardado: ${fileName}`);
@@ -61,8 +61,8 @@ export const readFromFile = async (fileName: string): Promise<string | null> => 
     const result = await Filesystem.readFile({
       path: fileName,
       directory: Directory.Documents,
-      // Using a valid Encoding type from @capacitor/filesystem
-      encoding: Filesystem.Encoding.UTF8
+      // Use a string literal for encoding, as defined in @capacitor/filesystem
+      encoding: 'utf8'
     });
     
     // Ensure we're handling the correct return type
