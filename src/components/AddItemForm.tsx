@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -402,8 +403,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-        {/* Contenedor principal que limita el ancho a un 70% */}
-        <div className="relative mx-auto w-[70%]">
+        <div className="relative">
           <Input
             type="text"
             placeholder="Artículo"
@@ -433,8 +433,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           )}
         </div>
 
-        {/* Contenedor de precio y cantidad con ancho reducido */}
-        <div className="flex gap-2 mx-auto w-[70%]">
+        <div className="flex gap-2">
           <Input
             type="text"
             placeholder="Precio (€)"
@@ -455,8 +454,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           />
         </div>
 
-        {/* Botones con ancho reducido */}
-        <div className="flex gap-2 mx-auto w-[70%]">
+        <div className="flex gap-2">
           <Button 
             type="submit" 
             className="flex-1"
