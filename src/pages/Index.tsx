@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -166,8 +165,8 @@ const Index = () => {
         </div>
 
         {/* Área de contenido con scroll */}
-        <ScrollArea className="flex-1 overflow-y-auto px-3">
-          <div className="max-w-xl mx-auto pb-20 pt-2">
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <div className="max-w-xl mx-auto pb-20 shopping-list-container">
             {viewMode === 'list' ? (
               <div className="space-y-2">
                 {items.length > 0 ? (

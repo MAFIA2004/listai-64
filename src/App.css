@@ -90,10 +90,15 @@
 }
 
 .scrollable-content {
-  margin-top: 0.5rem;
   padding: 0 0.75rem;
   overflow-y: auto;
   height: calc(100vh - 14rem);
+}
+
+.shopping-list-container {
+  width: 90%;
+  margin: 0 auto;
+  padding-top: 1rem;
 }
 
 .shopping-item {
