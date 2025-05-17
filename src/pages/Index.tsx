@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -19,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
 
 const Index = () => {
   const { 
@@ -177,7 +179,7 @@ const Index = () => {
           {viewMode === 'list' ? (
             <div className="space-y-4">
               {/* Lista 1: Productos Fantasma */}
-              <div className="mb-4">
+              <div className="mb-2">
                 <h2 className="text-sm font-medium text-primary mb-2">Lista Rápida</h2>
                 <div className="space-y-2">
                   {phantomItems.map(item => (
@@ -196,8 +198,8 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Separador entre listas */}
-              <div className="border-b border-border my-4"></div>
+              {/* Separador entre listas - REDUCIDO 50% */}
+              <Separator className="my-2 opacity-50 h-[0.5px]" />
 
               {/* Lista 2: Productos Regulares */}
               <div>
