@@ -9,6 +9,7 @@ export interface ShoppingItem {
   date: Date;
   category?: string;
   quantity: number;
+  phantom?: boolean; // Nueva propiedad para marcar items fantasma
 }
 
 export interface PurchaseHistoryEntry {
@@ -72,4 +73,3 @@ export interface ShoppingListHook {
   // New function for auto-save to history
   saveCurrentListToHistory: () => void;
 }
-

@@ -178,13 +178,17 @@ const Index = () => {
             <div className="space-y-2">
               {items.length > 0 ? (
                 items.map(item => (
-                  <ShoppingListItem
-                    key={item.id}
-                    item={item}
-                    onToggleComplete={toggleItemCompletion}
-                    onDelete={removeItem}
-                    onUpdateQuantity={updateItemQuantity}
-                  />
+                  <div 
+                    key={item.id} 
+                    data-phantom={item.phantom ? "true" : "false"}
+                  >
+                    <ShoppingListItem
+                      item={item}
+                      onToggleComplete={toggleItemCompletion}
+                      onDelete={removeItem}
+                      onUpdateQuantity={updateItemQuantity}
+                    />
+                  </div>
                 ))
               ) : (
                 <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
@@ -200,13 +204,18 @@ const Index = () => {
                   <div key={category} className="space-y-2">
                     <h2 className="text-sm font-medium capitalize mb-2">{category}</h2>
                     {categoryItems.map(item => (
-                      <ShoppingListItem
-                        key={item.id}
-                        item={item}
-                        onToggleComplete={toggleItemCompletion}
-                        onDelete={removeItem}
-                        onUpdateQuantity={updateItemQuantity}
-                      />
+                      <div 
+                        key={item.id} 
+                        data-phantom={item.phantom ? "true" : "false"}
+                      >
+                        <ShoppingListItem
+                          key={item.id}
+                          item={item}
+                          onToggleComplete={toggleItemCompletion}
+                          onDelete={removeItem}
+                          onUpdateQuantity={updateItemQuantity}
+                        />
+                      </div>
                     ))}
                   </div>
                 ))

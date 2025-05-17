@@ -39,6 +39,55 @@ export type {
   PurchaseHistoryEntry
 };
 
+// Productos fantasma que siempre estarán en la lista
+const phantomItems: ShoppingItem[] = [
+  {
+    id: 'phantom-1',
+    name: '1',
+    price: 0,
+    quantity: 1,
+    completed: false,
+    date: new Date(),
+    phantom: true
+  },
+  {
+    id: 'phantom-2',
+    name: '2',
+    price: 0,
+    quantity: 1,
+    completed: false,
+    date: new Date(),
+    phantom: true
+  },
+  {
+    id: 'phantom-3',
+    name: '3',
+    price: 0,
+    quantity: 1,
+    completed: false,
+    date: new Date(),
+    phantom: true
+  },
+  {
+    id: 'phantom-4',
+    name: '4',
+    price: 0,
+    quantity: 1,
+    completed: false,
+    date: new Date(),
+    phantom: true
+  },
+  {
+    id: 'phantom-5',
+    name: '5',
+    price: 0,
+    quantity: 1,
+    completed: false,
+    date: new Date(),
+    phantom: true
+  }
+];
+
 export function useShoppingList(): ShoppingListHook {
   const [items, setItems] = useState<ShoppingItem[]>(() => {
     const lastSavedDate = getLastSavedDate();
@@ -47,7 +96,7 @@ export function useShoppingList(): ShoppingListHook {
     // If the last saved date is not today, we should move items to history and start fresh
     if (lastSavedDate && lastSavedDate !== todayDateString) {
       // Get saved items to move them to history
-      const savedItems = loadItemsFromStorage();
+      const savedItems = loadItemsFromStorage().filter(item => !item.phantom);
       
       if (savedItems.length > 0) {
         // Get existing history
@@ -65,12 +114,20 @@ export function useShoppingList(): ShoppingListHook {
       
       // Update the last saved date to today
       updateLastSavedDate();
-      return [];
+      return [...phantomItems]; // Iniciar con productos fantasma
     }
     
-    // If it's still the same day, load items normally
+    // If it's still the same day, load items normally and ensure phantom items are included
     updateLastSavedDate();
-    return loadItemsFromStorage();
+    const savedItems = loadItemsFromStorage();
+    
+    // Check if phantom items already exist in the saved items
+    const existingPhantomIds = new Set(savedItems.filter(item => item.phantom).map(item => item.id));
+    
+    // Add phantom items that don't already exist
+    const missingPhantomItems = phantomItems.filter(item => !existingPhantomIds.has(item.id));
+    
+    return [...savedItems, ...missingPhantomItems];
   });
 
   const [sortOption, setSortOption] = useState<SortOption>('date');
@@ -162,6 +219,20 @@ export function useShoppingList(): ShoppingListHook {
     updateCategories();
   }, [items.map(item => item.id).join(',')]);
 
+  // Ensure phantom items are always present after any operation
+  const ensurePhantomItems = (currentItems: ShoppingItem[]): ShoppingItem[] => {
+    const existingPhantomIds = new Set(currentItems.filter(item => item.phantom).map(item => item.id));
+    
+    // Add any missing phantom items
+    const missingPhantomItems = phantomItems.filter(item => !existingPhantomIds.has(item.id));
+    
+    if (missingPhantomItems.length > 0) {
+      return [...currentItems, ...missingPhantomItems];
+    }
+    
+    return currentItems;
+  };
+
   const addItem = (name: string, price: number, quantity: number = 1, category?: string) => {
     // Check if item with same name exists
     const existingItem = items.find(item => 
@@ -222,11 +293,16 @@ export function useShoppingList(): ShoppingListHook {
     // Only save if there are items in the list
     if (items.length === 0) return;
     
+    // Filter out phantom items before saving to history
+    const nonPhantomItems = items.filter(item => !item.phantom);
+    
+    if (nonPhantomItems.length === 0) return; // Don't save if there are only phantom items
+    
     const historyEntry: PurchaseHistoryEntry = {
       id: crypto.randomUUID(),
       date: new Date(),
-      items: [...items],
-      totalAmount: calculateTotal()
+      items: [...nonPhantomItems],
+      totalAmount: calculateTotal(nonPhantomItems)
     };
     
     setPurchaseHistory(prev => [historyEntry, ...prev]);
@@ -234,8 +310,8 @@ export function useShoppingList(): ShoppingListHook {
 
   // Function to clear the entire shopping list
   const clearAllItems = () => {
-    // Save completed items to history before clearing
-    const completedItems = items.filter(item => item.completed);
+    // Save completed non-phantom items to history before clearing
+    const completedItems = items.filter(item => item.completed && !item.phantom);
     
     if (completedItems.length > 0) {
       const historyEntry: PurchaseHistoryEntry = {
@@ -248,11 +324,16 @@ export function useShoppingList(): ShoppingListHook {
       setPurchaseHistory(prev => [historyEntry, ...prev]);
     }
     
-    setItems([]);
+    // Keep phantom items when clearing
+    setItems(items.filter(item => item.phantom));
     toast.success('Lista de compras eliminada');
   };
 
   const removeItem = (id: string) => {
+    // No permitir eliminar productos fantasma
+    const item = items.find(item => item.id === id);
+    if (item?.phantom) return;
+    
     setItems(prevItems => prevItems.filter(item => item.id !== id));
   };
 
@@ -297,7 +378,11 @@ export function useShoppingList(): ShoppingListHook {
     }));
     
     // Add all items from the history entry to the current list
-    setItems(prev => [...prev, ...restoredItems]);
+    // Ensure we keep the phantom items
+    setItems(prev => {
+      const phantomItemsFromPrev = prev.filter(item => item.phantom);
+      return [...phantomItemsFromPrev, ...restoredItems];
+    });
     toast.success('Lista restaurada correctamente');
   };
 
@@ -325,6 +410,9 @@ export function useShoppingList(): ShoppingListHook {
         case 'category':
           return (a.category || '').localeCompare(b.category || '');
         case 'date':
+          // Put phantom items at the end when sorting by date
+          if (a.phantom && !b.phantom) return 1;
+          if (!a.phantom && b.phantom) return -1;
           return b.date.getTime() - a.date.getTime();
         default:
           return 0;
@@ -346,9 +434,9 @@ export function useShoppingList(): ShoppingListHook {
     return categorizedItems;
   };
 
-  const calculateTotal = () => {
-    return items.reduce((total, item) => 
-      !item.completed ? total + (item.price * item.quantity) : total, 0
+  const calculateTotal = (itemsToCalculate = items) => {
+    return itemsToCalculate.reduce((total, item) => 
+      (!item.completed && !item.phantom) ? total + (item.price * item.quantity) : total, 0
     );
   };
 
@@ -372,8 +460,8 @@ export function useShoppingList(): ShoppingListHook {
     // Budget functions
     budget,
     updateBudget,
-    getSavingSuggestions: () => getSavingSuggestions(items),
-    getPriorityItems: (maxBudget) => getPriorityItems(items, maxBudget),
+    getSavingSuggestions: () => getSavingSuggestions(items.filter(item => !item.phantom)),
+    getPriorityItems: (maxBudget) => getPriorityItems(items.filter(item => !item.phantom), maxBudget),
     // Pattern functions
     commonPatterns,
     setCommonPatterns,
@@ -381,7 +469,7 @@ export function useShoppingList(): ShoppingListHook {
     purchaseHistory,
     restoreListFromHistory,
     deleteHistoryEntry,
-    deleteAllHistory, // Add the new function to the return object
+    deleteAllHistory,
     // Auto save to history function
     saveCurrentListToHistory
   };
