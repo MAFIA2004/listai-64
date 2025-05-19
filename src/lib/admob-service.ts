@@ -63,15 +63,21 @@ let InterstitialAdPluginEvents: any = {
 
 // Intentar cargar el módulo AdMob solo cuando estamos en una plataforma nativa
 if (isNative) {
-  import('@capacitor/admob')
-    .then((module) => {
-      AdMob = module.AdMob;
-      InterstitialAdPluginEvents = module.InterstitialAdPluginEvents;
-      console.log("Módulo AdMob cargado correctamente");
-    })
-    .catch((error) => {
-      console.error("Error al cargar el módulo AdMob:", error);
-    });
+  try {
+    // Using a dynamic import wrapped in a try-catch to handle potential errors
+    // This will be processed at runtime, not during build
+    import('@capacitor/admob')
+      .then((module) => {
+        AdMob = module.AdMob;
+        InterstitialAdPluginEvents = module.InterstitialAdPluginEvents;
+        console.log("Módulo AdMob cargado correctamente");
+      })
+      .catch((error) => {
+        console.error("Error al cargar el módulo AdMob:", error);
+      });
+  } catch (error) {
+    console.error("Error crítico al intentar importar el módulo AdMob:", error);
+  }
 }
 
 // Obtener ID de anuncio adecuado según plataforma
