@@ -22,21 +22,22 @@ export function GoogleAdSense({
 
   useEffect(() => {
     try {
-      // Esperar un momento para asegurarse de que el elemento esté en el DOM
+      // Wait a moment to ensure the element is in the DOM
       const timer = setTimeout(() => {
         if (adRef.current && (window as any).adsbygoogle) {
+          console.log('AdSense loading for slot:', slot);
           // Push the adsbygoogle command to display an ad
           ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
         } else {
           console.log('AdSense not ready yet or element not found');
         }
-      }, 100);
+      }, 200); // Increased timeout to ensure the element is fully rendered
       
       return () => clearTimeout(timer);
     } catch (error) {
       console.error('AdSense error:', error);
     }
-  }, [adRef]);
+  }, [slot, adRef]);
 
   return (
     <div className={className} style={style}>
