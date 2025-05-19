@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useTheme } from '@/hooks/use-theme';
 import { Moon, Sun, Globe } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
+import { cn } from '@/lib/utils';
 
 interface LanguageThemeDialogProps {
   open: boolean;
@@ -15,84 +16,115 @@ interface LanguageThemeDialogProps {
 
 export function LanguageThemeDialog({ open, onOpenChange }: LanguageThemeDialogProps) {
   const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>(theme);
   const [selectedLanguage, setSelectedLanguage] = useState<'es' | 'en'>(language);
 
   const handleConfirm = () => {
-    // Actualizar tema si es diferente
+    // Update theme if different
     if (selectedTheme !== theme) {
       toggleTheme();
     }
     
-    // Actualizar idioma
+    // Update language
     setLanguage(selectedLanguage);
     
-    // Cerrar el diálogo
+    // Close dialog
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <div className="space-y-6 py-4">
-          <div className="text-center space-y-2">
-            <Globe className="mx-auto h-8 w-8 text-primary" />
-            <h2 className="text-xl font-bold">¡Bienvenido a ListAI!</h2>
-            <p className="text-sm text-muted-foreground">
-              Por favor, selecciona tu idioma y tema preferidos.
-            </p>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-3">Idioma / Language</h3>
-              <RadioGroup
-                defaultValue={selectedLanguage}
-                onValueChange={(value) => setSelectedLanguage(value as 'es' | 'en')}
-                className="flex flex-col gap-2"
+      <DialogContent className="sm:max-w-md bg-gradient-to-b from-background/80 to-background border-none shadow-xl backdrop-blur-lg p-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-primary/20 to-primary/5 p-6 text-center">
+          <Globe className="w-12 h-12 mx-auto mb-4 text-primary animate-pulse" />
+          <DialogTitle className="text-2xl font-bold gradient-text">{t('dialog.welcome')}</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            {t('dialog.select_preferences')}
+          </p>
+        </div>
+        
+        <div className="space-y-6 p-6">
+          {/* Language Selection */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground/80 mb-2">
+              {t('dialog.language')}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                className={cn(
+                  "flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all",
+                  selectedLanguage === 'es' 
+                    ? "bg-primary/10 border-primary/50 shadow-sm" 
+                    : "bg-card border-border hover:bg-primary/5"
+                )}
+                onClick={() => setSelectedLanguage('es')}
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="es" id="es" />
-                  <Label htmlFor="es" className="flex-1">Español</Label>
+                <div className="text-center">
+                  <span className="font-semibold block mb-1">Español</span>
+                  <span className="text-xs text-muted-foreground">Spanish</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="en" id="en" />
-                  <Label htmlFor="en" className="flex-1">English</Label>
+              </div>
+              <div
+                className={cn(
+                  "flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all",
+                  selectedLanguage === 'en' 
+                    ? "bg-primary/10 border-primary/50 shadow-sm" 
+                    : "bg-card border-border hover:bg-primary/5"
+                )}
+                onClick={() => setSelectedLanguage('en')}
+              >
+                <div className="text-center">
+                  <span className="font-semibold block mb-1">English</span>
+                  <span className="text-xs text-muted-foreground">Inglés</span>
                 </div>
-              </RadioGroup>
+              </div>
             </div>
+          </div>
 
-            <div>
-              <h3 className="text-sm font-medium mb-3">Tema / Theme</h3>
-              <RadioGroup
-                defaultValue={selectedTheme}
-                onValueChange={(value) => setSelectedTheme(value as 'light' | 'dark')}
-                className="flex flex-col gap-2"
+          {/* Theme Selection */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground/80 mb-2">
+              {t('dialog.theme')}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                className={cn(
+                  "flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all",
+                  selectedTheme === 'light' 
+                    ? "bg-primary/10 border-primary/50 shadow-sm" 
+                    : "bg-card border-border hover:bg-primary/5"
+                )}
+                onClick={() => setSelectedTheme('light')}
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="light" id="light" />
-                  <Label htmlFor="light" className="flex items-center gap-2">
-                    <Sun className="h-4 w-4" />
-                    <span>Claro / Light</span>
-                  </Label>
+                <div className="text-center">
+                  <Sun className="h-6 w-6 mx-auto mb-2 text-amber-500" />
+                  <span className="text-sm">{t('dialog.light')}</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="dark" id="dark" />
-                  <Label htmlFor="dark" className="flex items-center gap-2">
-                    <Moon className="h-4 w-4" />
-                    <span>Oscuro / Dark</span>
-                  </Label>
+              </div>
+              <div
+                className={cn(
+                  "flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all",
+                  selectedTheme === 'dark' 
+                    ? "bg-primary/10 border-primary/50 shadow-sm" 
+                    : "bg-card border-border hover:bg-primary/5"
+                )}
+                onClick={() => setSelectedTheme('dark')}
+              >
+                <div className="text-center">
+                  <Moon className="h-6 w-6 mx-auto mb-2 text-indigo-400" />
+                  <span className="text-sm">{t('dialog.dark')}</span>
                 </div>
-              </RadioGroup>
+              </div>
             </div>
           </div>
           
-          <div className="flex justify-center">
-            <Button onClick={handleConfirm}>
-              Continuar / Continue
-            </Button>
-          </div>
+          <Button 
+            onClick={handleConfirm} 
+            className="w-full bg-primary/80 hover:bg-primary text-primary-foreground"
+          >
+            {t('dialog.continue')}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

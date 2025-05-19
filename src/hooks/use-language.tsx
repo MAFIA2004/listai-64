@@ -9,10 +9,10 @@ type LanguageContextType = {
   t: (key: string) => string;
 };
 
-// Traducciones
+// Translations
 const translations: Record<Language, Record<string, string>> = {
   es: {
-    // Textos generales
+    // General texts
     'app.title': 'ListAI',
     'app.total': 'Total a pagar:',
     'app.quick_list': 'Lista Rápida',
@@ -20,31 +20,40 @@ const translations: Record<Language, Record<string, string>> = {
     'app.empty_list': 'No hay productos en tu lista',
     'app.empty_category': 'Tu lista está vacía',
     
-    // Botones
+    // Buttons
     'button.add': 'Añadir',
     'button.cancel': 'Cancelar',
     'button.delete': 'Eliminar',
     'button.confirm': 'Confirmar',
     'button.back': 'Volver',
     
-    // Formularios
+    // Forms
     'form.name': 'Nombre',
     'form.price': 'Precio',
     'form.quantity': 'Cantidad',
     'form.category': 'Categoría',
     
-    // Mensajes
+    // Messages
     'message.saved': 'Lista guardada en el historial',
     'message.deleted': 'Lista eliminada',
     'message.updated': 'Cantidad actualizada',
     
-    // Diálogos
+    // Dialogs
     'dialog.delete_confirm': '¿Eliminar artículo?',
     'dialog.delete_message': '¿Estás seguro de que deseas eliminar este artículo de tu lista de compras?',
     'dialog.history_title': 'Listas guardadas',
     'dialog.clear_all': 'Borrar historial',
     'dialog.delete_history': '¿Eliminar esta lista?',
     'dialog.delete_history_message': 'Esta acción eliminará esta lista del historial permanentemente.',
+    
+    // New translations for the welcome dialog
+    'dialog.welcome': '¡Bienvenido a ListAI!',
+    'dialog.select_preferences': 'Selecciona tus preferencias',
+    'dialog.language': 'Idioma',
+    'dialog.theme': 'Tema',
+    'dialog.light': 'Claro',
+    'dialog.dark': 'Oscuro',
+    'dialog.continue': 'Continuar',
   },
   en: {
     // General texts
@@ -80,6 +89,15 @@ const translations: Record<Language, Record<string, string>> = {
     'dialog.clear_all': 'Clear history',
     'dialog.delete_history': 'Delete this list?',
     'dialog.delete_history_message': 'This action will permanently delete this list from history.',
+    
+    // New translations for the welcome dialog
+    'dialog.welcome': 'Welcome to ListAI!',
+    'dialog.select_preferences': 'Select your preferences',
+    'dialog.language': 'Language',
+    'dialog.theme': 'Theme',
+    'dialog.light': 'Light',
+    'dialog.dark': 'Dark',
+    'dialog.continue': 'Continue',
   }
 };
 
@@ -87,25 +105,25 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
-    // Intentar cargar el idioma guardado
+    // Try to load saved language
     const savedLanguage = localStorage.getItem('app_language') as Language;
-    // Si no hay idioma guardado, usar el idioma del navegador o español por defecto
+    // If no saved language, use browser language or Spanish as default
     if (savedLanguage && (savedLanguage === 'es' || savedLanguage === 'en')) {
       return savedLanguage;
     }
     
-    // Detectar idioma del navegador
+    // Detect browser language
     const browserLang = navigator.language.substring(0, 2).toLowerCase();
-    return browserLang === 'en' ? 'en' : 'es'; // Usar español por defecto si no es inglés
+    return browserLang === 'en' ? 'en' : 'es'; // Use Spanish as default if not English
   });
 
-  // Función para cambiar el idioma
+  // Function to change language
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('app_language', lang);
   };
 
-  // Función para obtener traducciones
+  // Function to get translations
   const t = (key: string): string => {
     return translations[language][key] || key;
   };

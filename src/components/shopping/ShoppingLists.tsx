@@ -30,12 +30,16 @@ export function ShoppingLists({
   if (viewMode === 'list') {
     return (
       <div className="space-y-4">
-        {/* Lista 1: Productos Fantasma */}
+        {/* Lista 1: Productos Fantasma - Invisible but taking space */}
         <div className="mb-2">
           <h2 className="text-sm font-medium text-primary mb-2">{t('app.quick_list')}</h2>
           <div className="space-y-2">
             {phantomItems.map(item => (
-              <div key={item.id} data-phantom={item.phantom ? "true" : "false"}>
+              <div 
+                key={item.id} 
+                data-phantom={item.phantom ? "true" : "false"}
+                className="invisible" // Makes the item invisible but preserves space
+              >
                 <ShoppingListItem 
                   item={item} 
                   onToggleComplete={onToggleComplete} 

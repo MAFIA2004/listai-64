@@ -16,8 +16,11 @@ import { BudgetDialog } from '@/components/budget/BudgetDialog';
 import { BudgetAlertDialog } from '@/components/budget/BudgetAlertDialog';
 import { ConfirmClearDialog } from '@/components/shopping/ConfirmClearDialog';
 import { LanguageThemeDialog } from '@/components/settings/LanguageThemeDialog';
+import { useLanguage } from '@/hooks/use-language';
 
 const Index = () => {
+  const { t } = useLanguage();
+  
   const {
     phantomItems,
     regularItems,
@@ -50,10 +53,10 @@ const Index = () => {
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [budgetAlertOpen, setBudgetAlertOpen] = useState(false);
   
-  // Nuevo estado para controlar el diálogo de selección de idioma y tema
+  // State for language and theme selection dialog
   const [languageThemeDialogOpen, setLanguageThemeDialogOpen] = useState(false);
   
-  // Comprobar si es la primera vez que se abre la app
+  // Check if it's the first time the app is opened
   useEffect(() => {
     const isFirstTime = localStorage.getItem('app_first_launch') !== 'done';
     if (isFirstTime) {
@@ -62,21 +65,21 @@ const Index = () => {
   }, []);
   
   const handleClearAllItems = () => {
-    // Modificado: Guardar la lista en el historial si el total es superior a 2€ (en lugar de 10€)
+    // Modified: Save the list to history if the total is more than 2€ (instead of 10€)
     if (totalPrice > 2) {
       saveCurrentListToHistory();
-      toast.success('Lista guardada en el historial');
+      toast.success(t('message.saved'));
     }
     
     clearAllItems();
     setConfirmClearDialogOpen(false);
-    toast.success('Lista eliminada');
+    toast.success(t('message.deleted'));
   };
   
   const handleAddItem = (name: string, price: number, quantity: number = 1) => {
     addItem(name, price, quantity);
     
-    // Comprobar si se supera el presupuesto después de agregar el item
+    // Check if budget is exceeded after adding item
     setTimeout(() => {
       if (budget.enabled && totalPrice > budget.amount) {
         setBudgetAlertOpen(true);
@@ -167,12 +170,12 @@ const Index = () => {
         onDeleteAllHistory={deleteAllHistory} 
       />
 
-      {/* Nuevo: Diálogo de selección de idioma y tema */}
+      {/* Language and Theme Selection Dialog */}
       <LanguageThemeDialog
         open={languageThemeDialogOpen}
         onOpenChange={(open) => {
           if (!open) {
-            // Marcar como completado la primera vez
+            // Mark as completed the first time
             localStorage.setItem('app_first_launch', 'done');
           }
           setLanguageThemeDialogOpen(open);
