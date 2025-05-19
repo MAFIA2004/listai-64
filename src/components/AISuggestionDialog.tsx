@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { getAIRecipeSuggestions } from '@/lib/gemini-service';
 import { useLanguage } from '@/hooks/use-language';
-import { getItemEmoji } from '@/lib/utils'; // Add this import
+import { getItemEmoji } from '@/lib/utils'; // Fixed missing import
 
 // Import refactored components
 import { AdDisplay } from './ai/AdDisplay';
@@ -79,7 +79,9 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     setHasResults(false);
     
     try {
+      console.log("Fetching AI suggestions for prompt:", prompt);
       const result = await getAIRecipeSuggestions(prompt);
+      console.log("AI suggestion results:", result);
       
       if (result && result.ingredients && result.ingredients.length > 0) {
         // Filter out water and map the ingredients to our format with selected state
@@ -97,6 +99,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
         setHasResults(true);
         toast.success(language === 'es' ? '¡Sugerencias generadas!' : 'Suggestions generated!');
       } else {
+        console.error("No ingredients found in result:", result);
         toast.error(language === 'es' ? 'No se pudieron generar sugerencias' : 'Could not generate suggestions');
       }
     } catch (error) {

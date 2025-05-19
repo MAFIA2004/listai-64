@@ -46,6 +46,7 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
   
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    // Allow empty value or valid decimal number
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
       setPriceInput(value);
       form.setValue('price', parseFloat(value) || 0);
@@ -54,6 +55,7 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
   
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    // Allow empty value or valid integer
     if (value === '' || /^\d*$/.test(value)) {
       setQuantityInput(value);
       form.setValue('quantity', parseInt(value) || 1);

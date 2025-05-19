@@ -148,6 +148,8 @@ export async function getAIRecipeSuggestions(request: string): Promise<GeminiRes
   if (!request) return undefined;
   
   try {
+    console.log("Starting AI recipe suggestion request for:", request);
+    
     const prompt = `
       Actúa como un asistente de cocina en español que ayuda con listas de compras. Basado en mi solicitud,
       sugiere una lista de ingredientes necesarios para la receta o comida que quiero preparar.
@@ -169,6 +171,7 @@ export async function getAIRecipeSuggestions(request: string): Promise<GeminiRes
       "${request}"
     `;
 
+    console.log("Sending request to Gemini API...");
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -181,22 +184,39 @@ export async function getAIRecipeSuggestions(request: string): Promise<GeminiRes
       }),
     });
 
+    console.log("Received response from Gemini API, status:", response.status);
+    
     if (!response.ok) {
-      console.error('Gemini API error:', await response.text());
+      const errorText = await response.text();
+      console.error('Gemini API error:', errorText);
       return undefined;
     }
 
     const data = await response.json();
+    console.log("API response data:", data);
     
     // Extract JSON from the response text
     if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
       const text = data.candidates[0].content.parts[0].text;
+      console.log("Raw Gemini response text:", text);
+      
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       
       if (jsonMatch) {
-        const parsedData = JSON.parse(jsonMatch[0]);
-        return parsedData;
+        try {
+          const parsedData = JSON.parse(jsonMatch[0]);
+          console.log("Successfully parsed JSON:", parsedData);
+          return parsedData;
+        } catch (parseError) {
+          console.error("Error parsing JSON:", parseError);
+          console.log("Failed JSON string:", jsonMatch[0]);
+          return undefined;
+        }
+      } else {
+        console.error("No JSON pattern found in response");
       }
+    } else {
+      console.error("Missing expected data structure in API response");
     }
     
     return undefined;
