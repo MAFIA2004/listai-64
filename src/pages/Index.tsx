@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { AddItemForm } from '@/components/AddItemForm';
@@ -13,12 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { X } from 'lucide-react';
+
 const Index = () => {
   const {
     phantomItems,
-    // Nueva propiedad
     regularItems,
-    // Nueva propiedad
     itemsByCategory,
     addItem,
     removeItem,
@@ -47,23 +49,35 @@ const Index = () => {
   const [confirmClearDialogOpen, setConfirmClearDialogOpen] = useState(false);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
+  const [budgetAlertOpen, setBudgetAlertOpen] = useState(false);
+  
   const handleClearAllItems = () => {
+    // Solo guardar la lista en el historial si el total es superior a 10€
+    if (totalPrice > 10) {
+      saveCurrentListToHistory();
+      toast.success('Lista guardada en el historial');
+    }
+    
     clearAllItems();
     setConfirmClearDialogOpen(false);
     toast.success('Lista eliminada');
   };
+  
   const handleAiButtonClick = () => {
     setAiSuggestionDialogOpen(true);
   };
+  
   const handleAddItem = (name: string, price: number, quantity: number = 1) => {
     addItem(name, price, quantity);
+    
+    // Comprobar si se supera el presupuesto después de agregar el item
     setTimeout(() => {
-      if (totalPrice + price * quantity > 15) {
-        saveCurrentListToHistory();
-        toast.info("Lista guardada en el historial (supera los 15€)");
+      if (budget.enabled && totalPrice > budget.amount) {
+        setBudgetAlertOpen(true);
       }
     }, 100);
   };
+  
   const toggleViewMode = () => {
     if (viewMode === 'list') {
       setViewMode('category');
@@ -73,6 +87,7 @@ const Index = () => {
       setSortOption('name');
     }
   };
+  
   return <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header - Fixed position */}
       <header className="app-header">
@@ -159,7 +174,7 @@ const Index = () => {
             </div> : <div className="space-y-4">
               {Object.entries(itemsByCategory).length > 0 ? Object.entries(itemsByCategory).map(([category, categoryItems]) => <div key={category} className="space-y-2">
                     <h2 className="text-sm font-medium capitalize mb-2">{category}</h2>
-                    {categoryItems.map(item => <div key={item.id} data-phantom={item.phantom ? "true" : "false"}>
+                    {categoryItems.filter(item => !item.phantom).map(item => <div key={item.id} data-phantom={item.phantom ? "true" : "false"}>
                         <ShoppingListItem key={item.id} item={item} onToggleComplete={toggleItemCompletion} onDelete={removeItem} onUpdateQuantity={updateItemQuantity} />
                       </div>)}
                   </div>) : <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
@@ -193,7 +208,7 @@ const Index = () => {
                 <input type="checkbox" className="sr-only peer" checked={budget.enabled} onChange={() => updateBudget({
                 enabled: !budget.enabled
               })} />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
             
@@ -202,7 +217,7 @@ const Index = () => {
                   <label className="block text-sm font-medium mb-1">
                     Cantidad máxima (€)
                   </label>
-                  <input type="number" className="w-full p-2 border border-border rounded-lg" value={budget.amount} onChange={e => updateBudget({
+                  <input type="number" className="w-full p-2 border border-border bg-background text-foreground rounded-lg" value={budget.amount} onChange={e => updateBudget({
                 amount: Number(e.target.value)
               })} min="1" step="1" />
                 </div>
@@ -257,6 +272,35 @@ const Index = () => {
 
       {/* Purchase History Dialog */}
       <HistoryDialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen} purchaseHistory={purchaseHistory} onRestoreList={restoreListFromHistory} onDeleteList={deleteHistoryEntry} onDeleteAllHistory={deleteAllHistory} />
+      
+      {/* Budget Exceeded Alert Dialog */}
+      <Dialog open={budgetAlertOpen} onOpenChange={setBudgetAlertOpen}>
+        <DialogContent className="sm:max-w-md ai-dialog">
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <span>¡Presupuesto excedido!</span>
+            </DialogTitle>
+            <DialogDescription>
+              Has superado el presupuesto de {formatPrice(budget.amount)}. 
+              Actualmente tu lista suma {formatPrice(totalPrice)}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-2">
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription className="flex justify-between items-center">
+                <span>Has superado tu presupuesto por {formatPrice(totalPrice - budget.amount)}</span>
+              </AlertDescription>
+            </Alert>
+          </div>
+          
+          <DialogFooter className="sm:justify-end">
+            <Button onClick={() => setBudgetAlertOpen(false)}>
+              Continuar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>;
 };
 export default Index;

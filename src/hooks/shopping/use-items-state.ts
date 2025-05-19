@@ -228,7 +228,7 @@ export function useItemsState(
     return items.filter(item => item.phantom);
   };
 
-  // Nueva función para obtener solo los productos normales
+  // Nueva función para obtener solo los productos normales (siempre filtrar los productos fantasma)
   const getRegularItems = () => {
     const regularItems = items.filter(item => !item.phantom);
     return regularItems.sort((a, b) => {
@@ -250,14 +250,34 @@ export function useItemsState(
   };
 
   const getItemsByCategory = () => {
+    // Categorizar los items sin incluir phantoms en categorías
     const categorizedItems: Record<string, ShoppingItem[]> = {};
     
-    getSortedItems().forEach(item => {
+    // Solo incluir productos NO fantasma en la vista por categorías
+    items.filter(item => !item.phantom).forEach(item => {
       const category = item.category || 'uncategorized';
       if (!categorizedItems[category]) {
         categorizedItems[category] = [];
       }
       categorizedItems[category].push(item);
+    });
+    
+    // Ordenar cada categoría según la opción seleccionada
+    Object.keys(categorizedItems).forEach(category => {
+      categorizedItems[category].sort((a, b) => {
+        switch (sortOption) {
+          case 'name':
+            return a.name.localeCompare(b.name);
+          case 'price-asc':
+            return (a.price * a.quantity) - (b.price * b.quantity);
+          case 'price-desc':
+            return (b.price * b.quantity) - (a.price * a.quantity);
+          case 'date':
+            return b.date.getTime() - a.date.getTime();
+          default:
+            return 0;
+        }
+      });
     });
     
     return categorizedItems;
@@ -278,8 +298,8 @@ export function useItemsState(
     calculateTotal,
     getSortedItems,
     getItemsByCategory,
-    getPhantomItems, // Exportamos la nueva función
-    getRegularItems // Exportamos la nueva función
+    getPhantomItems,
+    getRegularItems
   };
 }
 

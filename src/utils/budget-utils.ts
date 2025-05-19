@@ -21,14 +21,12 @@ export function checkBudgetAfterAddingItem(
     });
   }
   
-  // If we exceed the budget
+  // Ya no reproducimos el sonido al exceder el presupuesto
+  // Mostramos solo un aviso más discreto
   if (currentTotal > budgetAmount && currentTotal - itemTotal <= budgetAmount) {
-    toast.error(`¡Has excedido tu presupuesto!`, {
+    toast.warning(`Presupuesto alcanzado`, {
       description: `Tu presupuesto es de ${budgetAmount}€ y llevas ${currentTotal.toFixed(2)}€`
     });
-    
-    // Play sound when budget is exceeded
-    playBudgetExceededSound();
   }
 }
 
