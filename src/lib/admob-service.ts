@@ -1,7 +1,25 @@
 
-import { AdMob, InterstitialAdPluginEvents, AdOptions, AdLoadInfo } from '@capacitor/admob';
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
+
+// Types for AdMob to be used without direct import for better compatibility
+interface AdOptions {
+  adId: string;
+  npa?: boolean;
+}
+
+interface AdLoadInfo {
+  adUnitId: string;
+}
+
+interface AdMobInitializationOptions {
+  requestTrackingAuthorization?: boolean;
+  initializeForTesting?: boolean;
+  testingDevices?: string[];
+  tagForChildDirectedTreatment?: boolean;
+  tagForUnderAgeOfConsent?: boolean;
+  appId: string;
+}
 
 // IDs de anuncios reales
 const APP_ID = {
@@ -22,6 +40,39 @@ const TEST_INTERSTITIAL_ID = {
 
 // Comprobamos si estamos en una plataforma nativa (iOS/Android)
 const isNative = Capacitor.isNativePlatform();
+
+// Versión simulada de AdMob para entornos web o cuando el módulo no está disponible
+const SimulatedAdMob = {
+  initialize: async () => console.log("Simulando inicialización de AdMob"),
+  prepareInterstitial: async () => console.log("Simulando preparación de anuncio"),
+  showInterstitial: async () => console.log("Simulando mostrar anuncio"),
+  addListener: () => ({
+    remove: () => {}
+  })
+};
+
+// Carga dinámica del módulo AdMob
+let AdMob: any = SimulatedAdMob;
+let InterstitialAdPluginEvents: any = {
+  Loaded: 'interstitialAdLoaded',
+  FailedToLoad: 'interstitialAdFailedToLoad',
+  Showed: 'interstitialAdShowed',
+  Dismissed: 'interstitialAdDismissed',
+  FailedToShow: 'interstitialAdFailedToShow'
+};
+
+// Intentar cargar el módulo AdMob solo cuando estamos en una plataforma nativa
+if (isNative) {
+  import('@capacitor/admob')
+    .then((module) => {
+      AdMob = module.AdMob;
+      InterstitialAdPluginEvents = module.InterstitialAdPluginEvents;
+      console.log("Módulo AdMob cargado correctamente");
+    })
+    .catch((error) => {
+      console.error("Error al cargar el módulo AdMob:", error);
+    });
+}
 
 // Obtener ID de anuncio adecuado según plataforma
 const getInterstitialAdId = () => {
@@ -67,7 +118,7 @@ export class InterstitialAdManager {
         this.isAdLoading = false;
       });
 
-      AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error) => {
+      AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error: any) => {
         console.error("Error al cargar anuncio intersticial", error);
         this.isAdLoaded = false;
         this.isAdLoading = false;
@@ -83,7 +134,7 @@ export class InterstitialAdManager {
         this.isAdLoaded = false;
       });
 
-      AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
+      AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error: any) => {
         console.error("Error al mostrar anuncio intersticial", error);
         this.isAdLoaded = false;
       });

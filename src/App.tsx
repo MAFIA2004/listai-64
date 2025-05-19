@@ -11,7 +11,15 @@ import { initializeAdMob } from "@/lib/admob-service";
 function App() {
   // Inicializar AdMob cuando carga la app
   useEffect(() => {
-    initializeAdMob();
+    const initializeAds = async () => {
+      try {
+        await initializeAdMob();
+      } catch (error) {
+        console.error("Error initializing AdMob:", error);
+      }
+    };
+    
+    initializeAds();
   }, []);
 
   return (
