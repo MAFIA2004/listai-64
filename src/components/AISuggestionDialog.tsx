@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { getItemEmoji } from '@/lib/utils';
+import { GoogleAdSense } from './ads/GoogleAdSense';
+import { useLanguage } from '@/hooks/use-language';
 
 interface AISuggestionDialogProps {
   open: boolean;
@@ -42,6 +44,7 @@ interface ItemFormValues {
 }
 
 export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggestionDialogProps) {
+  const { t, language } = useLanguage();
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<RecipeSuggestion[]>([]);
@@ -66,7 +69,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     }
   }, [transcript]);
   
-  // Contador para el anuncio simulado
+  // Contador para el anuncio real
   useEffect(() => {
     if (showAd && adTimerCount > 0) {
       const timer = setTimeout(() => {
@@ -91,11 +94,11 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
   
   const handleGenerateSuggestions = async () => {
     if (!prompt.trim()) {
-      toast.error('Por favor, indica lo que quieres cocinar');
+      toast.error(language === 'es' ? 'Por favor, indica lo que quieres cocinar' : 'Please indicate what you want to cook');
       return;
     }
     
-    // Mostrar el anuncio simulado antes de generar sugerencias
+    // Mostrar el anuncio real antes de generar sugerencias
     setShowAd(true);
   };
   
@@ -120,13 +123,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
         
         setSuggestions(mappedSuggestions);
         setHasResults(true);
-        toast.success('¡Sugerencias generadas!');
+        toast.success(language === 'es' ? '¡Sugerencias generadas!' : 'Suggestions generated!');
       } else {
-        toast.error('No se pudieron generar sugerencias');
+        toast.error(language === 'es' ? 'No se pudieron generar sugerencias' : 'Could not generate suggestions');
       }
     } catch (error) {
       console.error('Error generating suggestions:', error);
-      toast.error('Error al generar sugerencias');
+      toast.error(language === 'es' ? 'Error al generar sugerencias' : 'Error generating suggestions');
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +162,11 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       values.quantity
     );
     
-    toast.success(`${selectedItemForAdd.name} añadido a la lista`);
+    toast.success(
+      language === 'es' 
+        ? `${selectedItemForAdd.name} añadido a la lista`
+        : `${selectedItemForAdd.name} added to the list`
+    );
     
     // Remove the item from the suggestions list after adding it to the shopping list
     setSuggestions(prev => prev.filter(item => item.name !== selectedItemForAdd.name));
@@ -190,11 +197,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 <div className="absolute inset-0 h-5 w-5 bg-primary blur-sm rounded-full opacity-30 animate-pulse" />
               </div>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-                Sugerir Ingredientes
+                {language === 'es' ? 'Sugerir Ingredientes' : 'Suggest Ingredients'}
               </span>
             </DialogTitle>
             <DialogDescription>
-              Describe lo que quieres cocinar y la IA te sugerirá los ingredientes.
+              {language === 'es' 
+                ? 'Describe lo que quieres cocinar y la IA te sugerirá los ingredientes.'
+                : 'Describe what you want to cook and the AI will suggest ingredients.'}
             </DialogDescription>
           </DialogHeader>
           
@@ -202,27 +211,33 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
             {showAd ? (
               <div className="ad-container p-4 rounded-lg border border-primary/20 bg-background mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium text-primary">Anuncio</h3>
+                  <h3 className="font-medium text-primary">
+                    {language === 'es' ? 'Anuncio' : 'Advertisement'}
+                  </h3>
                   <span className="text-sm text-muted-foreground">
                     {adTimerCount}s
                   </span>
                 </div>
-                <div className="h-32 flex items-center justify-center bg-primary/10 rounded-md mb-2">
-                  <div className="text-center">
-                    <Sparkles className="mx-auto h-8 w-8 text-primary mb-2" />
-                    <p className="text-sm font-medium">ListAI Premium</p>
-                    <p className="text-xs text-muted-foreground">Sugerencias ilimitadas sin anuncios</p>
-                  </div>
+                <div className="h-32 flex items-center justify-center bg-primary/5 rounded-md mb-2 overflow-hidden">
+                  <GoogleAdSense 
+                    format="fluid" 
+                    slot="5962660784" 
+                    style={{ height: '100%', width: '100%', minHeight: '100px' }}
+                  />
                 </div>
                 <p className="text-xs text-center text-muted-foreground">
-                  Espere mientras se carga el contenido...
+                  {language === 'es' 
+                    ? 'Espere mientras se carga el contenido...'
+                    : 'Please wait while content loads...'}
                 </p>
               </div>
             ) : !hasResults ? (
               <div className="grid gap-4 py-4">
                 <div className="flex items-center gap-2">
                   <Input
-                    placeholder="Ej. Pizza casera para 4 personas"
+                    placeholder={language === 'es' 
+                      ? "Ej. Pizza casera para 4 personas" 
+                      : "Ex. Homemade pizza for 4 people"}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     className="flex-1 bg-background/60 backdrop-blur-sm border-primary/20 focus-visible:ring-primary/30"
@@ -241,7 +256,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 
                 {isListening && (
                   <div className="text-center text-sm text-primary">
-                    Escuchando... <span className="animate-pulse">●</span>
+                    {language === 'es' ? 'Escuchando...' : 'Listening...'} <span className="animate-pulse">●</span>
                   </div>
                 )}
                 
@@ -256,12 +271,12 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                         <div className="w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />
                       </div>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generando...
+                      {language === 'es' ? 'Generando...' : 'Generating...'}
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Generar Sugerencias
+                      {language === 'es' ? 'Generar Sugerencias' : 'Generate Suggestions'}
                     </>
                   )}
                 </Button>
@@ -297,7 +312,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                           className="text-xs border-primary/30 bg-card/30"
                         >
                           <Plus className="h-3 w-3 mr-1" />
-                          Añadir
+                          {language === 'es' ? 'Añadir' : 'Add'}
                         </Button>
                       )}
                     </div>
@@ -310,7 +325,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                     onClick={resetDialog}
                     className="border-primary/30 hover:bg-primary/10"
                   >
-                    Cancelar
+                    {language === 'es' ? 'Cancelar' : 'Cancel'}
                   </Button>
                 </div>
               </div>
@@ -323,7 +338,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       <Dialog open={!!selectedItemForAdd} onOpenChange={(open) => !open && setSelectedItemForAdd(null)}>
         <DialogContent className="sm:max-w-[350px] backdrop-blur-md bg-background/60 border border-primary/20">
           <DialogHeader>
-            <DialogTitle>Añadir a la lista</DialogTitle>
+            <DialogTitle>{language === 'es' ? 'Añadir a la lista' : 'Add to list'}</DialogTitle>
             <DialogDescription>
               {selectedItemForAdd && (
                 <div className="flex items-center gap-2 mt-1">
@@ -341,7 +356,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Precio (€)</FormLabel>
+                    <FormLabel>{language === 'es' ? 'Precio (€)' : 'Price (€)'}</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -361,7 +376,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 name="quantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cantidad</FormLabel>
+                    <FormLabel>{language === 'es' ? 'Cantidad' : 'Quantity'}</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -382,13 +397,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                   onClick={() => setSelectedItemForAdd(null)}
                   className="border-primary/20"
                 >
-                  Cancelar
+                  {language === 'es' ? 'Cancelar' : 'Cancel'}
                 </Button>
                 <Button 
                   type="submit"
                   className="bg-gradient-to-r from-primary to-primary/80"
                 >
-                  Añadir a la lista
+                  {language === 'es' ? 'Añadir a la lista' : 'Add to list'}
                 </Button>
               </div>
             </form>
