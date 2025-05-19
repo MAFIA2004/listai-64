@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sparkles, Loader2, Check, Plus, Mic, MicOff, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { getAIRecipeSuggestions } from '@/lib/gemini-service';
+import { showInterstitialAd } from '@/lib/admob-service';
 import {
   Form,
   FormControl,
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { getItemEmoji } from '@/lib/utils';
+import { useLanguage } from '@/hooks/use-language';
 
 interface AISuggestionDialogProps {
   open: boolean;
@@ -47,10 +48,10 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
   const [suggestions, setSuggestions] = useState<RecipeSuggestion[]>([]);
   const [hasResults, setHasResults] = useState(false);
   const [selectedItemForAdd, setSelectedItemForAdd] = useState<RecipeSuggestion | null>(null);
-  const [showAd, setShowAd] = useState(false);
-  const [adTimerCount, setAdTimerCount] = useState(5);
+  const [isLoadingAd, setIsLoadingAd] = useState(false);
   
   const { isListening, transcript, startListening, stopListening } = useSpeechRecognition();
+  const { t } = useLanguage();
   
   const form = useForm<ItemFormValues>({
     defaultValues: {
@@ -66,21 +67,6 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     }
   }, [transcript]);
   
-  // Contador para el anuncio simulado
-  useEffect(() => {
-    if (showAd && adTimerCount > 0) {
-      const timer = setTimeout(() => {
-        setAdTimerCount(adTimerCount - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (showAd && adTimerCount === 0) {
-      // Cuando el contador llega a 0, cerrar el anuncio y comenzar la generación
-      setShowAd(false);
-      setAdTimerCount(5); // Reset para la próxima vez
-      generateSuggestionsAfterAd();
-    }
-  }, [showAd, adTimerCount]);
-  
   const handleVoiceInput = () => {
     if (isListening) {
       stopListening();
@@ -91,12 +77,18 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
   
   const handleGenerateSuggestions = async () => {
     if (!prompt.trim()) {
-      toast.error('Por favor, indica lo que quieres cocinar');
+      toast.error(t('ai.error.empty_prompt'));
       return;
     }
     
-    // Mostrar el anuncio simulado antes de generar sugerencias
-    setShowAd(true);
+    // Show loading state for the ad
+    setIsLoadingAd(true);
+    
+    // Show the interstitial ad and continue with generation after it completes or fails
+    showInterstitialAd(() => {
+      setIsLoadingAd(false);
+      generateSuggestionsAfterAd();
+    });
   };
   
   const generateSuggestionsAfterAd = async () => {
@@ -120,13 +112,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
         
         setSuggestions(mappedSuggestions);
         setHasResults(true);
-        toast.success('¡Sugerencias generadas!');
+        toast.success(t('ai.success.suggestions_generated'));
       } else {
-        toast.error('No se pudieron generar sugerencias');
+        toast.error(t('ai.error.no_suggestions'));
       }
     } catch (error) {
       console.error('Error generating suggestions:', error);
-      toast.error('Error al generar sugerencias');
+      toast.error(t('ai.error.generation_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +151,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       values.quantity
     );
     
-    toast.success(`${selectedItemForAdd.name} añadido a la lista`);
+    toast.success(`${selectedItemForAdd.name} ${t('actions.added_to_list')}`);
     
     // Remove the item from the suggestions list after adding it to the shopping list
     setSuggestions(prev => prev.filter(item => item.name !== selectedItemForAdd.name));
@@ -172,8 +164,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     setSuggestions([]);
     setHasResults(false);
     setSelectedItemForAdd(null);
-    setShowAd(false);
-    setAdTimerCount(5);
+    setIsLoadingAd(false);
     onOpenChange(false);
   };
 
@@ -181,48 +172,44 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md backdrop-blur-2xl border border-primary/20 bg-background/60 shadow-lg shadow-primary/5 dark:bg-background/60">
-          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary/5 to-background/0 pointer-events-none" />
-          
-          <DialogHeader className="relative z-10">
-            <DialogTitle className="flex items-center gap-2">
-              <div className="relative">
-                <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-                <div className="absolute inset-0 h-5 w-5 bg-primary blur-sm rounded-full opacity-30 animate-pulse" />
-              </div>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-                Sugerir Ingredientes
-              </span>
-            </DialogTitle>
-            <DialogDescription>
-              Describe lo que quieres cocinar y la IA te sugerirá los ingredientes.
-            </DialogDescription>
-          </DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="relative">
+              <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+              <div className="absolute inset-0 h-5 w-5 bg-primary blur-sm rounded-full opacity-30 animate-pulse" />
+            </div>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
+              {t('ai.suggest_ingredients')}
+            </span>
+          </DialogTitle>
+          <DialogDescription>
+            {t('ai.describe_recipe')}
+          </DialogDescription>
           
           <div className="relative z-10">
-            {showAd ? (
+            {isLoadingAd ? (
               <div className="ad-container p-4 rounded-lg border border-primary/20 bg-background mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium text-primary">Anuncio</h3>
+                  <h3 className="font-medium text-primary">{t('ad.title')}</h3>
                   <span className="text-sm text-muted-foreground">
-                    {adTimerCount}s
+                    <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+                    {t('ad.loading')}
                   </span>
                 </div>
                 <div className="h-32 flex items-center justify-center bg-primary/10 rounded-md mb-2">
                   <div className="text-center">
-                    <Sparkles className="mx-auto h-8 w-8 text-primary mb-2" />
-                    <p className="text-sm font-medium">ListAI Premium</p>
-                    <p className="text-xs text-muted-foreground">Sugerencias ilimitadas sin anuncios</p>
+                    <Loader2 className="mx-auto h-8 w-8 text-primary mb-2 animate-spin" />
+                    <p className="text-sm font-medium">{t('ad.loading_ad')}</p>
                   </div>
                 </div>
                 <p className="text-xs text-center text-muted-foreground">
-                  Espere mientras se carga el contenido...
+                  {t('ad.please_wait')}
                 </p>
               </div>
             ) : !hasResults ? (
               <div className="grid gap-4 py-4">
                 <div className="flex items-center gap-2">
                   <Input
-                    placeholder="Ej. Pizza casera para 4 personas"
+                    placeholder={t('ai.placeholder')}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     className="flex-1 bg-background/60 backdrop-blur-sm border-primary/20 focus-visible:ring-primary/30"
@@ -241,7 +228,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 
                 {isListening && (
                   <div className="text-center text-sm text-primary">
-                    Escuchando... <span className="animate-pulse">●</span>
+                    {t('ai.listening')} <span className="animate-pulse">●</span>
                   </div>
                 )}
                 
@@ -256,12 +243,12 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                         <div className="w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />
                       </div>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generando...
+                      {t('ai.generating')}
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Generar Sugerencias
+                      {t('ai.generate_suggestions')}
                     </>
                   )}
                 </Button>
@@ -297,7 +284,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                           className="text-xs border-primary/30 bg-card/30"
                         >
                           <Plus className="h-3 w-3 mr-1" />
-                          Añadir
+                          {t('actions.add')}
                         </Button>
                       )}
                     </div>
@@ -310,7 +297,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                     onClick={resetDialog}
                     className="border-primary/30 hover:bg-primary/10"
                   >
-                    Cancelar
+                    {t('actions.cancel')}
                   </Button>
                 </div>
               </div>
@@ -323,7 +310,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       <Dialog open={!!selectedItemForAdd} onOpenChange={(open) => !open && setSelectedItemForAdd(null)}>
         <DialogContent className="sm:max-w-[350px] backdrop-blur-md bg-background/60 border border-primary/20">
           <DialogHeader>
-            <DialogTitle>Añadir a la lista</DialogTitle>
+            <DialogTitle>{t('actions.add_to_list')}</DialogTitle>
             <DialogDescription>
               {selectedItemForAdd && (
                 <div className="flex items-center gap-2 mt-1">
@@ -341,7 +328,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Precio (€)</FormLabel>
+                    <FormLabel>{t('item.price')} (€)</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -361,7 +348,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 name="quantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cantidad</FormLabel>
+                    <FormLabel>{t('item.quantity')}</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -382,13 +369,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                   onClick={() => setSelectedItemForAdd(null)}
                   className="border-primary/20"
                 >
-                  Cancelar
+                  {t('actions.cancel')}
                 </Button>
                 <Button 
                   type="submit"
                   className="bg-gradient-to-r from-primary to-primary/80"
                 >
-                  Añadir a la lista
+                  {t('actions.add_to_list')}
                 </Button>
               </div>
             </form>
