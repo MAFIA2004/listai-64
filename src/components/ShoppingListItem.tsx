@@ -41,15 +41,17 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
   return (
     <>
       <div 
-        className={cn('shopping-item', 
-          item.completed ? 'completed' : ''
+        className={cn(
+          'shopping-item relative overflow-hidden rounded-2xl p-3 transition-all duration-200', 
+          item.completed ? 'completed bg-opacity-60' : 'bg-card/80 backdrop-blur-sm',
+          item.phantom ? 'invisible' : ''
         )}
         onClick={() => onToggleComplete(item.id)}
       >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
             <div 
-              className="mr-2 rounded-lg bg-blue-100 size-10 flex items-center justify-center"
+              className="mr-3 rounded-xl bg-gradient-to-tr from-blue-100/80 to-blue-200/80 size-11 flex items-center justify-center shadow-sm"
               role="img" 
               aria-label={`Emoji for ${item.name}`}
             >
@@ -57,18 +59,18 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
             </div>
             <div>
               <p className="font-medium text-base">{item.name}</p>
-              <div className="text-xs text-primary opacity-80">
-                {item.quantity} unid. · <span className="text-sm">{formatPrice(item.price)}/unid.</span>
+              <div className="text-xs text-primary/80">
+                {item.quantity} unid. · <span className="text-sm font-medium">{formatPrice(item.price)}/unid.</span>
               </div>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="quantity-control">
+            <div className="quantity-control bg-card/60 backdrop-blur-sm rounded-full shadow-sm border border-border/10 px-1">
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="h-6 w-6 p-0" 
+                className="h-6 w-6 p-0 rounded-full" 
                 onClick={(e) => {
                   e.stopPropagation(); 
                   handleDecrementQuantity();
@@ -77,11 +79,11 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
               >
                 <Minus size={14} />
               </Button>
-              <span className="text-sm">{item.quantity}</span>
+              <span className="text-sm font-medium mx-1">{item.quantity}</span>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-6 w-6 p-0"
+                className="h-6 w-6 p-0 rounded-full"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleIncrementQuantity();
@@ -96,22 +98,29 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
               <Button
                 variant="ghost"
                 size="sm"
-                className="delete-button h-6 w-6"
+                className="delete-button h-7 w-7 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowDeleteDialog(true);
                 }}
               >
-                <Trash2 size={14} />
+                <Trash2 size={15} />
               </Button>
             )}
           </div>
         </div>
+        
+        {/* Línea decorativa al completar el item */}
+        {item.completed && (
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-primary opacity-20"></div>
+          </div>
+        )}
       </div>
 
       {!item.phantom && (
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
+          <AlertDialogContent className="rounded-2xl border-none shadow-xl bg-card/95 backdrop-blur-md">
             <AlertDialogHeader>
               <AlertDialogTitle>¿Eliminar artículo?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -119,9 +128,9 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
                 onClick={() => onDelete(item.id)}
               >
                 Eliminar
