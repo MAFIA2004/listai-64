@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { toast } from 'sonner';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { getAIRecipeSuggestions } from '@/lib/gemini-service';
 import { useLanguage } from '@/hooks/use-language';
+import { getItemEmoji } from '@/lib/utils'; // Add this import
 
 // Import refactored components
 import { AdDisplay } from './ai/AdDisplay';

@@ -54,7 +54,6 @@ export function GoogleAdSense({
   return (
     <div className={className} style={style}>
       <ins
-        ref={adRef}
         className="adsbygoogle"
         style={{
           display: 'block',
