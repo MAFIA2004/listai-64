@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
 import { AddItemForm } from '@/components/AddItemForm';
 import { AISuggestionDialog } from '@/components/AISuggestionDialog';
 import { HistoryDialog } from '@/components/HistoryDialog';

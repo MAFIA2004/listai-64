@@ -5,8 +5,25 @@ import { LanguageProvider } from "@/hooks/use-language";
 import Index from "@/pages/Index";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
+import { useEffect } from "react";
 
 function App() {
+  // Load Google AdSense script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5099055278802719";
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    document.head.appendChild(script);
+    
+    return () => {
+      // Clean up script on unmount
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
   return (
     <ThemeProvider>
       <LanguageProvider>
