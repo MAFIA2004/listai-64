@@ -16,6 +16,16 @@ interface BudgetDialogProps {
 export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: BudgetDialogProps) {
   const { t } = useLanguage();
   
+  const handleBudgetAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite valores vacíos o solo números
+    if (value === '' || /^\d*$/.test(value)) {
+      updateBudget({
+        amount: value === '' ? 0 : Number(value)
+      });
+    }
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md ai-dialog">
@@ -49,14 +59,11 @@ export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: Budge
                   {t('budget.max_amount')}
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   className="w-full p-2 border border-border bg-background text-foreground rounded-lg"
-                  value={budget.amount}
-                  onChange={(e) => updateBudget({
-                    amount: Number(e.target.value)
-                  })}
-                  min="1"
-                  step="1"
+                  value={budget.amount || ''}
+                  onChange={handleBudgetAmountChange}
+                  inputMode="numeric"
                 />
               </div>
               <div className="mb-4">

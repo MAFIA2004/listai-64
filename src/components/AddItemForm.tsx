@@ -37,7 +37,9 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
     handleSelectSpellingSuggestion,
     handleIgnoreSpelling,
     setVoiceRecognitionValues,
-    setProcessingStatus
+    setProcessingStatus,
+    handlePriceChange,
+    handleQuantityChange
   } = useAddItemForm({ onAddItem });
 
   // Voice recognition
@@ -102,18 +104,17 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             type="text" 
             placeholder={t('input.price')}
             value={itemPrice} 
-            onChange={(e) => setVoiceRecognitionValues(undefined, e.target.value, undefined)} 
+            onChange={handlePriceChange}
             className="w-full bg-card dark:bg-card/50 border-input" 
             inputMode="decimal" 
           />
 
           <Input 
-            type="number" 
+            type="text" 
             placeholder={t('input.quantity')}
             value={itemQuantity} 
-            onChange={(e) => setVoiceRecognitionValues(undefined, undefined, e.target.value)} 
+            onChange={handleQuantityChange}
             className="w-24 bg-card dark:bg-card/50 border-input" 
-            min="1" 
             inputMode="numeric" 
           />
         </div>

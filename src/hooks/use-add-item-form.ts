@@ -40,6 +40,24 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
     updateSuggestions(value);
   };
 
+  // Nuevo manejador para cambios en el precio
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite valores vacíos o números válidos (con posible punto decimal)
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setItemPrice(value);
+    }
+  };
+
+  // Nuevo manejador para cambios en la cantidad
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite valores vacíos o solo números
+    if (value === '' || /^\d*$/.test(value)) {
+      setItemQuantity(value);
+    }
+  };
+
   const handleSuggestionClick = (suggestion: string) => {
     setItemName(suggestion);
     setShowSuggestions(false);
@@ -51,19 +69,18 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
       toast.error("Nombre no puede estar vacío");
       return;
     }
-    const price = parseFloat(itemPrice.replace(',', '.'));
-    if (isNaN(price) || price <= 0) {
+    
+    // Validar precio
+    const price = itemPrice === '' ? 0 : parseFloat(itemPrice.replace(',', '.'));
+    if (isNaN(price) || price < 0) {
       toast.error("Precio debe ser un número positivo");
       return;
     }
     
-    // Modificado: Permitir campo vacío para la cantidad, usar 1 como valor predeterminado
-    const quantityValue = itemQuantity.trim();
+    // Validar cantidad
     let quantity = 1; // Valor predeterminado
-    
-    // Solo parsear si hay un valor
-    if (quantityValue !== '') {
-      quantity = parseInt(quantityValue, 10);
+    if (itemQuantity !== '') {
+      quantity = parseInt(itemQuantity, 10);
       if (isNaN(quantity) || quantity <= 0) {
         toast.error("Cantidad debe ser un número positivo");
         return;
@@ -84,30 +101,20 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
   };
 
   const handleSelectSpellingSuggestion = (suggestion: string) => {
-    const price = parseFloat(itemPrice.replace(',', '.'));
+    const price = itemPrice === '' ? 0 : parseFloat(itemPrice.replace(',', '.'));
     
     // Usar el mismo enfoque para la cantidad aquí
-    const quantityValue = itemQuantity.trim();
-    let quantity = 1;
-    
-    if (quantityValue !== '') {
-      quantity = parseInt(quantityValue, 10) || 1;
-    }
+    const quantity = itemQuantity === '' ? 1 : (parseInt(itemQuantity, 10) || 1);
     
     addItemToList(suggestion, price, quantity);
     setSpellCheckOpen(false);
   };
 
   const handleIgnoreSpelling = () => {
-    const price = parseFloat(itemPrice.replace(',', '.'));
+    const price = itemPrice === '' ? 0 : parseFloat(itemPrice.replace(',', '.'));
     
     // Usar el mismo enfoque para la cantidad aquí también
-    const quantityValue = itemQuantity.trim();
-    let quantity = 1;
-    
-    if (quantityValue !== '') {
-      quantity = parseInt(quantityValue, 10) || 1;
-    }
+    const quantity = itemQuantity === '' ? 1 : (parseInt(itemQuantity, 10) || 1);
     
     addItemToList(misspelledWord, price, quantity);
     setSpellCheckOpen(false);
@@ -117,7 +124,7 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
     onAddItem(name, price, quantity);
     setItemName('');
     setItemPrice('');
-    setItemQuantity(''); // Modificado: Dejar el campo vacío después de agregar
+    setItemQuantity('');
     setSuggestions([]);
     setShowSuggestions(false);
   };
@@ -149,6 +156,8 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
     spellCheckSuggestions,
     misspelledWord,
     handleNameChange,
+    handlePriceChange,
+    handleQuantityChange,
     handleSuggestionClick,
     handleSubmit,
     handleSelectSpellingSuggestion,
