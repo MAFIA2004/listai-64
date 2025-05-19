@@ -1,3 +1,4 @@
+
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
 
@@ -65,9 +66,12 @@ if (isNative) {
   // We'll use an immediately-invoked async function to handle dynamic import
   (async () => {
     try {
-      const admobModule = await import('@capacitor/admob');
-      AdMob = admobModule.AdMob;
-      InterstitialAdPluginEvents = admobModule.InterstitialAdPluginEvents;
+      // Using explicit type annotation to avoid TypeScript error
+      const { AdMob: AdMobModule, InterstitialAdPluginEvents: EventsModule } = 
+        await import('@capacitor/admob') as any;
+      
+      AdMob = AdMobModule;
+      InterstitialAdPluginEvents = EventsModule;
       console.log("Módulo AdMob cargado correctamente");
     } catch (error) {
       console.error("Error al cargar el módulo AdMob:", error);
