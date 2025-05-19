@@ -69,7 +69,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     }
   }, [transcript]);
   
-  // Contador para el anuncio real
+  // Contador para el anuncio
   useEffect(() => {
     if (showAd && adTimerCount > 0) {
       const timer = setTimeout(() => {
@@ -77,7 +77,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       }, 1000);
       return () => clearTimeout(timer);
     } else if (showAd && adTimerCount === 0) {
-      // Cuando el contador llega a 0, cerrar el anuncio y comenzar la generación
+      // Cuando el contador llega a 0, comenzar la generación
       setShowAd(false);
       setAdTimerCount(5); // Reset para la próxima vez
       generateSuggestionsAfterAd();
@@ -98,7 +98,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       return;
     }
     
-    // Mostrar el anuncio real antes de generar sugerencias
+    // Mostrar el anuncio antes de generar sugerencias
     setShowAd(true);
   };
   
@@ -227,8 +227,8 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
                 </div>
                 <p className="text-xs text-center text-muted-foreground">
                   {language === 'es' 
-                    ? 'Espere mientras se carga el contenido...'
-                    : 'Please wait while content loads...'}
+                    ? 'Espere mientras se genera su sugerencia...'
+                    : 'Please wait while generating your suggestion...'}
                 </p>
               </div>
             ) : !hasResults ? (

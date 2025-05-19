@@ -21,16 +21,20 @@ export function GoogleAdSense({
   const adRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check if window.adsbygoogle is available
-    if (adRef.current && (window as any).adsbygoogle) {
-      try {
-        // Push the adsbygoogle command to display an ad
-        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('AdSense error:', error);
-      }
-    } else {
-      console.log('AdSense not ready yet');
+    try {
+      // Esperar un momento para asegurarse de que el elemento esté en el DOM
+      const timer = setTimeout(() => {
+        if (adRef.current && (window as any).adsbygoogle) {
+          // Push the adsbygoogle command to display an ad
+          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        } else {
+          console.log('AdSense not ready yet or element not found');
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    } catch (error) {
+      console.error('AdSense error:', error);
     }
   }, [adRef]);
 
