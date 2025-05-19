@@ -5,6 +5,7 @@ import { Trash2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { HistoryDateGroup } from './HistoryDateGroup';
 import { EmptyHistoryState } from './EmptyHistoryState';
+import { useLanguage } from '@/hooks/use-language';
 
 interface HistoryListProps {
   groupedEntries: Record<string, PurchaseHistoryEntry[]>;
@@ -17,12 +18,13 @@ export function HistoryList({
   onSelectEntry,
   onOpenDeleteAllDialog
 }: HistoryListProps) {
+  const { t } = useLanguage();
   const entriesExist = Object.keys(groupedEntries).length > 0;
   
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-medium">Listas guardadas</h3>
+        <h3 className="text-sm font-medium">{t('history.saved_lists')}</h3>
         {entriesExist && (
           <Button 
             variant="outline" 
@@ -31,7 +33,7 @@ export function HistoryList({
             onClick={onOpenDeleteAllDialog}
           >
             <Trash2 className="mr-1 h-4 w-4" />
-            Borrar historial
+            {t('dialog.clear_all')}
           </Button>
         )}
       </div>

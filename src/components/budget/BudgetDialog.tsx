@@ -4,6 +4,7 @@ import { Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BudgetAlert } from '@/types/shopping';
+import { useLanguage } from '@/hooks/use-language';
 
 interface BudgetDialogProps {
   open: boolean;
@@ -13,19 +14,21 @@ interface BudgetDialogProps {
 }
 
 export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: BudgetDialogProps) {
+  const { t } = useLanguage();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md ai-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5 text-primary" />
-            <span className="gradient-text">Configurar Presupuesto</span>
+            <span className="gradient-text">{t('budget.title')}</span>
           </DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <div className="flex items-center justify-between mb-4">
-            <span>Activar presupuesto</span>
+            <span>{t('budget.enable')}</span>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -43,7 +46,7 @@ export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: Budge
             <>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">
-                  Cantidad máxima (€)
+                  {t('budget.max_amount')}
                 </label>
                 <input
                   type="number"
@@ -58,7 +61,7 @@ export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: Budge
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">
-                  Aviso al alcanzar % del presupuesto
+                  {t('budget.warning')}
                 </label>
                 <input
                   type="range"
@@ -83,7 +86,7 @@ export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: Budge
         
         <DialogFooter>
           <Button onClick={() => onOpenChange(false)}>
-            Aceptar
+            {t('button.accept')}
           </Button>
         </DialogFooter>
       </DialogContent>

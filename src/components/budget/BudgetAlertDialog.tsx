@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/utils';
+import { useLanguage } from '@/hooks/use-language';
 
 interface BudgetAlertDialogProps {
   open: boolean;
@@ -13,30 +14,35 @@ interface BudgetAlertDialogProps {
 }
 
 export function BudgetAlertDialog({ open, onOpenChange, budgetAmount, totalPrice }: BudgetAlertDialogProps) {
+  const { t } = useLanguage();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md ai-dialog">
         <DialogHeader>
           <DialogTitle className="text-destructive flex items-center gap-2">
-            <span>¡Presupuesto excedido!</span>
+            <span>{t('budget.exceeded')}</span>
           </DialogTitle>
           <DialogDescription>
-            Has superado el presupuesto de {formatPrice(budgetAmount)}. 
-            Actualmente tu lista suma {formatPrice(totalPrice)}.
+            {t('budget.exceeded_description')
+              .replace('{amount}', formatPrice(budgetAmount))
+              .replace('{total}', formatPrice(totalPrice))}
           </DialogDescription>
         </DialogHeader>
         
         <div className="py-2">
           <Alert variant="destructive" className="mb-4">
             <AlertDescription className="flex justify-between items-center">
-              <span>Has superado tu presupuesto por {formatPrice(totalPrice - budgetAmount)}</span>
+              <span>
+                {t('budget.exceeded_by').replace('{amount}', formatPrice(totalPrice - budgetAmount))}
+              </span>
             </AlertDescription>
           </Alert>
         </div>
         
         <DialogFooter className="sm:justify-end">
           <Button onClick={() => onOpenChange(false)}>
-            Continuar
+            {t('button.continue')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -10,12 +10,15 @@ import { ItemSuggestions } from '@/components/ItemSuggestions';
 import { VoiceInputButton } from '@/components/VoiceInputButton';
 import { useAddItemForm } from '@/hooks/use-add-item-form';
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/use-language";
 
 interface AddItemFormProps {
   onAddItem: (name: string, price: number, quantity?: number) => void;
 }
 
 export function AddItemForm({ onAddItem }: AddItemFormProps) {
+  const { t } = useLanguage();
+  
   const {
     itemName,
     itemPrice,
@@ -67,11 +70,11 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   // Handle errors in voice recognition
   useEffect(() => {
     if (error) {
-      toast.error("Error de reconocimiento de voz", {
+      toast.error(t('message.voice_error'), {
         description: error
       });
     }
-  }, [error]);
+  }, [error, t]);
 
   return (
     <>
@@ -79,7 +82,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         <div className="relative">
           <Input 
             type="text" 
-            placeholder="Artículo" 
+            placeholder={t('input.item')}
             value={itemName} 
             onChange={handleNameChange} 
             onFocus={() => itemName.length >= 2 && setShowSuggestions(true)} 
@@ -97,7 +100,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         <div className="flex gap-2">
           <Input 
             type="text" 
-            placeholder="Precio (€)" 
+            placeholder={t('input.price')}
             value={itemPrice} 
             onChange={(e) => setVoiceRecognitionValues(undefined, e.target.value, undefined)} 
             className="w-full bg-card dark:bg-card/50 border-input" 
@@ -106,7 +109,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
 
           <Input 
             type="number" 
-            placeholder="Cantidad" 
+            placeholder={t('input.quantity')}
             value={itemQuantity} 
             onChange={(e) => setVoiceRecognitionValues(undefined, undefined, e.target.value)} 
             className="w-24 bg-card dark:bg-card/50 border-input" 
@@ -118,7 +121,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         <div className="flex gap-2">
           <Button type="submit" className="flex-1">
             <Plus className="mr-1 h-4 w-4" />
-            Añadir Artículo
+            {t('button.add_item')}
           </Button>
 
           <VoiceInputButton 

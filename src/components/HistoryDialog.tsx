@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PurchaseHistoryEntry } from '@/types/shopping';
 import { format } from 'date-fns';
+import { useLanguage } from '@/hooks/use-language';
 
 // Componentes refactorizados
 import { HistoryDialogHeader } from './history/HistoryDialogHeader';
@@ -30,6 +31,7 @@ export function HistoryDialog({
   const [selectedEntry, setSelectedEntry] = useState<PurchaseHistoryEntry | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
+  const { t } = useLanguage();
 
   const handleSelectEntry = (entry: PurchaseHistoryEntry) => {
     setSelectedEntry(entry);
@@ -106,16 +108,16 @@ export function HistoryDialog({
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDelete}
-        title="¿Eliminar esta lista?"
-        description="Esta acción eliminará esta lista del historial permanentemente."
+        title={t('dialog.delete_history')}
+        description={t('dialog.delete_history_message')}
       />
       
       <DeleteConfirmDialog
         open={isDeleteAllDialogOpen}
         onOpenChange={setIsDeleteAllDialogOpen}
         onConfirm={handleDeleteAllHistory}
-        title="¿Eliminar todo el historial?"
-        description="Esta acción eliminará todas las listas del historial permanentemente."
+        title={t('dialog.delete_all_history')}
+        description={t('dialog.delete_all_history_message')}
       />
     </>
   );

@@ -9,6 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/hooks/use-language";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -25,6 +26,8 @@ export function DeleteConfirmDialog({
   title,
   description
 }: DeleteConfirmDialogProps) {
+  const { t } = useLanguage();
+  
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="glass-effect">
@@ -35,12 +38,12 @@ export function DeleteConfirmDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel>{t('button.cancel')}</AlertDialogCancel>
           <AlertDialogAction 
             onClick={onConfirm} 
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Eliminar
+            {t('button.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

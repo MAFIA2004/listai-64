@@ -38,7 +38,7 @@ export function ShoppingLists({
               <div 
                 key={item.id} 
                 data-phantom={item.phantom ? "true" : "false"}
-                className="invisible" // Makes the item invisible but preserves space
+                className="opacity-0" // Makes the item invisible but preserves space
               >
                 <ShoppingListItem 
                   item={item} 
