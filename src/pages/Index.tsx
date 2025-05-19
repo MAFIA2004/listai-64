@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, ShoppingBag } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { AddItemForm } from '@/components/AddItemForm';
 import { AISuggestionDialog } from '@/components/AISuggestionDialog';
 import { HistoryDialog } from '@/components/HistoryDialog';
@@ -16,10 +16,8 @@ import { BudgetDialog } from '@/components/budget/BudgetDialog';
 import { BudgetAlertDialog } from '@/components/budget/BudgetAlertDialog';
 import { ConfirmClearDialog } from '@/components/shopping/ConfirmClearDialog';
 import { LanguageThemeDialog } from '@/components/settings/LanguageThemeDialog';
-import { useLanguage } from '@/hooks/use-language';
 
 const Index = () => {
-  const { t } = useLanguage();
   const {
     phantomItems,
     regularItems,
@@ -52,7 +50,7 @@ const Index = () => {
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [budgetAlertOpen, setBudgetAlertOpen] = useState(false);
   
-  // Estado para controlar el diálogo de selección de idioma y tema
+  // Nuevo estado para controlar el diálogo de selección de idioma y tema
   const [languageThemeDialogOpen, setLanguageThemeDialogOpen] = useState(false);
   
   // Comprobar si es la primera vez que se abre la app
@@ -91,30 +89,19 @@ const Index = () => {
       {/* Header */}
       <ShoppingHeader />
 
-      {/* Welcome panel - Rediseñado para ser más moderno */}
-      <div className="welcome-panel bg-gradient-to-r from-primary/5 to-primary/10 rounded-2xl mx-4 my-4 p-5 shadow-sm border border-primary/10">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="bg-primary/10 p-2 rounded-xl">
-            <ShoppingBag className="h-6 w-6 text-primary" />
-          </div>
-          <h2 className="text-lg font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-            {t('app.welcome_message') || 'Bienvenido a tu Lista de Compras'}
-          </h2>
-        </div>
-        
+      {/* Form and filter buttons */}
+      <div className="filter-buttons-container max-w-xl mx-auto w-full">
         <AddItemForm onAddItem={handleAddItem} />
         
         <FilterButtons 
           onOpenBudget={() => setBudgetDialogOpen(true)} 
           onOpenHistory={() => setHistoryDialogOpen(true)} 
         />
-      </div>
 
-      {/* Total Price Bar - Estilo modernizado */}
-      <TotalPriceBar totalPrice={totalPrice} />
+        {/* Total Price Bar */}
+        <TotalPriceBar totalPrice={totalPrice} />
 
-      {/* Organize Buttons - Estilo actualizado */}
-      <div className="mx-4 mb-4">
+        {/* Organize Buttons */}
         <OrganizeButtons 
           sortOption={sortOption}
           onSort={setSortOption}
@@ -125,8 +112,8 @@ const Index = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 mx-4 mb-16 mt-2 overflow-hidden">
-        <div className="h-full overflow-y-auto rounded-2xl bg-background/50 backdrop-blur-sm shadow-sm border border-border/10 p-4">
+      <div className="main-content-wrapper">
+        <div className="shopping-list-container">
           <ShoppingLists 
             viewMode={viewMode}
             phantomItems={phantomItems}
@@ -180,7 +167,7 @@ const Index = () => {
         onDeleteAllHistory={deleteAllHistory} 
       />
 
-      {/* Diálogo de selección de idioma y tema */}
+      {/* Nuevo: Diálogo de selección de idioma y tema */}
       <LanguageThemeDialog
         open={languageThemeDialogOpen}
         onOpenChange={(open) => {
