@@ -2,7 +2,7 @@
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
 
-// Types for AdMob to be used without direct import for better compatibility
+// Types for AdMob to be used without direct import
 interface AdOptions {
   adId: string;
   npa?: boolean;
@@ -41,41 +41,40 @@ const TEST_INTERSTITIAL_ID = {
 // Comprobamos si estamos en una plataforma nativa (iOS/Android)
 const isNative = Capacitor.isNativePlatform();
 
-// Versión simulada de AdMob para entornos web o cuando el módulo no está disponible
-const SimulatedAdMob = {
-  initialize: async () => console.log("Simulando inicialización de AdMob"),
-  prepareInterstitial: async () => console.log("Simulando preparación de anuncio"),
-  showInterstitial: async () => console.log("Simulando mostrar anuncio"),
-  addListener: () => ({
-    remove: () => {}
-  })
+// Mock implementation of AdMob for web and development
+const AdMob = {
+  initialize: async (options: AdMobInitializationOptions) => {
+    console.log("AdMob mock initialization with options:", options);
+    return { value: true };
+  },
+  
+  prepareInterstitial: async (options: AdOptions) => {
+    console.log("Preparing mock interstitial ad with options:", options);
+    return { value: true };
+  },
+  
+  showInterstitial: async () => {
+    console.log("Showing mock interstitial ad");
+    return { value: true };
+  },
+  
+  addListener: (eventName: string, callback: Function) => {
+    console.log(`Added mock listener for event: ${eventName}`);
+    // In a real implementation with the AdMob plugin, this would return a PluginListenerHandle
+    return {
+      remove: () => console.log(`Removed mock listener for event: ${eventName}`)
+    };
+  }
 };
 
-// Carga dinámica del módulo AdMob
-let AdMob: any = SimulatedAdMob;
-let InterstitialAdPluginEvents: any = {
+// Events that would be provided by the actual AdMob plugin
+const InterstitialAdPluginEvents = {
   Loaded: 'interstitialAdLoaded',
   FailedToLoad: 'interstitialAdFailedToLoad',
   Showed: 'interstitialAdShowed',
   Dismissed: 'interstitialAdDismissed',
   FailedToShow: 'interstitialAdFailedToShow'
 };
-
-// Intentar cargar el módulo AdMob solo cuando estamos en una plataforma nativa
-if (isNative) {
-  // Utilizamos una función async inmediatamente ejecutada
-  (async () => {
-    try {
-      // Importación dinámica con tipo 'any' para evitar problemas de compilación
-      const module = await import(/* @vite-ignore */ '@capacitor/admob');
-      AdMob = module.AdMob;
-      InterstitialAdPluginEvents = module.InterstitialAdPluginEvents;
-      console.log("Módulo AdMob cargado correctamente");
-    } catch (error) {
-      console.error("Error al cargar el módulo AdMob:", error);
-    }
-  })();
-}
 
 // Obtener ID de anuncio adecuado según plataforma
 const getInterstitialAdId = () => {
