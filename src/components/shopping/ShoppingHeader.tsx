@@ -6,7 +6,7 @@ import { useLanguage } from '@/hooks/use-language';
 import { Button } from '@/components/ui/button';
 
 export function ShoppingHeader() {
-  const { t, setLanguageDialogOpen } = useLanguage();
+  const { t, toggleLanguageDialog } = useLanguage();
   
   return (
     <header className="app-header">
@@ -17,7 +17,7 @@ export function ShoppingHeader() {
       <Button 
         variant="ghost" 
         size="icon"
-        onClick={() => setLanguageDialogOpen(true)}
+        onClick={() => toggleLanguageDialog(true)}
         className="mr-2"
       >
         <Settings size={18} />
