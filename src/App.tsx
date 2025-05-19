@@ -5,8 +5,15 @@ import { LanguageProvider } from "@/hooks/use-language";
 import Index from "@/pages/Index";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
+import { useEffect } from "react";
+import { initializeAdMob } from "@/lib/admob-service";
 
 function App() {
+  // Inicializar AdMob cuando carga la app
+  useEffect(() => {
+    initializeAdMob();
+  }, []);
+
   return (
     <ThemeProvider>
       <LanguageProvider>

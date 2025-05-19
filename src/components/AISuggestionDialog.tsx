@@ -66,7 +66,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     }
   }, [transcript]);
   
-  // Contador para el anuncio simulado
+  // Contador para mostrar anuncio
   useEffect(() => {
     if (showAd && adTimerCount > 0) {
       const timer = setTimeout(() => {
@@ -74,10 +74,18 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       }, 1000);
       return () => clearTimeout(timer);
     } else if (showAd && adTimerCount === 0) {
-      // Cuando el contador llega a 0, cerrar el anuncio y comenzar la generación
+      // Cuando el contador llega a 0, mostrar anuncio real y comenzar la generación
       setShowAd(false);
       setAdTimerCount(5); // Reset para la próxima vez
-      generateSuggestionsAfterAd();
+      
+      // Usar anuncio real en lugar de simulado
+      import('@/lib/admob-service').then(({ showInterstitialAd }) => {
+        showInterstitialAd(generateSuggestionsAfterAd);
+      }).catch(error => {
+        console.error("Error al cargar servicio de anuncios:", error);
+        // Fallback en caso de error
+        generateSuggestionsAfterAd();
+      });
     }
   }, [showAd, adTimerCount]);
   
@@ -95,7 +103,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       return;
     }
     
-    // Mostrar el anuncio simulado antes de generar sugerencias
+    // Mostrar el anuncio antes de generar sugerencias
     setShowAd(true);
   };
   
