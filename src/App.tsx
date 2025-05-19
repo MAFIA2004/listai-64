@@ -5,17 +5,8 @@ import { LanguageProvider } from "@/hooks/use-language";
 import Index from "@/pages/Index";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
-import { useEffect } from "react";
-import { initializeAdMob } from "@/lib/admob-service";
 
 function App() {
-  // Initialize AdMob when app loads
-  useEffect(() => {
-    initializeAdMob()
-      .then(() => console.log('AdMob initialized'))
-      .catch(error => console.error('AdMob initialization failed', error));
-  }, []);
-
   return (
     <ThemeProvider>
       <LanguageProvider>
