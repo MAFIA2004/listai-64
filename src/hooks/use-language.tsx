@@ -7,6 +7,7 @@ type LanguageContextType = {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  toggleLanguageDialog: (open: boolean) => void;
 };
 
 // Traducciones
@@ -99,10 +100,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return browserLang === 'en' ? 'en' : 'es'; // Usar español por defecto si no es inglés
   });
 
+  const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
+
   // Función para cambiar el idioma
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('app_language', lang);
+  };
+
+  // Función para abrir/cerrar el diálogo de idioma
+  const toggleLanguageDialog = (open: boolean) => {
+    setLanguageDialogOpen(open);
   };
 
   // Función para obtener traducciones
@@ -111,7 +119,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ 
+      language, 
+      setLanguage, 
+      t,
+      toggleLanguageDialog 
+    }}>
       {children}
     </LanguageContext.Provider>
   );
