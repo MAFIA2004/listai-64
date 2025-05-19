@@ -56,7 +56,15 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
       toast.error("Precio debe ser un número positivo");
       return;
     }
-    const quantity = parseInt(itemQuantity, 10);
+    
+    // Permitir campo vacío pero validar que sea un número ≥ 1 si hay algo
+    const quantityValue = itemQuantity.trim();
+    if (quantityValue === '') {
+      toast.error("Cantidad debe ser un número positivo");
+      return;
+    }
+    
+    const quantity = parseInt(quantityValue, 10);
     if (isNaN(quantity) || quantity <= 0) {
       toast.error("Cantidad debe ser un número positivo");
       return;
@@ -93,7 +101,7 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
     onAddItem(name, price, quantity);
     setItemName('');
     setItemPrice('');
-    setItemQuantity('1');
+    setItemQuantity('1'); // Siempre volver a "1" después de agregar
     setSuggestions([]);
     setShowSuggestions(false);
   };

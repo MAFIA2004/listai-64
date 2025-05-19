@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Check, Plus, Mic, MicOff } from 'lucide-react';
+import { Sparkles, Loader2, Check, Plus, Mic, MicOff, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog,
@@ -47,6 +47,8 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
   const [suggestions, setSuggestions] = useState<RecipeSuggestion[]>([]);
   const [hasResults, setHasResults] = useState(false);
   const [selectedItemForAdd, setSelectedItemForAdd] = useState<RecipeSuggestion | null>(null);
+  const [showAd, setShowAd] = useState(false);
+  const [adTimerCount, setAdTimerCount] = useState(5);
   
   const { isListening, transcript, startListening, stopListening } = useSpeechRecognition();
   
@@ -64,6 +66,21 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     }
   }, [transcript]);
   
+  // Contador para el anuncio simulado
+  useEffect(() => {
+    if (showAd && adTimerCount > 0) {
+      const timer = setTimeout(() => {
+        setAdTimerCount(adTimerCount - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (showAd && adTimerCount === 0) {
+      // Cuando el contador llega a 0, cerrar el anuncio y comenzar la generación
+      setShowAd(false);
+      setAdTimerCount(5); // Reset para la próxima vez
+      generateSuggestionsAfterAd();
+    }
+  }, [showAd, adTimerCount]);
+  
   const handleVoiceInput = () => {
     if (isListening) {
       stopListening();
@@ -78,6 +95,11 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       return;
     }
     
+    // Mostrar el anuncio simulado antes de generar sugerencias
+    setShowAd(true);
+  };
+  
+  const generateSuggestionsAfterAd = async () => {
     setIsLoading(true);
     setHasResults(false);
     
@@ -150,6 +172,8 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     setSuggestions([]);
     setHasResults(false);
     setSelectedItemForAdd(null);
+    setShowAd(false);
+    setAdTimerCount(5);
     onOpenChange(false);
   };
 
@@ -175,7 +199,26 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
           </DialogHeader>
           
           <div className="relative z-10">
-            {!hasResults ? (
+            {showAd ? (
+              <div className="ad-container p-4 rounded-lg border border-primary/20 bg-background mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-medium text-primary">Anuncio</h3>
+                  <span className="text-sm text-muted-foreground">
+                    {adTimerCount}s
+                  </span>
+                </div>
+                <div className="h-32 flex items-center justify-center bg-primary/10 rounded-md mb-2">
+                  <div className="text-center">
+                    <Sparkles className="mx-auto h-8 w-8 text-primary mb-2" />
+                    <p className="text-sm font-medium">ListAI Premium</p>
+                    <p className="text-xs text-muted-foreground">Sugerencias ilimitadas sin anuncios</p>
+                  </div>
+                </div>
+                <p className="text-xs text-center text-muted-foreground">
+                  Espere mientras se carga el contenido...
+                </p>
+              </div>
+            ) : !hasResults ? (
               <div className="grid gap-4 py-4">
                 <div className="flex items-center gap-2">
                   <Input
