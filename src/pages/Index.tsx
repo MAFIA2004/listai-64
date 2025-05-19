@@ -78,16 +78,6 @@ const Index = () => {
     }, 100);
   };
   
-  const toggleViewMode = () => {
-    if (viewMode === 'list') {
-      setViewMode('category');
-    } else {
-      setViewMode('list');
-      // Reset to sorting by name when switching back to list view
-      setSortOption('name');
-    }
-  };
-  
   return <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header - Fixed position */}
       <header className="app-header">
@@ -103,9 +93,6 @@ const Index = () => {
         <AddItemForm onAddItem={handleAddItem} />
         
         <div className="flex gap-2 my-3 overflow-x-auto hide-scrollbar pb-1">
-          <Button variant="outline" size="sm" className={`filter-button ${viewMode === 'category' ? '' : 'active'}`} onClick={toggleViewMode}>
-            {viewMode === 'category' ? 'Nombre' : 'Categori'}
-          </Button>
           <Button variant="outline" size="sm" className="filter-button" onClick={() => setBudgetDialogOpen(true)}>
             <Calculator className="mr-1 h-4 w-4" />
             Presupuesto
