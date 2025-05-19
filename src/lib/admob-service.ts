@@ -1,7 +1,41 @@
 
-import { AdMob, AdOptions, InterstitialAdPluginEvents, AdLoadInfo, AdMobRewardItem } from '@capacitor/admob';
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
+
+// Import types from @capacitor/admob but handle case when the module isn't available
+let AdMob: any;
+let InterstitialAdPluginEvents: any;
+
+// Dynamically import AdMob only in native environments
+// This prevents build errors in web environments
+try {
+  if (Capacitor.isNativePlatform()) {
+    const admobModule = require('@capacitor/admob');
+    AdMob = admobModule.AdMob;
+    InterstitialAdPluginEvents = admobModule.InterstitialAdPluginEvents;
+  }
+} catch (error) {
+  console.warn('AdMob module not available:', error);
+}
+
+// Interface definitions for better type safety
+interface AdOptions {
+  adId: string;
+  npa?: boolean;
+}
+
+interface AdMobInitializeOptions {
+  requestTrackingAuthorization?: boolean;
+  initializeForTesting?: boolean;
+  testingDevices?: string[];
+  tagForChildDirectedTreatment?: boolean;
+  tagForUnderAgeOfConsent?: boolean;
+  appId: string;
+}
+
+interface AdLoadInfo {
+  adUnitId: string;
+}
 
 // AdMob IDs
 const APP_ID = {
@@ -39,7 +73,7 @@ const getInterstitialAdId = (): string => {
 
 // Initialize AdMob
 export const initializeAdMob = async (): Promise<void> => {
-  if (!isNative) return;
+  if (!isNative || !AdMob) return;
   
   try {
     const platform = Capacitor.getPlatform();
@@ -50,7 +84,7 @@ export const initializeAdMob = async (): Promise<void> => {
       tagForChildDirectedTreatment: false,
       tagForUnderAgeOfConsent: false,
       appId: platform === 'ios' ? APP_ID.ios : APP_ID.android,
-    });
+    } as AdMobInitializeOptions);
     console.log('AdMob initialized successfully');
   } catch (error) {
     console.error('Failed to initialize AdMob', error);
@@ -63,7 +97,7 @@ export class InterstitialAdManager {
   private isAdLoading = false;
   
   constructor() {
-    if (isNative) {
+    if (isNative && AdMob && InterstitialAdPluginEvents) {
       // Set up ad event listeners
       AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
         console.log('Interstitial ad loaded', info);
@@ -71,7 +105,7 @@ export class InterstitialAdManager {
         this.isAdLoading = false;
       });
       
-      AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error) => {
+      AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error: any) => {
         console.error('Interstitial ad failed to load', error);
         this.isAdLoaded = false;
         this.isAdLoading = false;
@@ -87,7 +121,7 @@ export class InterstitialAdManager {
         this.isAdLoaded = false;
       });
       
-      AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
+      AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error: any) => {
         console.error('Interstitial ad failed to show', error);
         this.isAdLoaded = false;
       });
@@ -96,7 +130,7 @@ export class InterstitialAdManager {
   
   // Preload an interstitial ad
   async loadAd(): Promise<boolean> {
-    if (!isNative) return false;
+    if (!isNative || !AdMob) return false;
     if (this.isAdLoaded || this.isAdLoading) return this.isAdLoaded;
     
     this.isAdLoading = true;
@@ -124,7 +158,7 @@ export class InterstitialAdManager {
   
   // Show a loaded interstitial ad
   async showAd(): Promise<boolean> {
-    if (!isNative) return false;
+    if (!isNative || !AdMob) return false;
     if (!this.isAdLoaded) await this.loadAd();
     
     try {
@@ -148,7 +182,7 @@ export class InterstitialAdManager {
   
   // Show an interstitial ad and execute callback after completion or failure
   async showAdWithCallback(onAdClosed: () => void): Promise<void> {
-    if (!isNative) {
+    if (!isNative || !AdMob) {
       // Fallback behavior for web or when ads can't be shown
       onAdClosed();
       return;
@@ -203,7 +237,7 @@ export const showSimulatedAd = (onComplete: () => void): void => {
 
 // Helper function that works across all platforms
 export const showInterstitialAd = async (onAdClosed: () => void): Promise<void> => {
-  if (isNative) {
+  if (isNative && AdMob) {
     // Show real ad on native platforms
     await interstitialAdManager.showAdWithCallback(onAdClosed);
   } else {
