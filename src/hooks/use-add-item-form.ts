@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { COMMON_SHOPPING_ITEMS } from '@/lib/constants';
 import { checkSpelling } from '@/lib/utils';
@@ -40,7 +39,7 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
     updateSuggestions(value);
   };
 
-  // Nuevo manejador para cambios en el precio
+  // Manejador para cambios en el precio
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Permite valores vacíos o números válidos (con posible punto decimal)
@@ -49,7 +48,7 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
     }
   };
 
-  // Nuevo manejador para cambios en la cantidad
+  // Manejador para cambios en la cantidad
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Permite valores vacíos o solo números
@@ -70,10 +69,15 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
       return;
     }
     
-    // Validar precio
+    // Validar precio - ahora requiere que sea al menos 0.1
     const price = itemPrice === '' ? 0 : parseFloat(itemPrice.replace(',', '.'));
-    if (isNaN(price) || price < 0) {
-      toast.error("Precio debe ser un número positivo");
+    if (isNaN(price)) {
+      toast.error("Precio debe ser un número válido");
+      return;
+    }
+    
+    if (price < 0.1) {
+      toast.error("Precio debe ser al menos 0.1");
       return;
     }
     
@@ -103,6 +107,13 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
   const handleSelectSpellingSuggestion = (suggestion: string) => {
     const price = itemPrice === '' ? 0 : parseFloat(itemPrice.replace(',', '.'));
     
+    // Si el precio es menor que 0.1, no permitir agregar el ítem
+    if (price < 0.1) {
+      toast.error("Precio debe ser al menos 0.1");
+      setSpellCheckOpen(false);
+      return;
+    }
+    
     // Usar el mismo enfoque para la cantidad aquí
     const quantity = itemQuantity === '' ? 1 : (parseInt(itemQuantity, 10) || 1);
     
@@ -112,6 +123,13 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
 
   const handleIgnoreSpelling = () => {
     const price = itemPrice === '' ? 0 : parseFloat(itemPrice.replace(',', '.'));
+    
+    // Si el precio es menor que 0.1, no permitir agregar el ítem
+    if (price < 0.1) {
+      toast.error("Precio debe ser al menos 0.1");
+      setSpellCheckOpen(false);
+      return;
+    }
     
     // Usar el mismo enfoque para la cantidad aquí también
     const quantity = itemQuantity === '' ? 1 : (parseInt(itemQuantity, 10) || 1);

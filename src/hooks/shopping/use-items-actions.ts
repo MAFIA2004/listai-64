@@ -1,3 +1,4 @@
+
 import { ShoppingItem } from '@/types/shopping';
 import { saveItemsToStorage } from '@/utils/storage-utils';
 import { updatePurchaseHistory } from '@/utils/history-utils';
@@ -18,6 +19,12 @@ export function useItemsActions(
   calculateTotal: (items?: ShoppingItem[]) => number
 ) {
   const addItem = (name: string, price: number, quantity: number = 1, category?: string) => {
+    // Validate price must be at least 0.1
+    if (price < 0.1) {
+      toast.error("El precio debe ser al menos 0.1");
+      return;
+    }
+    
     // Check if item with same name exists
     const existingItem = items.find(item => 
       item.name.toLowerCase() === name.toLowerCase() && !item.completed);

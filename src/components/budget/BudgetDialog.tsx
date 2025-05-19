@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BudgetAlert } from '@/types/shopping';
 import { useLanguage } from '@/hooks/use-language';
+import { toast } from 'sonner';
 
 interface BudgetDialogProps {
   open: boolean;
@@ -20,10 +21,28 @@ export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: Budge
     const value = e.target.value;
     // Permite valores vacíos o solo números
     if (value === '' || /^\d*$/.test(value)) {
+      const numValue = value === '' ? 0 : Number(value);
+      
+      // Aplicar validación antes de actualizar el valor
+      if (budget.enabled && numValue < 0.1 && value !== '') {
+        toast.error(t('budget.min_amount_required'));
+        return;
+      }
+      
       updateBudget({
-        amount: value === '' ? 0 : Number(value)
+        amount: numValue
       });
     }
+  };
+  
+  const handleSaveBudget = () => {
+    // Validar que el presupuesto esté establecido si está habilitado
+    if (budget.enabled && budget.amount < 0.1) {
+      toast.error(t('budget.min_amount_required'));
+      return;
+    }
+    
+    onOpenChange(false);
   };
   
   return (
@@ -56,7 +75,7 @@ export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: Budge
             <>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">
-                  {t('budget.max_amount')}
+                  {t('budget.max_amount')} *
                 </label>
                 <input
                   type="text"
@@ -92,7 +111,7 @@ export function BudgetDialog({ open, onOpenChange, budget, updateBudget }: Budge
         </div>
         
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>
+          <Button onClick={handleSaveBudget}>
             {t('button.accept')}
           </Button>
         </DialogFooter>

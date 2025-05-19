@@ -102,7 +102,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         <div className="flex gap-2">
           <Input 
             type="text" 
-            placeholder={t('input.price')}
+            placeholder={t('input.price') + " *"}
             value={itemPrice} 
             onChange={handlePriceChange}
             className="w-full bg-card dark:bg-card/50 border-input" 

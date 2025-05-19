@@ -6,6 +6,7 @@ import { useLanguage } from "@/hooks/use-language";
 import { useForm } from "react-hook-form";
 import { getItemEmoji } from "@/lib/utils";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface RecipeSuggestion {
   name: string;
@@ -38,8 +39,17 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const price = parseFloat(priceInput) || 0;
+    
+    // Validate price must be at least 0.1
+    if (price < 0.1) {
+      toast.error(language === 'es' ? 'El precio debe ser al menos 0.1' : 'Price must be at least 0.1');
+      return;
+    }
+    
     onAddItem({
-      price: parseFloat(priceInput) || 0,
+      price: price,
       quantity: parseInt(quantityInput) || 1
     });
   };
@@ -67,7 +77,7 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-2">
       <div className="space-y-2">
-        <FormLabel>{language === 'es' ? 'Precio (€)' : 'Price (€)'}</FormLabel>
+        <FormLabel>{language === 'es' ? 'Precio (€) *' : 'Price (€) *'}</FormLabel>
         <Input 
           type="text" 
           className="bg-background/60"
