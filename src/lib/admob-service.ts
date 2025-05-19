@@ -63,15 +63,13 @@ let InterstitialAdPluginEvents: any = {
 
 // Intentar cargar el módulo AdMob solo cuando estamos en una plataforma nativa
 if (isNative) {
-  // We'll use an immediately-invoked async function to handle dynamic import
+  // Utilizamos una función async inmediatamente ejecutada
   (async () => {
     try {
-      // Using explicit type annotation to avoid TypeScript error
-      const { AdMob: AdMobModule, InterstitialAdPluginEvents: EventsModule } = 
-        await import('@capacitor/admob') as any;
-      
-      AdMob = AdMobModule;
-      InterstitialAdPluginEvents = EventsModule;
+      // Importación dinámica con tipo 'any' para evitar problemas de compilación
+      const module = await import(/* @vite-ignore */ '@capacitor/admob');
+      AdMob = module.AdMob;
+      InterstitialAdPluginEvents = module.InterstitialAdPluginEvents;
       console.log("Módulo AdMob cargado correctamente");
     } catch (error) {
       console.error("Error al cargar el módulo AdMob:", error);
