@@ -2,8 +2,11 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useLanguage } from '@/hooks/use-language';
 
 export function ShoppingHeader() {
+  const { t } = useLanguage();
+  
   return (
     <header className="app-header">
       <div className="app-icon">

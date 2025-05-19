@@ -4,6 +4,7 @@ import { ShoppingItem } from '@/types/shopping';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingCart } from 'lucide-react';
+import { useLanguage } from '@/hooks/use-language';
 
 interface ShoppingListsProps {
   viewMode: 'list' | 'category';
@@ -24,12 +25,14 @@ export function ShoppingLists({
   onDelete,
   onUpdateQuantity
 }: ShoppingListsProps) {
+  const { t } = useLanguage();
+  
   if (viewMode === 'list') {
     return (
       <div className="space-y-4">
         {/* Lista 1: Productos Fantasma */}
         <div className="mb-2">
-          <h2 className="text-sm font-medium text-primary mb-2">Lista Rápida</h2>
+          <h2 className="text-sm font-medium text-primary mb-2">{t('app.quick_list')}</h2>
           <div className="space-y-2">
             {phantomItems.map(item => (
               <div key={item.id} data-phantom={item.phantom ? "true" : "false"}>
@@ -49,7 +52,7 @@ export function ShoppingLists({
 
         {/* Lista 2: Productos Regulares */}
         <div>
-          <h2 className="text-sm font-medium text-primary mb-2">Mis Productos</h2>
+          <h2 className="text-sm font-medium text-primary mb-2">{t('app.my_products')}</h2>
           <div className="space-y-2">
             {regularItems.length > 0 ? (
               regularItems.map(item => (
@@ -64,7 +67,7 @@ export function ShoppingLists({
               ))
             ) : (
               <div className="py-6 text-center text-muted-foreground rounded-md bg-card">
-                <p>No hay productos en tu lista</p>
+                <p>{t('app.empty_list')}</p>
               </div>
             )}
           </div>
@@ -94,7 +97,7 @@ export function ShoppingLists({
         ) : (
           <div className="py-12 text-center text-muted-foreground rounded-md bg-card">
             <ShoppingCart className="mx-auto mb-3 opacity-30" size={32} />
-            <p>Tu lista está vacía</p>
+            <p>{t('app.empty_category')}</p>
           </div>
         )}
       </div>

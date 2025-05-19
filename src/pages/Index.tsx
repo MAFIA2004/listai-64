@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { AddItemForm } from '@/components/AddItemForm';
 import { AISuggestionDialog } from '@/components/AISuggestionDialog';
@@ -15,6 +15,7 @@ import { FloatingAIButton } from '@/components/shopping/FloatingAIButton';
 import { BudgetDialog } from '@/components/budget/BudgetDialog';
 import { BudgetAlertDialog } from '@/components/budget/BudgetAlertDialog';
 import { ConfirmClearDialog } from '@/components/shopping/ConfirmClearDialog';
+import { LanguageThemeDialog } from '@/components/settings/LanguageThemeDialog';
 
 const Index = () => {
   const {
@@ -49,9 +50,20 @@ const Index = () => {
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [budgetAlertOpen, setBudgetAlertOpen] = useState(false);
   
+  // Nuevo estado para controlar el diálogo de selección de idioma y tema
+  const [languageThemeDialogOpen, setLanguageThemeDialogOpen] = useState(false);
+  
+  // Comprobar si es la primera vez que se abre la app
+  useEffect(() => {
+    const isFirstTime = localStorage.getItem('app_first_launch') !== 'done';
+    if (isFirstTime) {
+      setLanguageThemeDialogOpen(true);
+    }
+  }, []);
+  
   const handleClearAllItems = () => {
-    // Solo guardar la lista en el historial si el total es superior a 10€
-    if (totalPrice > 10) {
+    // Modificado: Guardar la lista en el historial si el total es superior a 2€ (en lugar de 10€)
+    if (totalPrice > 2) {
       saveCurrentListToHistory();
       toast.success('Lista guardada en el historial');
     }
@@ -153,6 +165,18 @@ const Index = () => {
         onRestoreList={restoreListFromHistory} 
         onDeleteList={deleteHistoryEntry} 
         onDeleteAllHistory={deleteAllHistory} 
+      />
+
+      {/* Nuevo: Diálogo de selección de idioma y tema */}
+      <LanguageThemeDialog
+        open={languageThemeDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            // Marcar como completado la primera vez
+            localStorage.setItem('app_first_launch', 'done');
+          }
+          setLanguageThemeDialogOpen(open);
+        }}
       />
     </div>
   );

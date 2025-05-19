@@ -57,17 +57,17 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
       return;
     }
     
-    // Permitir campo vacío pero validar que sea un número ≥ 1 si hay algo
+    // Modificado: Permitir campo vacío para la cantidad, usar 1 como valor predeterminado
     const quantityValue = itemQuantity.trim();
-    if (quantityValue === '') {
-      toast.error("Cantidad debe ser un número positivo");
-      return;
-    }
+    let quantity = 1; // Valor predeterminado
     
-    const quantity = parseInt(quantityValue, 10);
-    if (isNaN(quantity) || quantity <= 0) {
-      toast.error("Cantidad debe ser un número positivo");
-      return;
+    // Solo parsear si hay un valor
+    if (quantityValue !== '') {
+      quantity = parseInt(quantityValue, 10);
+      if (isNaN(quantity) || quantity <= 0) {
+        toast.error("Cantidad debe ser un número positivo");
+        return;
+      }
     }
 
     // Check spelling before adding
@@ -85,14 +85,30 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
 
   const handleSelectSpellingSuggestion = (suggestion: string) => {
     const price = parseFloat(itemPrice.replace(',', '.'));
-    const quantity = parseInt(itemQuantity, 10) || 1;
+    
+    // Usar el mismo enfoque para la cantidad aquí
+    const quantityValue = itemQuantity.trim();
+    let quantity = 1;
+    
+    if (quantityValue !== '') {
+      quantity = parseInt(quantityValue, 10) || 1;
+    }
+    
     addItemToList(suggestion, price, quantity);
     setSpellCheckOpen(false);
   };
 
   const handleIgnoreSpelling = () => {
     const price = parseFloat(itemPrice.replace(',', '.'));
-    const quantity = parseInt(itemQuantity, 10) || 1;
+    
+    // Usar el mismo enfoque para la cantidad aquí también
+    const quantityValue = itemQuantity.trim();
+    let quantity = 1;
+    
+    if (quantityValue !== '') {
+      quantity = parseInt(quantityValue, 10) || 1;
+    }
+    
     addItemToList(misspelledWord, price, quantity);
     setSpellCheckOpen(false);
   };
@@ -101,7 +117,7 @@ export function useAddItemForm({ onAddItem }: UseAddItemFormProps) {
     onAddItem(name, price, quantity);
     setItemName('');
     setItemPrice('');
-    setItemQuantity('1'); // Siempre volver a "1" después de agregar
+    setItemQuantity(''); // Modificado: Dejar el campo vacío después de agregar
     setSuggestions([]);
     setShowSuggestions(false);
   };
