@@ -26,13 +26,6 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const emoji = getItemEmoji(item.name);
   
-  // Función para formatear correctamente el precio unitario
-  const formatUnitPrice = (price: number) => {
-    // Si el precio es menor que 1 pero mayor que 0, convertirlo a céntimos (dividiendo por 10)
-    const displayPrice = price >= 0 && price < 1 ? price / 10 : price;
-    return formatPrice(displayPrice);
-  };
-  
   const handleIncrementQuantity = () => {
     if (onUpdateQuantity) {
       onUpdateQuantity(item.id, item.quantity + 1);
@@ -65,7 +58,7 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
             <div>
               <p className="font-medium text-base">{item.name}</p>
               <div className="text-xs text-primary opacity-80">
-                {item.quantity} unid. · <span className="text-sm">{formatUnitPrice(item.price)}/unid.</span>
+                {item.quantity} unid. · <span className="text-sm">{formatPrice(item.price)}/unid.</span>
               </div>
             </div>
           </div>

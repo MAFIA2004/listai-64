@@ -1,3 +1,4 @@
+
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -6,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatPrice = (price: number) => {
-  // Si el precio es menor que 1 pero mayor que 0, convertirlo a céntimos (dividiendo por 10)
+  // Si el precio es menor que 1 pero mayor que 0, convertirlo a céntimos
   const displayPrice = price >= 0 && price < 1 ? price / 10 : price;
   
   // Asegurar que siempre se muestren 2 decimales para todos los precios
