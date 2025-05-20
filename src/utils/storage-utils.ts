@@ -2,6 +2,13 @@
 import { ShoppingItem, PurchaseHistoryEntry, BudgetAlert, ShoppingPattern, ItemPurchaseHistory } from '@/types/shopping';
 import { getDefaultPatterns } from './pattern-utils';
 
+export {
+  loadPurchaseHistoryFromStorage,
+  savePurchaseHistoryToStorage,
+  loadItemHistoryFromStorage,
+  saveItemHistoryToStorage
+} from '@/hooks/shopping/use-items-storage';
+
 export function loadItemsFromStorage(): ShoppingItem[] {
   const savedItems = localStorage.getItem('shoppingItems');
   if (savedItems) {
@@ -15,27 +22,6 @@ export function loadItemsFromStorage(): ShoppingItem[] {
       }));
     } catch (e) {
       console.error('Error parsing saved items', e);
-      return [];
-    }
-  }
-  return [];
-}
-
-export function loadPurchaseHistoryFromStorage(): PurchaseHistoryEntry[] {
-  const savedHistory = localStorage.getItem('purchaseHistoryEntries');
-  if (savedHistory) {
-    try {
-      const parsedHistory = JSON.parse(savedHistory);
-      return parsedHistory.map((entry: any) => ({
-        ...entry,
-        date: new Date(entry.date),
-        items: entry.items.map((item: any) => ({
-          ...item,
-          date: new Date(item.date)
-        }))
-      }));
-    } catch (e) {
-      console.error('Error parsing saved purchase history', e);
       return [];
     }
   }
@@ -66,27 +52,6 @@ export function loadPatternsFromStorage(): ShoppingPattern[] {
   return getDefaultPatterns();
 }
 
-export function loadItemHistoryFromStorage(): Record<string, ItemPurchaseHistory> {
-  const savedHistory = localStorage.getItem('purchaseHistory');
-  if (savedHistory) {
-    try {
-      const parsed = JSON.parse(savedHistory);
-      // Convert string dates back to Date objects
-      const converted: Record<string, ItemPurchaseHistory> = {};
-      for (const [key, value] of Object.entries(parsed)) {
-        converted[key] = {
-          frequency: (value as any).frequency,
-          lastBought: new Date((value as any).lastBought)
-        };
-      }
-      return converted;
-    } catch (e) {
-      return {};
-    }
-  }
-  return {};
-}
-
 export function saveItemsToStorage(items: ShoppingItem[]): void {
   localStorage.setItem('shoppingItems', JSON.stringify(items));
 }
@@ -97,14 +62,6 @@ export function saveBudgetToStorage(budget: BudgetAlert): void {
 
 export function savePatternsToStorage(patterns: ShoppingPattern[]): void {
   localStorage.setItem('shoppingPatterns', JSON.stringify(patterns));
-}
-
-export function saveItemHistoryToStorage(history: Record<string, ItemPurchaseHistory>): void {
-  localStorage.setItem('purchaseHistory', JSON.stringify(history));
-}
-
-export function savePurchaseHistoryToStorage(history: PurchaseHistoryEntry[]): void {
-  localStorage.setItem('purchaseHistoryEntries', JSON.stringify(history));
 }
 
 export function moveItemsToHistory(

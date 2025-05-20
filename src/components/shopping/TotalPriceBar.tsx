@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice } from '@/lib/core-utils';
 import { useLanguage } from '@/hooks/use-language';
 
 interface TotalPriceBarProps {
