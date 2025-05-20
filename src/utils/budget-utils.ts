@@ -1,3 +1,4 @@
+
 import { ShoppingItem, BudgetAlert } from '@/types/shopping';
 import { toast } from 'sonner';
 import { playBudgetExceededSound } from '@/lib/sound-utils';
