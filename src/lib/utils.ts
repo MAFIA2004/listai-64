@@ -7,9 +7,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatPrice = (price: number) => {
+  // Asegurar que siempre se muestren 2 decimales para todos los precios
   return new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(price);
 };
 

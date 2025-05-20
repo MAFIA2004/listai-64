@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { AddItemForm } from '@/components/AddItemForm';
 import { AISuggestionDialog } from '@/components/AISuggestionDialog';
@@ -63,6 +62,13 @@ const Index = () => {
     }
   }, []);
   
+  // Comprobar si el presupuesto se ha superado cada vez que cambia el precio total
+  useEffect(() => {
+    if (budget.enabled && totalPrice > budget.amount) {
+      setBudgetAlertOpen(true);
+    }
+  }, [budget.enabled, budget.amount, totalPrice]);
+  
   const handleClearAllItems = () => {
     // Modified: Save the list to history if the total is more than 2€ (instead of 10€)
     if (totalPrice > 2) {
@@ -77,13 +83,6 @@ const Index = () => {
   
   const handleAddItem = (name: string, price: number, quantity: number = 1) => {
     addItem(name, price, quantity);
-    
-    // Check if budget is exceeded after adding item
-    setTimeout(() => {
-      if (budget.enabled && totalPrice > budget.amount) {
-        setBudgetAlertOpen(true);
-      }
-    }, 100);
   };
 
   return (
