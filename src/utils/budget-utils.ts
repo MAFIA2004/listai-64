@@ -1,4 +1,3 @@
-
 import { ShoppingItem, BudgetAlert } from '@/types/shopping';
 import { toast } from 'sonner';
 import { playBudgetExceededSound } from '@/lib/sound-utils';
@@ -21,8 +20,7 @@ export function checkBudgetAfterAddingItem(
     });
   }
   
-  // Ya no reproducimos el sonido al exceder el presupuesto
-  // Mostramos solo un aviso más discreto
+  // Si se excede el presupuesto por cualquier cantidad, mostrar advertencia
   if (currentTotal > budgetAmount && currentTotal - itemTotal <= budgetAmount) {
     toast.warning(`Presupuesto alcanzado`, {
       description: `Tu presupuesto es de ${budgetAmount}€ y llevas ${currentTotal.toFixed(2)}€`
