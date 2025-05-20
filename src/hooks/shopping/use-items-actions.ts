@@ -1,4 +1,3 @@
-
 import { ShoppingItem } from '@/types/shopping';
 import { saveItemsToStorage } from '@/utils/storage-utils';
 import { updatePurchaseHistory } from '@/utils/history-utils';
@@ -25,12 +24,14 @@ export function useItemsActions(
       return;
     }
     
-    // Check if item with same name exists
+    // Check if item with same name AND SAME PRICE exists (important change here)
     const existingItem = items.find(item => 
-      item.name.toLowerCase() === name.toLowerCase() && !item.completed);
+      item.name.toLowerCase() === name.toLowerCase() && 
+      item.price === price && 
+      !item.completed);
     
     if (existingItem) {
-      // Update quantity instead of adding new item
+      // Update quantity instead of adding new item (only if name AND price match)
       setItems(prevItems => prevItems.map(item => 
         item.id === existingItem.id 
           ? { ...item, quantity: item.quantity + quantity }

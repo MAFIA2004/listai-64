@@ -38,6 +38,15 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
     }
   };
 
+  // Función para formatear el precio correctamente (mostrar céntimos)
+  const formatItemPrice = (price: number) => {
+    if (price < 1) {
+      // Si es menos de 1€, mostrar como céntimos
+      return `${price * 100}¢`;
+    }
+    return formatPrice(price);
+  };
+
   return (
     <>
       <div 
@@ -58,7 +67,7 @@ export function ShoppingListItem({ item, onToggleComplete, onDelete, onUpdateQua
             <div>
               <p className="font-medium text-base">{item.name}</p>
               <div className="text-xs text-primary opacity-80">
-                {item.quantity} unid. · <span className="text-sm">{formatPrice(item.price)}/unid.</span>
+                {item.quantity} unid. · <span className="text-sm">{formatItemPrice(item.price)}/unid.</span>
               </div>
             </div>
           </div>
