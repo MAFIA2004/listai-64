@@ -1,4 +1,3 @@
-
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -7,16 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatPrice = (price: number) => {
-  // Si el precio es menor que 1 pero mayor que 0, convertirlo a céntimos
-  const displayPrice = price >= 0 && price < 1 ? price / 10 : price;
-  
-  // Asegurar que siempre se muestren 2 decimales para todos los precios
+  // Quitar la conversión incorrecta y mostrar el precio directamente
   return new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  }).format(displayPrice);
+  }).format(price);
 };
 
 // Adding the missing checkSpelling function
