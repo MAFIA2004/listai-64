@@ -6,7 +6,8 @@
  */
 export const sendWebhookNotification = async (data: any): Promise<any> => {
   try {
-    const WEBHOOK_URL = "https://n8n-ww7l.onrender.com/webhook-test/860a346e-3286-45b7-bc20-1fdb56b6ae61";
+    // Updated webhook URL as requested
+    const WEBHOOK_URL = "https://n8n-ww7l.onrender.com/webhook/860a346e-3286-45b7-bc20-1fdb56b6ae61";
     
     console.log("Sending notification to webhook:", data);
     
