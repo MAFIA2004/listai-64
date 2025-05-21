@@ -1,4 +1,3 @@
-
 /**
  * Sends a notification to the specified webhook and returns the response
  * @param data Data to send in the webhook notification
@@ -6,7 +5,7 @@
  */
 export const sendWebhookNotification = async (data: any): Promise<any> => {
   try {
-    // Updated webhook URL as requested
+    // Using the provided webhook URL
     const WEBHOOK_URL = "https://n8n-ww7l.onrender.com/webhook/860a346e-3286-45b7-bc20-1fdb56b6ae61";
     
     console.log("Sending notification to webhook:", data);
@@ -54,17 +53,56 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
   try {
     // If response is already a parsed object, try to use it directly
     if (typeof response === 'object' && response !== null) {
+      // Looking for output field in the response based on the logs
+      if (response.output) {
+        const outputText = response.output.trim();
+        
+        // Try to extract ingredients from the output text
+        // For this specific webhook, we need to check if there's an error message
+        if (outputText.includes("no es una receta válida") || 
+            outputText.includes("No puedo procesar la solicitud")) {
+          console.log("Webhook returned an error message");
+          return { description, ingredients };
+        }
+        
+        // If it's not an error, use the output as description or extract ingredients
+        const lines = outputText.split('\n').filter(line => line.trim() !== '');
+        
+        if (lines.length > 0) {
+          description = lines[0];
+          
+          // If there are more lines, they might contain ingredients
+          if (lines.length > 1) {
+            // Look for lines that might be ingredients (e.g., "- Ingredient")
+            const ingredientLines = lines.slice(1).filter(line => 
+              line.trim().startsWith('-') || line.includes(':')
+            );
+            
+            if (ingredientLines.length > 0) {
+              ingredients = ingredientLines.map(line => 
+                line.replace(/^-\s*/, '').trim()
+              );
+            } else {
+              // If no ingredient format is found, use the remaining text as a single ingredient
+              ingredients = [lines.slice(1).join(' ').trim()];
+            }
+          }
+        }
+        
+        return { description, ingredients };
+      }
+      
+      // Standard format check (fallback)
       if (response.description) {
         description = response.description;
       }
       
       if (Array.isArray(response.ingredients)) {
         ingredients = response.ingredients;
-        return { description, ingredients };
       }
     }
     
-    // If response is string, try to parse it
+    // If response is string, try to parse it (keeping the existing parsing logic as fallback)
     if (typeof response === 'string') {
       // Extract description enclosed in parentheses
       const descMatch = response.match(/\((.*?)\)/);
