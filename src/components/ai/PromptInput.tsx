@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { VoiceInputControls } from "./VoiceInputControls";
 import { useLanguage } from "@/hooks/use-language";
-import { sendWebhookNotification } from "@/lib/utils";
 
 interface PromptInputProps {
   prompt: string;
@@ -24,19 +23,6 @@ export function PromptInput({
   onToggleVoiceInput
 }: PromptInputProps) {
   const { language } = useLanguage();
-  
-  const handleGenerateClick = () => {
-    // Send webhook notification when generate button is clicked
-    sendWebhookNotification({
-      action: "generate_button_clicked",
-      prompt: prompt,
-      timestamp: new Date().toISOString(),
-      language: language
-    });
-    
-    // Call the original onGenerateSuggestions handler
-    onGenerateSuggestions();
-  };
   
   return (
     <div className="grid gap-4 py-4">
@@ -58,7 +44,7 @@ export function PromptInput({
       </div>
       
       <Button 
-        onClick={handleGenerateClick} 
+        onClick={onGenerateSuggestions} 
         disabled={isLoading || !prompt.trim()}
         className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
       >

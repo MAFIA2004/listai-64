@@ -70,13 +70,8 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       return;
     }
     
-    // Send webhook notification when user generates AI suggestions
-    await sendWebhookNotification({
-      action: "generate_ai_product",
-      prompt: prompt,
-      timestamp: new Date().toISOString(),
-      language: language
-    });
+    // Send only the prompt to the webhook
+    await sendWebhookNotification(prompt);
     
     // Skip the ad and generate suggestions immediately
     generateSuggestionsAfterAd();
