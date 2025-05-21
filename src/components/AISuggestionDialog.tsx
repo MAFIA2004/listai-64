@@ -76,19 +76,21 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     setHasResults(false);
     
     try {
-      // Send only the prompt to the webhook
+      // Send the prompt to the webhook
       const webhookResponse = await sendWebhookNotification(prompt);
-      console.log("Webhook response:", webhookResponse);
+      console.log("Webhook response received:", webhookResponse);
       
-      if (webhookResponse && typeof webhookResponse === 'string') {
+      if (webhookResponse) {
         // Parse the webhook response
         const { description, ingredients } = parseWebhookResponse(webhookResponse);
+        console.log("Parsed response - Description:", description);
+        console.log("Parsed response - Ingredients:", ingredients);
         
         // Set the description
         setResponseDescription(description);
         
         // Map the ingredients to our format
-        if (ingredients.length > 0) {
+        if (ingredients && ingredients.length > 0) {
           const mappedSuggestions = ingredients.map(name => ({
             name,
             quantity: 1,
@@ -103,7 +105,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
           toast.error(language === 'es' ? 'No se pudieron generar sugerencias' : 'Could not generate suggestions');
         }
       } else {
-        console.error("Invalid webhook response format:", webhookResponse);
+        console.error("Invalid webhook response:", webhookResponse);
         toast.error(language === 'es' ? 'Respuesta del servidor no válida' : 'Invalid server response');
       }
     } catch (error) {
