@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -79,8 +78,8 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       language: language
     });
     
-    // Show ad before generating suggestions
-    setShowAd(true);
+    // Skip the ad and generate suggestions immediately
+    generateSuggestionsAfterAd();
   };
   
   const generateSuggestionsAfterAd = async () => {
@@ -185,13 +184,9 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
           </DialogHeader>
           
           <div className="relative z-10">
-            {/* Ad Display Component */}
-            <AdDisplay 
-              isVisible={showAd} 
-              onAdComplete={generateSuggestionsAfterAd} 
-            />
+            {/* Ad Display component is kept but will not be shown since we're bypassing it */}
             
-            {!showAd && !hasResults && (
+            {!hasResults && (
               <PromptInput 
                 prompt={prompt}
                 onPromptChange={setPrompt}
@@ -202,7 +197,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
               />
             )}
             
-            {!showAd && hasResults && (
+            {hasResults && (
               <div className="py-4">
                 <h3 className="mb-2 font-medium text-primary">{prompt}</h3>
                 
