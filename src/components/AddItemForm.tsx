@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
-import { processVoiceInputWithAI } from '@/lib/voice-processing';
+import { processVoiceInputWithAI } from '@/lib/voice'; // Updated import path
 import { SpellCheckDialog } from '@/components/SpellCheckDialog';
 import { ItemSuggestions } from '@/components/ItemSuggestions';
 import { VoiceInputButton } from '@/components/VoiceInputButton';
