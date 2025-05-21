@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { toast } from 'sonner';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { getAIRecipeSuggestions } from '@/lib/gemini-service';
 import { useLanguage } from '@/hooks/use-language';
-import { getItemEmoji } from '@/lib/utils'; // Fixed missing import
+import { getItemEmoji, sendWebhookNotification } from '@/lib/utils'; // Import the webhook utility
 
 // Import refactored components
 import { AdDisplay } from './ai/AdDisplay';
@@ -69,6 +70,14 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       toast.error(language === 'es' ? 'Por favor, indica lo que quieres cocinar' : 'Please indicate what you want to cook');
       return;
     }
+    
+    // Send webhook notification when user generates AI suggestions
+    await sendWebhookNotification({
+      action: "generate_ai_product",
+      prompt: prompt,
+      timestamp: new Date().toISOString(),
+      language: language
+    });
     
     // Show ad before generating suggestions
     setShowAd(true);

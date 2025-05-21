@@ -3,3 +3,4 @@
 export { cn, formatPrice } from './core-utils';
 export { checkSpelling } from './spell-check-utils';
 export { getItemEmoji } from './emoji-utils';
+export { sendWebhookNotification } from './webhook-utils';
