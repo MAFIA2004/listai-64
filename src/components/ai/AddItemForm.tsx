@@ -1,11 +1,8 @@
 
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/use-language";
-import { useForm } from "react-hook-form";
-import { getItemEmoji } from "@/lib/utils";
-import { useState } from "react";
 import { toast } from "sonner";
 
 interface RecipeSuggestion {
@@ -30,13 +27,6 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
   const [priceInput, setPriceInput] = useState('1.0');
   const [quantityInput, setQuantityInput] = useState(selectedItem?.quantity?.toString() || '1');
   
-  const form = useForm<ItemFormValues>({
-    defaultValues: {
-      price: 1.0,
-      quantity: selectedItem?.quantity || 1,
-    },
-  });
-  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -59,7 +49,6 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
     // Allow empty value or valid decimal number
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
       setPriceInput(value);
-      form.setValue('price', parseFloat(value) || 0);
     }
   };
   
@@ -68,7 +57,6 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
     // Allow empty value or valid integer
     if (value === '' || /^\d*$/.test(value)) {
       setQuantityInput(value);
-      form.setValue('quantity', parseInt(value) || 1);
     }
   };
   
@@ -77,7 +65,9 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-2">
       <div className="space-y-2">
-        <FormLabel>{language === 'es' ? 'Precio (€) *' : 'Price (€) *'}</FormLabel>
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {language === 'es' ? 'Precio (€) *' : 'Price (€) *'}
+        </label>
         <Input 
           type="text" 
           className="bg-background/60"
@@ -88,7 +78,9 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
       </div>
 
       <div className="space-y-2">
-        <FormLabel>{language === 'es' ? 'Cantidad' : 'Quantity'}</FormLabel>
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {language === 'es' ? 'Cantidad' : 'Quantity'}
+        </label>
         <Input 
           type="text" 
           className="bg-background/60"
