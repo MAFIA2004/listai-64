@@ -39,7 +39,7 @@ export function AddItemForm({ selectedItem, onCancel, onAddItem }: AddItemFormPr
     }
     
     onAddItem({
-      price: price,
+      price: parseFloat(parseFloat(priceInput).toFixed(2)) || 0, // Fix precision to 2 decimal places but keep as number
       quantity: parseInt(quantityInput) || 1
     });
   };

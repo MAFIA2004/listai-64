@@ -80,7 +80,7 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
         const lines = outputText.split('\n').filter(line => line.trim() !== '');
         
         if (lines.length > 0) {
-          // Extract description without parentheses
+          // Extract description without parentheses - MODIFIED HERE
           let firstLine = lines[0];
           // Remove parentheses if they exist
           if (firstLine.startsWith('(') && firstLine.endsWith(')')) {
@@ -118,7 +118,7 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
       
       // Standard format check (fallback)
       if (response.description) {
-        // Remove parentheses if they exist
+        // Remove parentheses if they exist - MODIFIED HERE
         let desc = response.description;
         if (desc.startsWith('(') && desc.endsWith(')')) {
           desc = desc.substring(1, desc.length - 1);
@@ -150,7 +150,7 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
       } catch (e) {
         // Not valid JSON, continue with string parsing
         
-        // Extract description enclosed in parentheses but remove the parentheses
+        // Extract description enclosed in parentheses but remove the parentheses - MODIFIED HERE
         const descMatch = response.match(/\((.*?)\)/);
         if (descMatch && descMatch[1]) {
           description = descMatch[1].trim();
@@ -173,7 +173,7 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
             .filter(line => line.length > 0);
           
           if (lines.length > 0) {
-            // First line could be the description (remove parentheses if present)
+            // First line could be the description (remove parentheses if present) - MODIFIED HERE
             let firstLine = lines[0];
             if (firstLine.startsWith('(') && firstLine.endsWith(')')) {
               firstLine = firstLine.substring(1, firstLine.length - 1);

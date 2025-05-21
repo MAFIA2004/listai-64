@@ -24,10 +24,13 @@ export function useItemsActions(
       return;
     }
     
+    // Store price with 2 decimal precision to avoid JavaScript floating point issues
+    const fixedPrice = parseFloat(price.toFixed(2));
+    
     // Check if item with same name AND SAME PRICE exists (important change here)
     const existingItem = items.find(item => 
       item.name.toLowerCase() === name.toLowerCase() && 
-      item.price === price && 
+      item.price === fixedPrice && 
       !item.completed);
     
     if (existingItem) {
@@ -40,14 +43,14 @@ export function useItemsActions(
       toast.success(`Cantidad actualizada: ${name} (${existingItem.quantity + quantity})`);
       
       // Check budget after updating quantity
-      checkBudgetAfterAddingItem(existingItem.price * quantity, budget, calculateTotal);
+      checkBudgetAfterAddingItem(fixedPrice * quantity, budget, calculateTotal);
       return;
     }
     
     const newItem: ShoppingItem = {
       id: crypto.randomUUID(),
       name,
-      price,
+      price: fixedPrice, // Use fixed price here
       quantity,
       completed: false,
       date: new Date(),
@@ -88,7 +91,7 @@ export function useItemsActions(
     );
     
     // Check budget after adding item
-    checkBudgetAfterAddingItem(price * quantity, budget, calculateTotal);
+    checkBudgetAfterAddingItem(fixedPrice * quantity, budget, calculateTotal);
   };
 
   const removeItem = (id: string) => {
