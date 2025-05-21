@@ -1,3 +1,4 @@
+
 /**
  * Sends a notification to the specified webhook and returns the response
  * @param data Data to send in the webhook notification
@@ -6,7 +7,7 @@
 export const sendWebhookNotification = async (data: any): Promise<any> => {
   try {
     // Using the provided webhook URL
-    const WEBHOOK_URL = "https://n8n-ww7l.onrender.com/webhook/860a346e-3286-45b7-bc20-1fdb56b6ae61";
+    const WEBHOOK_URL = "https://n8n-ww7l.onrender.com/webhook-test/89a279ce-3317-43e0-9e01-f8bfd2c18693";
     
     console.log("Sending notification to webhook:", data);
     
