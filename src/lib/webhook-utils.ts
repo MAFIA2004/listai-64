@@ -1,4 +1,3 @@
-
 /**
  * Sends a notification to the specified webhook and returns the response
  * @param data Data to send in the webhook notification
@@ -20,20 +19,27 @@ export const sendWebhookNotification = async (data: any): Promise<any> => {
     });
     
     if (!response.ok) {
-      console.error("Webhook notification failed:", await response.text());
+      console.error("Webhook notification failed with status:", response.status);
       return null;
     }
     
-    // Parse and return the response data
+    // Only try to read the response body once
     try {
+      const responseClone = response.clone(); // Clone the response before reading
       const responseData = await response.json();
-      console.log("Webhook response:", responseData);
+      console.log("Webhook JSON response:", responseData);
       return responseData;
     } catch (error) {
-      // If it's not JSON, try returning the text directly
-      const textResponse = await response.text();
-      console.log("Webhook text response:", textResponse);
-      return textResponse;
+      // If it's not JSON, try returning the text directly from the cloned response
+      try {
+        const responseClone = response.clone();
+        const textResponse = await responseClone.text();
+        console.log("Webhook text response:", textResponse);
+        return textResponse;
+      } catch (textError) {
+        console.error("Error reading response as text:", textError);
+        return null;
+      }
     }
   } catch (error) {
     console.error("Error sending webhook notification:", error);
@@ -52,11 +58,14 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
   let ingredients: string[] = [];
   
   try {
+    console.log("Parsing webhook response:", response);
+    
     // If response is already a parsed object, try to use it directly
     if (typeof response === 'object' && response !== null) {
       // Looking for output field in the response based on the logs
       if (response.output) {
         const outputText = response.output.trim();
+        console.log("Found output field:", outputText);
         
         // Try to extract ingredients from the output text
         // For this specific webhook, we need to check if there's an error message
@@ -101,21 +110,56 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
       if (Array.isArray(response.ingredients)) {
         ingredients = response.ingredients;
       }
+      
+      // Last resort: try to find any array in the response
+      for (const key in response) {
+        if (Array.isArray(response[key]) && response[key].length > 0) {
+          ingredients = response[key].map(item => 
+            typeof item === 'string' ? item : JSON.stringify(item)
+          );
+          break;
+        }
+      }
     }
     
     // If response is string, try to parse it (keeping the existing parsing logic as fallback)
     if (typeof response === 'string') {
-      // Extract description enclosed in parentheses
-      const descMatch = response.match(/\((.*?)\)/);
-      if (descMatch && descMatch[1]) {
-        description = descMatch[1].trim();
-      }
-      
-      // Extract ingredients enclosed in quotes
-      const ingredientsMatch = response.match(/"([^"]*)"/);
-      if (ingredientsMatch && ingredientsMatch[1]) {
-        // Split by commas and trim each ingredient
-        ingredients = ingredientsMatch[1].split(',').map(item => item.trim()).filter(item => item.length > 0);
+      try {
+        // Try to parse as JSON first
+        const parsedJson = JSON.parse(response);
+        return parseWebhookResponse(parsedJson); // Recursively parse the JSON object
+      } catch (e) {
+        // Not valid JSON, continue with string parsing
+        
+        // Extract description enclosed in parentheses
+        const descMatch = response.match(/\((.*?)\)/);
+        if (descMatch && descMatch[1]) {
+          description = descMatch[1].trim();
+        }
+        
+        // Extract ingredients enclosed in quotes
+        const ingredientsMatch = response.match(/"([^"]*)"/);
+        if (ingredientsMatch && ingredientsMatch[1]) {
+          // Split by commas and trim each ingredient
+          ingredients = ingredientsMatch[1].split(',').map(item => item.trim()).filter(item => item.length > 0);
+        }
+        
+        // If no structured format found, try to split by lines
+        if (ingredients.length === 0) {
+          const lines = response.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+          
+          if (lines.length > 0) {
+            // First line could be the description
+            description = description || lines[0];
+            
+            // Rest could be ingredients
+            if (lines.length > 1) {
+              ingredients = lines.slice(1);
+            }
+          }
+        }
       }
     }
     
