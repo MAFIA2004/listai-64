@@ -1,3 +1,4 @@
+
 /**
  * Sends a notification to the specified webhook and returns the response
  * @param data Data to send in the webhook notification
@@ -6,7 +7,7 @@
 export const sendWebhookNotification = async (data: any): Promise<any> => {
   try {
     // Using the provided webhook URL
-    const WEBHOOK_URL = "https://n8n-ww7l.onrender.com/webhook-test/89a279ce-3317-43e0-9e01-f8bfd2c18693";
+    const WEBHOOK_URL = "https://n8n-ww7l.onrender.com/webhook/89a279ce-3317-43e0-9e01-f8bfd2c18693";
     
     console.log("Sending notification to webhook:", data);
     
@@ -79,22 +80,35 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
         const lines = outputText.split('\n').filter(line => line.trim() !== '');
         
         if (lines.length > 0) {
-          description = lines[0];
+          // Extract description without parentheses
+          let firstLine = lines[0];
+          // Remove parentheses if they exist
+          if (firstLine.startsWith('(') && firstLine.endsWith(')')) {
+            firstLine = firstLine.substring(1, firstLine.length - 1);
+          }
+          description = firstLine.trim();
           
           // If there are more lines, they might contain ingredients
           if (lines.length > 1) {
-            // Look for lines that might be ingredients (e.g., "- Ingredient")
-            const ingredientLines = lines.slice(1).filter(line => 
-              line.trim().startsWith('-') || line.includes(':')
-            );
-            
-            if (ingredientLines.length > 0) {
-              ingredients = ingredientLines.map(line => 
-                line.replace(/^-\s*/, '').trim()
-              );
-            } else {
-              // If no ingredient format is found, use the remaining text as a single ingredient
-              ingredients = [lines.slice(1).join(' ').trim()];
+            // Look for ingredients in quotes
+            for (let i = 1; i < lines.length; i++) {
+              const line = lines[i];
+              // Extract content inside quotes if present
+              const quoteMatch = line.match(/"([^"]*)"/);
+              
+              if (quoteMatch && quoteMatch[1]) {
+                // Split by commas and process each ingredient
+                const extractedIngredients = quoteMatch[1]
+                  .split(',')
+                  .map(item => item.trim())
+                  .filter(item => item.length > 0);
+                
+                // Add each ingredient individually to the ingredients array
+                ingredients = extractedIngredients;
+              } else if (line.trim() !== '') {
+                // If no quotes, add the line as is (might be a single ingredient)
+                ingredients.push(line.trim());
+              }
             }
           }
         }
@@ -104,7 +118,12 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
       
       // Standard format check (fallback)
       if (response.description) {
-        description = response.description;
+        // Remove parentheses if they exist
+        let desc = response.description;
+        if (desc.startsWith('(') && desc.endsWith(')')) {
+          desc = desc.substring(1, desc.length - 1);
+        }
+        description = desc.trim();
       }
       
       if (Array.isArray(response.ingredients)) {
@@ -115,7 +134,7 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
       for (const key in response) {
         if (Array.isArray(response[key]) && response[key].length > 0) {
           ingredients = response[key].map(item => 
-            typeof item === 'string' ? item : JSON.stringify(item)
+            typeof item === 'string' ? item.trim() : JSON.stringify(item)
           );
           break;
         }
@@ -131,17 +150,20 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
       } catch (e) {
         // Not valid JSON, continue with string parsing
         
-        // Extract description enclosed in parentheses
+        // Extract description enclosed in parentheses but remove the parentheses
         const descMatch = response.match(/\((.*?)\)/);
         if (descMatch && descMatch[1]) {
           description = descMatch[1].trim();
         }
         
-        // Extract ingredients enclosed in quotes
+        // Extract ingredients enclosed in quotes and split them individually
         const ingredientsMatch = response.match(/"([^"]*)"/);
         if (ingredientsMatch && ingredientsMatch[1]) {
           // Split by commas and trim each ingredient
-          ingredients = ingredientsMatch[1].split(',').map(item => item.trim()).filter(item => item.length > 0);
+          ingredients = ingredientsMatch[1]
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
         }
         
         // If no structured format found, try to split by lines
@@ -151,12 +173,28 @@ export const parseWebhookResponse = (response: any): { description: string, ingr
             .filter(line => line.length > 0);
           
           if (lines.length > 0) {
-            // First line could be the description
-            description = description || lines[0];
+            // First line could be the description (remove parentheses if present)
+            let firstLine = lines[0];
+            if (firstLine.startsWith('(') && firstLine.endsWith(')')) {
+              firstLine = firstLine.substring(1, firstLine.length - 1);
+            }
+            description = description || firstLine.trim();
             
-            // Rest could be ingredients
+            // Rest could be ingredients - split by commas if needed
             if (lines.length > 1) {
-              ingredients = lines.slice(1);
+              for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.includes(',')) {
+                  // If the line contains commas, split it into multiple ingredients
+                  const lineIngredients = line
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(item => item.length > 0);
+                  ingredients.push(...lineIngredients);
+                } else if (line.trim() !== '') {
+                  ingredients.push(line.trim());
+                }
+              }
             }
           }
         }
