@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { toast } from 'sonner';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { getAIRecipeSuggestions } from '@/lib/gemini-service';
 import { useLanguage } from '@/hooks/use-language';
-import { getItemEmoji, sendWebhookNotification } from '@/lib/utils'; // Import the webhook utility
+import { getItemEmoji, sendWebhookNotification, parseWebhookResponse } from '@/lib/utils';
 
 // Import refactored components
 import { AdDisplay } from './ai/AdDisplay';
@@ -46,6 +47,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
   const [hasResults, setHasResults] = useState(false);
   const [selectedItemForAdd, setSelectedItemForAdd] = useState<RecipeSuggestion | null>(null);
   const [showAd, setShowAd] = useState(false);
+  const [responseDescription, setResponseDescription] = useState('');
   
   const { isListening, transcript, startListening, stopListening } = useSpeechRecognition();
   
@@ -70,40 +72,39 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
       return;
     }
     
-    // Send only the prompt to the webhook
-    await sendWebhookNotification(prompt);
-    
-    // Skip the ad and generate suggestions immediately
-    generateSuggestionsAfterAd();
-  };
-  
-  const generateSuggestionsAfterAd = async () => {
     setIsLoading(true);
     setHasResults(false);
     
     try {
-      console.log("Fetching AI suggestions for prompt:", prompt);
-      const result = await getAIRecipeSuggestions(prompt);
-      console.log("AI suggestion results:", result);
+      // Send only the prompt to the webhook
+      const webhookResponse = await sendWebhookNotification(prompt);
+      console.log("Webhook response:", webhookResponse);
       
-      if (result && result.ingredients && result.ingredients.length > 0) {
-        // Filter out water and map the ingredients to our format with selected state
-        const mappedSuggestions = result.ingredients
-          .filter(ingredient => 
-            !ingredient.name.toLowerCase().includes('agua') && 
-            !ingredient.name.toLowerCase().includes('water'))
-          .map(ingredient => ({
-            name: ingredient.name,
-            quantity: ingredient.quantity || 1,
-            selected: true // Default to selected
-          }));
+      if (webhookResponse && typeof webhookResponse === 'string') {
+        // Parse the webhook response
+        const { description, ingredients } = parseWebhookResponse(webhookResponse);
         
-        setSuggestions(mappedSuggestions);
-        setHasResults(true);
-        toast.success(language === 'es' ? '¡Sugerencias generadas!' : 'Suggestions generated!');
+        // Set the description
+        setResponseDescription(description);
+        
+        // Map the ingredients to our format
+        if (ingredients.length > 0) {
+          const mappedSuggestions = ingredients.map(name => ({
+            name,
+            quantity: 1,
+            selected: true
+          }));
+          
+          setSuggestions(mappedSuggestions);
+          setHasResults(true);
+          toast.success(language === 'es' ? '¡Sugerencias generadas!' : 'Suggestions generated!');
+        } else {
+          console.error("No ingredients found in response:", webhookResponse);
+          toast.error(language === 'es' ? 'No se pudieron generar sugerencias' : 'Could not generate suggestions');
+        }
       } else {
-        console.error("No ingredients found in result:", result);
-        toast.error(language === 'es' ? 'No se pudieron generar sugerencias' : 'Could not generate suggestions');
+        console.error("Invalid webhook response format:", webhookResponse);
+        toast.error(language === 'es' ? 'Respuesta del servidor no válida' : 'Invalid server response');
       }
     } catch (error) {
       console.error('Error generating suggestions:', error);
@@ -111,6 +112,12 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // We don't need this function anymore as we're using the webhook response directly
+  const generateSuggestionsAfterAd = async () => {
+    // This function is kept for backward compatibility
+    // but its functionality has been moved to handleGenerateSuggestions
   };
   
   const toggleItemSelection = (index: number) => {
@@ -152,6 +159,7 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
     setHasResults(false);
     setSelectedItemForAdd(null);
     setShowAd(false);
+    setResponseDescription('');
     onOpenChange(false);
   };
 
@@ -179,8 +187,6 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
           </DialogHeader>
           
           <div className="relative z-10">
-            {/* Ad Display component is kept but will not be shown since we're bypassing it */}
-            
             {!hasResults && (
               <PromptInput 
                 prompt={prompt}
@@ -195,6 +201,13 @@ export function AISuggestionDialog({ open, onOpenChange, onAddItem }: AISuggesti
             {hasResults && (
               <div className="py-4">
                 <h3 className="mb-2 font-medium text-primary">{prompt}</h3>
+                
+                {/* Show the description if available */}
+                {responseDescription && (
+                  <div className="p-3 mb-4 bg-primary/10 rounded-md text-sm">
+                    <p className="italic text-muted-foreground">{responseDescription}</p>
+                  </div>
+                )}
                 
                 <SuggestionsList 
                   suggestions={suggestions}
