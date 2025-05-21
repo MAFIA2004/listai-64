@@ -17,7 +17,7 @@ interface AddItemFormProps {
 }
 
 export function AddItemForm({ onAddItem }: AddItemFormProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const {
     itemName,
@@ -54,11 +54,11 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   // Handle voice transcript
   useEffect(() => {
     if (transcript) {
-      // Process voice input with AI
+      // Process voice input with AI, passing the current language
       const processVoice = async () => {
         setProcessingStatus(true);
         try {
-          const result = await processVoiceInputWithAI(transcript);
+          const result = await processVoiceInputWithAI(transcript, language);
           setVoiceRecognitionValues(result.name, result.price, result.quantity);
         } finally {
           setProcessingStatus(false);
@@ -67,7 +67,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
       
       processVoice();
     }
-  }, [transcript]);
+  }, [transcript, language]); // Added language as a dependency
 
   // Handle errors in voice recognition
   useEffect(() => {

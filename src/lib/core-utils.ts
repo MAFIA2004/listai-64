@@ -43,9 +43,27 @@ export function cn(...classes: (string | undefined | null | false | Record<strin
  * @returns Formatted price string
  */
 export const formatPrice = (price: number): string => {
-  // Modified to not show trailing zeros for values like 0.20 -> 0.2€
-  const formatted = price.toFixed(2);
-  // Remove trailing zeros (but keep at least one decimal if there's a decimal point)
-  const cleanedPrice = formatted.replace(/\.?0+$/, '');
+  // Show the exact value without removing trailing zeros
+  // This ensures 0.2 is displayed as 0.2€ and not 0.20€
+  if (price === 0) return '0€';
+  
+  // Convert to string with 2 decimal places
+  const formattedPrice = price.toFixed(2);
+  
+  // Remove trailing zeros
+  let cleanedPrice = formattedPrice;
+  
+  // If it ends with .00, remove the decimals completely
+  if (cleanedPrice.endsWith('.00')) {
+    cleanedPrice = cleanedPrice.replace('.00', '');
+  } 
+  // Otherwise just remove trailing zeros but keep at least one decimal if there's a decimal point
+  else {
+    cleanedPrice = cleanedPrice.replace(/0+$/, '');
+    if (cleanedPrice.endsWith('.')) {
+      cleanedPrice = cleanedPrice.replace('.', '');
+    }
+  }
+  
   return `${cleanedPrice}€`;
 };

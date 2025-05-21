@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { useLanguage } from '@/hooks/use-language';
 
 // Definimos los tipos que faltan para Speech Recognition
 interface SpeechRecognitionEvent extends Event {
@@ -88,6 +89,7 @@ interface SpeechRecognitionHook {
 }
 
 export function useSpeechRecognition(): SpeechRecognitionHook {
+  const { language } = useLanguage();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | undefined>();
@@ -100,14 +102,16 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
       if (!SpeechRecognition) {
-        setError("Tu navegador no soporta reconocimiento de voz");
+        setError(language === 'es' ? "Tu navegador no soporta reconocimiento de voz" : "Your browser doesn't support speech recognition");
         return;
       }
 
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = false;
       recognitionInstance.interimResults = false;
-      recognitionInstance.lang = 'es-ES';
+      
+      // Set the language based on the current app language
+      recognitionInstance.lang = language === 'es' ? 'es-ES' : 'en-US';
 
       recognitionInstance.onresult = (event) => {
         const current = event.resultIndex;
@@ -127,7 +131,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
       setRecognition(recognitionInstance);
     }
-  }, [isNative]);
+  }, [isNative, language]); // Added language as a dependency
 
   const startListening = useCallback(() => {
     setError(undefined);
@@ -135,21 +139,26 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
     if (isNative) {
       // On native platforms, inform that we'd use a different approach
-      // You would typically implement native voice recognition here
-      setError("El reconocimiento de voz necesita permisos en Android");
+      setError(language === 'es' 
+        ? "El reconocimiento de voz necesita permisos en Android" 
+        : "Voice recognition requires permissions on Android");
       return;
     }
 
     if (recognition) {
       try {
+        // Update the recognition language before starting
+        recognition.lang = language === 'es' ? 'es-ES' : 'en-US';
         recognition.start();
         setIsListening(true);
       } catch (err) {
-        setError("Error al iniciar reconocimiento de voz");
+        setError(language === 'es' 
+          ? "Error al iniciar reconocimiento de voz" 
+          : "Error starting voice recognition");
         setIsListening(false);
       }
     }
-  }, [recognition, isNative]);
+  }, [recognition, isNative, language]);
 
   const stopListening = useCallback(() => {
     if (recognition && isListening && !isNative) {

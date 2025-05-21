@@ -2,7 +2,7 @@
 // Gemini API service for shopping list app
 // API key should be stored safely in a backend service, but for demo purposes it's here
 
-const GEMINI_API_KEY = "AIzaSyC7LtWs9tYp3deRmfWA6AUUaUajc5KgU0k";
+const GEMINI_API_KEY = "AIzaSyDafRYpORUnWBbqXcs2yBR8sFCN9L7d3n0"; // Updated API key
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 export interface GeminiResponse {
@@ -82,12 +82,12 @@ export async function categorizeItems(items: string[]): Promise<GeminiResponse |
 /**
  * Uses Gemini AI to identify quantities in voice input
  */
-export async function identifyQuantities(transcript: string): Promise<GeminiResponse | undefined> {
+export async function identifyQuantities(transcript: string, language: string = 'es'): Promise<GeminiResponse | undefined> {
   if (!transcript) return undefined;
   
   try {
     const prompt = `
-      Act as a shopping list assistant that understands spoken Spanish. I will give you a sentence about buying items.
+      Act as a shopping list assistant that understands spoken ${language === 'es' ? 'Spanish' : 'English'}. I will give you a sentence about buying items.
       Identify the following:
       1. The product name(s)
       2. The quantity of each product (default to 1 if not specified)
@@ -144,13 +144,13 @@ export async function identifyQuantities(transcript: string): Promise<GeminiResp
 /**
  * Uses Gemini AI to generate recipe suggestions
  */
-export async function getAIRecipeSuggestions(request: string): Promise<GeminiResponse | undefined> {
+export async function getAIRecipeSuggestions(request: string, language: string = 'es'): Promise<GeminiResponse | undefined> {
   if (!request) return undefined;
   
   try {
     console.log("Starting AI recipe suggestion request for:", request);
     
-    const prompt = `
+    const prompt = language === 'es' ? `
       Actúa como un asistente de cocina en español que ayuda con listas de compras. Basado en mi solicitud,
       sugiere una lista de ingredientes necesarios para la receta o comida que quiero preparar.
       Para cada ingrediente, proporciona:
@@ -168,6 +168,25 @@ export async function getAIRecipeSuggestions(request: string): Promise<GeminiRes
       }
       
       Aquí está mi solicitud:
+      "${request}"
+    ` : `
+      Act as a kitchen assistant in English that helps with shopping lists. Based on my request,
+      suggest a list of ingredients needed for the recipe or meal I want to prepare.
+      For each ingredient, provide:
+      1. The name of the ingredient in English
+      2. Approximate quantity needed
+      3. Estimated price in euros (make a reasonable estimate)
+      
+      Don't include water in the ingredients list, as it is assumed the user has it.
+      
+      Return your response ONLY as a JSON object with the following format:
+      {
+        "ingredients": [
+          {"name": "ingredient name", "quantity": number, "price": number}
+        ]
+      }
+      
+      Here's my request:
       "${request}"
     `;
 
